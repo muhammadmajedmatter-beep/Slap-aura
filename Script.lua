@@ -487,8 +487,8 @@ function LoadMainGUI()
         local FarmsTab = MainWindow:Tab({ Title = "Farms", Icon = "tractor" })
         FarmsTab:Toggle({ Title = "Slap AutoFarm", Desc = "يضرب ويلم فلوس تلقائياً", Value = false, Callback = function(state) toggleAutoFarm(state) end })
 FarmsTab:Toggle({ 
-    Title = "Auto Collect Candy", 
-    Desc = "ينتقل لكل الكاندي في السيرفر ويلمها تلقائياً", 
+    Title = "Auto Collect Candy (E)", 
+    Desc = "ينتقل للكاندي ويضغط زرار E تلقائياً", 
     Value = false, 
     Callback = function(state) 
         Settings.CandyFarm = state 
@@ -501,9 +501,15 @@ FarmsTab:Toggle({
                         local root = myChar.HumanoidRootPart
                         for _, obj in pairs(workspace:GetDescendants()) do
                             if not Settings.CandyFarm then break end 
-                            if obj:IsA("BasePart") and (string.find(string.lower(obj.Name), "candy") or string.find(string.lower(obj.Name), "sweet")) then
-                                root.CFrame = obj.CFrame + Vector3.new(0, 3, 0)
-                                task.wait(0.15) 
+                            if obj:IsA("ProximityPrompt") and (obj.Parent.Name:lower():find("candy") or obj.Parent.Name:lower():find("bucket") or obj.ActionText:lower():find("candy")) then
+                                if obj.Parent:IsA("BasePart") then
+                                    root.CFrame = obj.Parent.CFrame + Vector3.new(0, 3, 0)
+                                end
+                                task.wait(0.2) 
+                                pcall(function()
+                                    fireproximityprompt(obj)
+                                end)
+                                task.wait(0.3) 
                             end
                         end
                     end
