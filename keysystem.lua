@@ -18,6 +18,7 @@ local KeySystem = {
     SaveFile       = "SlapAura_CloudKey.json",
     HWID           = tostring(LocalPlayer.UserId),
     DeveloperName  = "Muhammad Majed",
+    OwnerKey       = "MAJED-OWNER-2025" -- 👈 مفتاح الأونر
 }
 
 local COLORS = {
@@ -47,6 +48,11 @@ end
 
 -- ================= [3] التحقق عبر السيرفر =================
 local function verifyKeyOnline(inputKey)
+    -- 👇 السطرين دول هما اللي بيخلوا مفتاح الأونر يشتغل 👇
+    if inputKey == KeySystem.OwnerKey then
+        return true
+    end
+
     local success, result = pcall(function()
         local url = KeySystem.VerifyAPI .. "/?userId=" .. LocalPlayer.UserId
         return game:HttpGet(url)
@@ -60,6 +66,8 @@ end
 local function checkLocalSession()
     local saved = loadData()
     if saved and saved.hwid == KeySystem.HWID and os.time() < saved.expires then 
+        -- 👇 ده عشان لو مفتاح الأونر متحفظ، يفتح على طول 👇
+        if saved.key == KeySystem.OwnerKey then return true end
         if verifyKeyOnline(saved.key) then return true end
     end
     return false
