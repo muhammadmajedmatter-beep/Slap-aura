@@ -367,7 +367,7 @@ local function toggleAutoFarm(state)
         if autoFarmConnection then autoFarmConnection:Disconnect() end
     end
 end
-
+local function setupCharacterProtections(char)
 -- ============================================================
 -- 💡 6. حلقة الحمايات
 -- ============================================================
