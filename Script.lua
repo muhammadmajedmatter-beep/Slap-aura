@@ -486,7 +486,32 @@ function LoadMainGUI()
 
         local FarmsTab = MainWindow:Tab({ Title = "Farms", Icon = "tractor" })
         FarmsTab:Toggle({ Title = "Slap AutoFarm", Desc = "يضرب ويلم فلوس تلقائياً", Value = false, Callback = function(state) toggleAutoFarm(state) end })
-
+FarmsTab:Toggle({ 
+    Title = "Auto Collect Candy", 
+    Desc = "ينتقل لكل الكاندي في السيرفر ويلمها تلقائياً", 
+    Value = false, 
+    Callback = function(state) 
+        Settings.CandyFarm = state 
+        if state then
+            task.spawn(function()
+                while Settings.CandyFarm do
+                    task.wait(0.5) 
+                    local myChar = LocalPlayer.Character
+                    if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                        local root = myChar.HumanoidRootPart
+                        for _, obj in pairs(workspace:GetDescendants()) do
+                            if not Settings.CandyFarm then break end 
+                            if obj:IsA("BasePart") and (string.find(string.lower(obj.Name), "candy") or string.find(string.lower(obj.Name), "sweet")) then
+                                root.CFrame = obj.CFrame + Vector3.new(0, 3, 0)
+                                task.wait(0.15) 
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end 
+})
         print("✅ [Slap Aura] الواجهة اشتغلت بنجاح.")
     end)
     if not success then warn("❌ خطأ في الواجهة: " .. tostring(err)) end
