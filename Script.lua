@@ -370,7 +370,7 @@ end
 -- ============================================================
 -- 💡 6. حلقة الحمايات
 -- ============================================================
--- 1. اعتراض دوال الموت (Metatable Hijack)
+ 
 pcall(function()
     local mt = getrawmetatable(game)
     local oldNamecall = mt.__namecall
