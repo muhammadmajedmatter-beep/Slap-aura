@@ -377,18 +377,43 @@ RunService.Heartbeat:Connect(function()
     local myRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not myHum or not myRoot then return end
 
+    -- 1. الجود مود (تصليح الصحة فوراً)
     if Settings.Godmode then
-        if myHum.Health < myHum.MaxHealth then myHum.Health = myHum.MaxHealth end
+        myHum.MaxHealth = math.huge
+        if myHum.Health < myHum.MaxHealth then 
+            myHum.Health = myHum.MaxHealth 
+        end
     end
+    
+    -- 2. منع السقوط (Anti-Ragdoll)
     if Settings.AntiRagdoll then
         if myHum.PlatformStand then myHum.PlatformStand = false end
+        if myHum:GetState() == Enum.HumanoidStateType.Physics or myHum:GetState() == Enum.HumanoidStateType.FallingDown then
+            myHum:ChangeState(Enum.HumanoidStateType.GettingUp)
+        end
     end
+
+    -- 3. منع الطيران (Anti-Knockback) - السرعة العالية
+    if Settings.AntiKnockback then
+        local velocity = myRoot.AssemblyLinearVelocity
+        if velocity.Magnitude > 40 then
+            myRoot.AssemblyLinearVelocity = Vector3.new(0, math.min(velocity.Y, 0), 0)
+        end
+    end
+
+    -- 4. منع السقوط في الفراغ (Anti-Void)
+    if Settings.AntiVoid then
+        if myRoot.Position.Y < -40 then
+            myRoot.CFrame = CFrame.new(0, 50, 0) 
+        end
+    end
+
+    -- 5. السرعة والقفز
     if not isFlying then
         myHum.WalkSpeed = Settings.WalkSpeed
         myHum.JumpPower = Settings.JumpPower
     end
 end)
-
 -- ============================================================
 -- 🥊 7. حلقة الأورا
 -- ============================================================
