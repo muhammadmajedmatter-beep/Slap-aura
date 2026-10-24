@@ -370,103 +370,114 @@ end
 -- ============================================================
 -- 💡 6. حلقة الحمايات
 -- ============================================================
-local IgnoredOneShots = {
-    Overkill = true,
-    Counter = true,
-    Reverse = true,
-    ["God's Hand"] = true,
-    Reaper = true,
-    Error = true,
-    Killstreak = true,
-}
+-- 1. اعتراض دوال الموت (Metatable Hijack)
+pcall(function()
+    local mt = getrawmetatable(game)
+    local oldNamecall = mt.__namecall
+    local oldNewIndex = mt.__newindex
+    
+    setreadonly(mt, false)
+    
+    -- منع السيرفر من تغيير الـ Health
+    mt.__newindex = newcclosure(function(t, k, v)
+        if k == "Health" and t == LocalPlayer.Character and t:FindFirstChild("Humanoid") then
+            if v < t.Health then
+                return -- ارفض الأمر، متغيرش الصحة!
+            end
+        end
+        return oldNewIndex(t, k, v)
+    end)
+    
+    -- منع دوال الضرر المباشرة (TakeDamage)
+    mt.__namecall = newcclosure(function(self, ...)
+        local method = getnamecallmethod()
+        if method == "TakeDamage" and self == LocalPlayer.Character:FindFirstChild("Humanoid") then
+            return -- ارفض استلام الضرر
+        end
+        return oldNamecall(self, ...)
+    end)
+    
+    setreadonly(mt, true)
+end)
 
+-- 2. تعطيل حالات السقوط والموت
 local function setupCharacterProtections(char)
     local myHum = char:WaitForChild("Humanoid")
-    
-    -- 1. حماية الميتاتيبل (Metatable Bypass)
-    -- تعترض أي محاولة لتغيير الصحة من السيرفر أو اللعبة
-    pcall(function()
-        local mt = getrawmetatable(game)
-        local oldIndex = mt.__index
-        setreadonly(mt, false)
-        mt.__index = newcclosure(function(t, k)
-            if k == "Health" and t == myHum then return math.huge end
-            if k == "MaxHealth" and t == myHum then return math.huge end
-            if k == "WalkSpeed" and t == myHum then return Settings.WalkSpeed end
-            if k == "JumpPower" and t == myHum then return Settings.JumpPower end
-            return oldIndex(t, k)
-        end)
-        setreadonly(mt, true)
-    end)
-
-    -- 2. تعطيل حالات الموت (Physics Sync)
     pcall(function()
         myHum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
         myHum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
         myHum:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
         myHum:SetStateEnabled(Enum.HumanoidStateType.Dead, false)
     end)
-
-    -- 3. تصحيح فوري عند أي تغيير في الصحة
-    myHum.HealthChanged:Connect(function(health)
-        if Settings.Godmode and health < myHum.MaxHealth then
-            myHum.Health = myHum.MaxHealth
-        end
-    end)
 end
 
 if LocalPlayer.Character then setupCharacterProtections(LocalPlayer.Character) end
 LocalPlayer.CharacterAdded:Connect(setupCharacterProtections)
 
--- 4. حلقة الفحص السريع (0.1s Loops) لمنع الطيران والوقوع
-task.spawn(function()
-    while task.wait(0.1) do
-        if not LocalPlayer.Character then continue end
-        local myHum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        local myRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if not myHum or not myRoot then continue end
+-- 3. حلقة الفيزياء النووية (Anti-Knockback & Godmode)
+-- RenderStepped بيشتغل مع كل فريم (أسرع من Heartbeat)
+RunService.RenderStepped:Connect(function()
+    if not LocalPlayer.Character then return end
+    local myHum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+    local myRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not myHum or not myRoot then return end
 
-        -- الجود مود
-        if Settings.Godmode then
-            myHum.MaxHealth = math.huge
-            if myHum.Health <= 0 or myHum.Health < myHum.MaxHealth then 
-                myHum.Health = myHum.MaxHealth 
-            end
-        end
-        
-        -- منع السقوط (Anti-Ragdoll)
-        if Settings.AntiRagdoll then
-            if myHum.PlatformStand then myHum.PlatformStand = false end
-            local currentState = myHum:GetState()
-            if currentState == Enum.HumanoidStateType.Physics or currentState == Enum.HumanoidStateType.FallingDown or currentState == Enum.HumanoidStateType.Ragdoll then
-                myHum:ChangeState(Enum.HumanoidStateType.GettingUp)
-            end
-        end
-
-        -- منع الطيران (Anti-Knockback) - مُحسّن
-        -- يمنع الطيران الأفقي فقط، ويسمح بالقفز الطبيعي
-        if Settings.AntiKnockback then
-            local velocity = myRoot.AssemblyLinearVelocity
-            if velocity.Magnitude > 80 then
-                myRoot.AssemblyLinearVelocity = Vector3.new(0, velocity.Y, 0)
-            end
-        end
-
-        -- منع السقوط في الفراغ (Anti-Void)
-        if Settings.AntiVoid then
-            if myRoot.Position.Y < -40 then
-                myRoot.CFrame = CFrame.new(0, 50, 0) 
-            end
-        end
-
-        -- السرعة والقفز
-        if not isFlying then
-            myHum.WalkSpeed = Settings.WalkSpeed
-            myHum.JumpPower = Settings.JumpPower
+    -- أ. تثبيت الصحة (لو الـ Metatable فشل لأي سبب)
+    if Settings.Godmode then
+        myHum.MaxHealth = math.huge
+        if myHum.Health < myHum.MaxHealth then 
+            myHum.Health = myHum.MaxHealth 
         end
     end
-end)
+    
+    -- ب. منع السقوط (Anti-Ragdoll)
+    if Settings.AntiRagdoll then
+        if myHum.PlatformStand then myHum.PlatformStand = false end
+        local state = myHum:GetState()
+        if state == Enum.HumanoidStateType.Physics or state == Enum.HumanoidStateType.FallingDown then
+            myHum:ChangeState(Enum.HumanoidStateType.GettingUp)
+        end
+    end
 
+    -- ج. منع الطيران النووي (Anti-Knockback)
+    if Settings.AntiKnockback then
+        local vel = myRoot.AssemblyLinearVelocity
+        
+        -- لو السرعة عالية جداً (ضربة قوية)
+        if vel.Magnitude > 50 then
+            -- 1. مسح أي قوة خارجية فوراً
+            for _, v in pairs(myRoot:GetChildren()) do
+                if v:IsA("BodyVelocity") or v:IsA("BodyForce") or v:IsA("BodyPosition") then
+                    if v.Name ~= "SlapFlyBV" and v.Name ~= "SlapFlyBG" then
+                        v:Destroy()
+                    end
+                end
+            end
+            
+            -- 2. تصفير السرعة تماماً (أفقياً ورأسياً)
+            myRoot.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+            
+            -- 3. تثبيت الجسم في مكانه لمدة 0.1 ثانية (عشان ميطيرش)
+            myRoot.Anchored = true
+            task.delay(0.1, function()
+                if myRoot then myRoot.Anchored = false end
+            end)
+        end
+    end
+
+    -- د. منع السقوط في الفراغ (Anti-Void)
+    if Settings.AntiVoid then
+        if myRoot.Position.Y < -40 then
+            myRoot.CFrame = CFrame.new(0, 50, 0) 
+        end
+    end
+
+    -- هـ. السرعة والقفز
+    if not isFlying then
+        myHum.WalkSpeed = Settings.WalkSpeed
+        myHum.JumpPower = Settings.JumpPower
+    end
+end)
 -- ============================================================
 -- 🥊 7. حلقة الأورا
 -- ============================================================
