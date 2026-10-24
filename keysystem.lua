@@ -18,7 +18,7 @@ local KeySystem = {
     SaveFile       = "SlapAura_CloudKey.json",
     HWID           = tostring(LocalPlayer.UserId),
     DeveloperName  = "Muhammad Majed",
-    OwnerKey       = "MAJED-OWNER-2025" -- 👈 مفتاح الأونر
+    OwnerKey       = "MAJED-OWNER-2025" -- 👈 سطر مفتاح الأونر
 }
 
 local COLORS = {
@@ -48,7 +48,7 @@ end
 
 -- ================= [3] التحقق عبر السيرفر =================
 local function verifyKeyOnline(inputKey)
-    -- 👇 السطرين دول هما اللي بيخلوا مفتاح الأونر يشتغل 👇
+    -- 👇 التعديل هنا: لو المفتاح أونر، خليه يعدي
     if inputKey == KeySystem.OwnerKey then
         return true
     end
@@ -66,7 +66,7 @@ end
 local function checkLocalSession()
     local saved = loadData()
     if saved and saved.hwid == KeySystem.HWID and os.time() < saved.expires then 
-        -- 👇 ده عشان لو مفتاح الأونر متحفظ، يفتح على طول 👇
+        -- 👇 التعديل هنا: لو مفتاح الأونر متحفظ، افتح على طول
         if saved.key == KeySystem.OwnerKey then return true end
         if verifyKeyOnline(saved.key) then return true end
     end
