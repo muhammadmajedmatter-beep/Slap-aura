@@ -487,29 +487,69 @@ function LoadMainGUI()
         local FarmsTab = MainWindow:Tab({ Title = "Farms", Icon = "tractor" })
         FarmsTab:Toggle({ Title = "Slap AutoFarm", Desc = "يضرب ويلم فلوس تلقائياً", Value = false, Callback = function(state) toggleAutoFarm(state) end })
 FarmsTab:Toggle({ 
-    Title = "Auto Collect Candy (E)", 
-    Desc = "ينتقل للكاندي ويضغط زرار E تلقائياً", 
+    Title = "Auto Candy Farm (All Worlds)", 
+    Desc = "يجمع السلال والكاندي اللي باللمس", 
     Value = false, 
     Callback = function(state) 
         Settings.CandyFarm = state 
         if state then
             task.spawn(function()
+                local collected = {}
                 while Settings.CandyFarm do
-                    task.wait(0.5) 
+                    task.wait(0.3) 
                     local myChar = LocalPlayer.Character
                     if myChar and myChar:FindFirstChild("HumanoidRootPart") then
                         local root = myChar.HumanoidRootPart
+                        local closestObj = nil
+                        local isBucket = false
+                        local shortest = 200 
+                        
                         for _, obj in pairs(workspace:GetDescendants()) do
-                            if not Settings.CandyFarm then break end 
-                            if obj:IsA("ProximityPrompt") and (obj.Parent.Name:lower():find("candy") or obj.Parent.Name:lower():find("bucket") or obj.ActionText:lower():find("candy")) then
-                                if obj.Parent:IsA("BasePart") then
-                                    root.CFrame = obj.Parent.CFrame + Vector3.new(0, 3, 0)
+                            if not Settings.CandyFarm then break end
+                            
+                            -- 1. سلال الكاندي (زرار E)
+                            if obj:IsA("ProximityPrompt") and obj.Enabled then
+                                local isCandy = string.find(string.lower(obj.Parent.Name), "candy") or string.find(string.lower(obj.Parent.Name), "bucket") or string.find(string.lower(obj.ActionText), "candy")
+                                if isCandy and not collected[obj.Parent] then
+                                    local part = obj.Parent
+                                    if part:IsA("BasePart") then
+                                        local dist = (root.Position - part.Position).Magnitude
+                                        if dist < shortest then shortest = dist; closestObj = obj; isBucket = true end
+                                    end
                                 end
-                                task.wait(0.2) 
+                                
+                            -- 2. الكاندي الصغيرة (لمس عادي)
+                            elseif obj:IsA("BasePart") and not obj:IsA("SpawnLocation") and obj.Parent ~= myChar then
+                                local nameCheck = string.lower(obj.Name)
+                                if (string.find(nameCheck, "candy") or string.find(nameCheck, "sweet")) and not collected[obj] then
+                                    if obj.Size.Magnitude < 10 then 
+                                        local dist = (root.Position - obj.Position).Magnitude
+                                        if dist < shortest then shortest = dist; closestObj = obj; isBucket = false end
+                                    end
+                                end
+                            end
+                        end
+                        
+                        if closestObj then
+                            local targetPart = isBucket and closestObj.Parent or closestObj
+                            
+                            -- نطير ونقف جوه الكاندي بالظبط (عشان تلمسها)
+                            root.CFrame = targetPart.CFrame
+                            task.wait(0.2) -- استنى عشان السيرفر يسجل اللمسة
+                            
+                            if isBucket then
                                 pcall(function()
-                                    fireproximityprompt(obj)
+                                    closestObj:InputHoldBegin()
+                                    task.wait(0.1)
+                                    closestObj:InputHoldEnd()
+                                    fireproximityprompt(closestObj)
                                 end)
-                                task.wait(0.3) 
+                                collected[targetPart] = true
+                                task.wait(0.2) 
+                            else
+                                -- الكاندي الصغيرة: سجلناها خلاص عشان نروح للي بعدها
+                                collected[closestObj] = true
+                                task.wait(0.1)
                             end
                         end
                     end
