@@ -18,7 +18,6 @@ local KeySystem = {
     SaveFile       = "SlapAura_CloudKey.json",
     HWID           = tostring(LocalPlayer.UserId),
     DeveloperName  = "Muhammad Majed",
-    OwnerKey       = "MAJED-OWNER-2025" -- 👈 سطر مفتاح الأونر
 }
 
 local COLORS = {
@@ -48,11 +47,6 @@ end
 
 -- ================= [3] التحقق عبر السيرفر =================
 local function verifyKeyOnline(inputKey)
-    -- 👇 التعديل هنا: لو المفتاح أونر، خليه يعدي
-    if inputKey == KeySystem.OwnerKey then
-        return true
-    end
-
     local success, result = pcall(function()
         local url = KeySystem.VerifyAPI .. "/?userId=" .. LocalPlayer.UserId
         return game:HttpGet(url)
@@ -66,8 +60,6 @@ end
 local function checkLocalSession()
     local saved = loadData()
     if saved and saved.hwid == KeySystem.HWID and os.time() < saved.expires then 
-        -- 👇 التعديل هنا: لو مفتاح الأونر متحفظ، افتح على طول
-        if saved.key == KeySystem.OwnerKey then return true end
         if verifyKeyOnline(saved.key) then return true end
     end
     return false
@@ -258,4 +250,4 @@ end)
 if not success then
     showNotification("Error", "فشل تحميل السكربت، تأكد من الرابط.", false)
     warn("❌ Error: " .. tostring(err))
-end
+end دا ال شغال مضيفش حاجه ال مفتاح الاونر يكون شغالل
