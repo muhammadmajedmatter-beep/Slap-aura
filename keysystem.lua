@@ -250,4 +250,4 @@ end)
 if not success then
     showNotification("Error", "فشل تحميل السكربت، تأكد من الرابط.", false)
     warn("❌ Error: " .. tostring(err))
-end دا ال شغال مضيفش حاجه ال مفتاح الاونر يكون شغالل
+end 
