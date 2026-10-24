@@ -60,6 +60,7 @@ local Settings = {
     WalkSpeed = 16, JumpPower = 50, 
     Fullbright = false, ESP = false, CandyFarm = false
 }
+
 -- ================= نظام الإشعارات المخصص =================
 local function showNotification(title, text, isSuccess)
     local notifGui = Instance.new("ScreenGui")
@@ -85,6 +86,7 @@ local function showNotification(title, text, isSuccess)
     end)
 end
 -- =========================================================
+
 -- ============================================================
 -- 🔔 2. شاشة الـ HUD
 -- ============================================================
@@ -368,16 +370,15 @@ local function toggleAutoFarm(state)
 end
 
 -- ============================================================
--- 💡 6. حلقة الحمايات
+-- 💡 6. حلقة الحمايات (God Tier Antis - Physics Fix)
 -- ============================================================
- -- 1. حماية ضد الـ Overkill (قفل الصحة)
 pcall(function()
     local mt = getrawmetatable(game)
     local oldIndex = mt.__index
     setreadonly(mt, false)
     mt.__index = newcclosure(function(t, k)
         if k == "Health" and t == LocalPlayer.Character and t:FindFirstChild("Humanoid") then
-            return math.huge -- بيمنع أي ضرر من السيرفر
+            return math.huge
         end
         return oldIndex(t, k)
     end)
@@ -386,8 +387,6 @@ end)
 
 local function setupCharacterProtections(char)
     local myHum = char:WaitForChild("Humanoid")
-    
-    -- تعطيل حالات الـ Ragdoll نهائياً
     pcall(function()
         myHum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
         myHum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
@@ -398,49 +397,33 @@ end
 if LocalPlayer.Character then setupCharacterProtections(LocalPlayer.Character) end
 LocalPlayer.CharacterAdded:Connect(setupCharacterProtections)
 
--- 2. لوب الحمايات (بيشتغل مع كل فريم)
 RunService.Heartbeat:Connect(function()
     if not LocalPlayer.Character then return end
     local myHum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
     local myRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not myHum or not myRoot then return end
 
-    -- أ. الجود مود (بدون ما نستخدم math.huge عشان نمنع مشاكل الفيزياء)
     if Settings.Godmode then
         myHum.MaxHealth = 10000
-        if myHum.Health < myHum.MaxHealth then 
-            myHum.Health = myHum.MaxHealth 
-        end
+        if myHum.Health < myHum.MaxHealth then myHum.Health = myHum.MaxHealth end
     end
     
-    -- ب. منع السقوط (Anti-Ragdoll) - من غير ما نطير في الهوا
     if Settings.AntiRagdoll then
-        if myHum.PlatformStand then 
-            myHum.PlatformStand = false 
-        end
+        if myHum.PlatformStand then myHum.PlatformStand = false end
     end
 
-    -- ج. منع الطيران الأفقي (Anti-Knockback) - بيسمحلك تنط عادي
     if Settings.AntiKnockback then
         local vel = myRoot.AssemblyLinearVelocity
-        -- بنحسب السرعة الأفقية بس (الطيران لقدام أو ورا)
         local horizontalSpeed = Vector3.new(vel.X, 0, vel.Z).Magnitude
-        
-        -- لو السرعة الأفقية عدت 45 (ده رقم كبير جداً للنطة العادية)
         if horizontalSpeed > 45 then
-            -- بنصفر السرعة الأفقية، ونسيب سرعة النط (Y) زي ما هي
             myRoot.AssemblyLinearVelocity = Vector3.new(0, vel.Y, 0)
         end
     end
 
-    -- د. منع السقوط في الفراغ (Anti-Void)
     if Settings.AntiVoid then
-        if myRoot.Position.Y < -40 then
-            myRoot.CFrame = CFrame.new(0, 50, 0) 
-        end
+        if myRoot.Position.Y < -40 then myRoot.CFrame = CFrame.new(0, 50, 0) end
     end
 
-    -- هـ. السرعة والقفز
     if not isFlying then
         myHum.WalkSpeed = Settings.WalkSpeed
         myHum.JumpPower = Settings.JumpPower
@@ -536,13 +519,12 @@ function LoadMainGUI()
         StatusLabel = CombatTab:Paragraph({Title = "Status", Desc = "⏳ Waiting for Calibration... Slap a player ONCE.", Image = "info"})
         
         CombatTab:Button({ Title = "🔄 Refresh / Re-learn Glove", Desc = "دوس هنا لو غيرت القفاز", Callback = RefreshGlove })
-        
         CombatTab:Toggle({Title = "Enable Auto Slap", Value = true, Callback = function(state) Settings.AuraEnabled = state end})
         CombatTab:Slider({Title = "Range", Step = 1, Value = { Min = 1, Max = 50, Default = 10 }, Callback = function(value) Settings.Range = value end})
         CombatTab:Slider({Title = "Speed", Step = 1, Value = { Min = 1, Max = 4, Default = 3 }, Callback = function(value) Settings.MaxHitsPerSecond = value end})
 
         local UtilityTab = MainWindow:Tab({ Title = "Utility", Icon = "settings" })
-        UtilityTab:Toggle({ Title = "Fly (Mobile)", Value = false, Callback = function(state) if state then startFly() else stopFly() end end })
+        UtilityTab:Toggle({ Title = "Fly", Value = false, Callback = function(state) if state then startFly() else stopFly() end end })
         UtilityTab:Slider({ Title = "Fly Speed", Step = 10, Value = { Min = 20, Max = 200, Default = 50 }, Callback = function(value) Settings.FlySpeed = value end })
         UtilityTab:Toggle({ Title = "Noclip", Value = false, Callback = function(state) Settings.Noclip = state end })
         UtilityTab:Slider({ Title = "WalkSpeed", Step = 1, Value = { Min = 16, Max = 100, Default = 16 }, Callback = function(value) Settings.WalkSpeed = value end })
@@ -556,60 +538,53 @@ function LoadMainGUI()
         AntisTab:Toggle({ Title = "Anti-Void", Value = false, Callback = function(state) Settings.AntiVoid = state end })
         AntisTab:Toggle({ Title = "Godmode (Anti-Overkill)", Value = true, Callback = function(state) Settings.Godmode = state end })
         AntisTab:Toggle({ Title = "Anti-Ragdoll", Value = true, Callback = function(state) Settings.AntiRagdoll = state end })
-        AntisTab:Toggle({ Title = "Anti-Knockback", Desc = "منع الطيران عند الضربة القوية", Value = true, Callback = function(state) Settings.AntiKnockback = state end })
+        AntisTab:Toggle({ Title = "Anti-Knockback", Desc = "منع الطيران عند الضربة", Value = true, Callback = function(state) Settings.AntiKnockback = state end })
 
         local FarmsTab = MainWindow:Tab({ Title = "Farms", Icon = "tractor" })
         FarmsTab:Toggle({ Title = "Slap AutoFarm", Desc = "يضرب ويلم فلوس تلقائياً", Value = false, Callback = function(state) toggleAutoFarm(state) end })
         
         FarmsTab:Toggle({ 
-    Title = "Auto Candy Farm (Ultra Speed)", 
-    Desc = "أسرع طريقة لجمع الكاندي (0.03s)", 
-    Value = false, 
-    Callback = function(state) 
-        Settings.CandyFarm = state 
-        if state then
-            task.spawn(function()
-                local TweenService = game:GetService("TweenService")
-                local tweenInfo = TweenInfo.new(0.03, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
-                
-                while Settings.CandyFarm do
-                    local myChar = LocalPlayer.Character
-                    if myChar and myChar:FindFirstChild("HumanoidRootPart") then
-                        local hrp = myChar.HumanoidRootPart
-                        
-                        -- البحث عن فولدر الكاندي
-                        local folder = workspace:FindFirstChild("CandyCorns") or workspace:FindFirstChild("Candy") or workspace:FindFirstChild("HalloweenCandy")
-                        
-                        if folder then
-                            local candies = folder:GetChildren()
-                            for i = 1, #candies do
-                                if not Settings.CandyFarm then break end
-                                local candy = candies[i]
-                                
-                                if candy:IsA("BasePart") and candy.Parent == folder then
-                                    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = candy.CFrame})
-                                    tween:Play()
-                                    tween.Completed:Wait() 
+            Title = "Auto Candy Farm (Ultra Speed)", 
+            Desc = "أسرع طريقة لجمع الكاندي", 
+            Value = false, 
+            Callback = function(state) 
+                Settings.CandyFarm = state 
+                if state then
+                    task.spawn(function()
+                        local tweenInfo = TweenInfo.new(0.03, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+                        while Settings.CandyFarm do
+                            local myChar = LocalPlayer.Character
+                            if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                                local hrp = myChar.HumanoidRootPart
+                                local folder = workspace:FindFirstChild("CandyCorns") or workspace:FindFirstChild("Candy") or workspace:FindFirstChild("HalloweenCandy")
+                                if folder then
+                                    for i = 1, #folder:GetChildren() do
+                                        if not Settings.CandyFarm then break end
+                                        local candy = folder:GetChildren()[i]
+                                        if candy:IsA("BasePart") then
+                                            local tween = TweenService:Create(hrp, tweenInfo, {CFrame = candy.CFrame})
+                                            tween:Play()
+                                            tween.Completed:Wait() 
+                                        end
+                                    end
+                                else
+                                    for _, obj in pairs(workspace:GetDescendants()) do
+                                        if not Settings.CandyFarm then break end
+                                        local nameCheck = string.lower(obj.Name)
+                                        if obj:IsA("BasePart") and (string.find(nameCheck, "candy") or string.find(nameCheck, "corn")) then
+                                            local tween = TweenService:Create(hrp, tweenInfo, {CFrame = obj.CFrame})
+                                            tween:Play()
+                                            tween.Completed:Wait()
+                                        end
+                                    end
                                 end
                             end
-                        else
-                            -- خطة بديلة
-                            for _, obj in pairs(workspace:GetDescendants()) do
-                                if not Settings.CandyFarm then break end
-                                local nameCheck = string.lower(obj.Name)
-                                if obj:IsA("BasePart") and (string.find(nameCheck, "candy") or string.find(nameCheck, "corn")) then
-                                    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = obj.CFrame})
-                                    tween:Play()
-                                    tween.Completed:Wait()
-                                end
-                            end
+                            task.wait(0.1) 
                         end
-                    end
-                    task.wait(0.1) 
+                    end)
                 end
-            end)
-        end
-    end 
-})
+            end 
+        })
+    end)
     if not success then warn("❌ خطأ في الواجهة: " .. tostring(err)) end
 end
