@@ -1,5 +1,5 @@
 -- ============================================================
--- 🥊 Slap Aura Hub | V49.5 | Halloween Edition + Refresh
+-- 🥊 Slap Aura Hub | V49.5 | Halloween Edition + Candy Farm
 -- ============================================================
 print("🚀 [Slap Aura] بدء التشغيل...")
 
@@ -12,7 +12,6 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local Camera = workspace.CurrentCamera
 
--- =========================================================
 -- 🛑 1. درع الحماية + الالتقاط الفوري
 local CapturedRemote = nil
 local RemoteFormat = "None"
@@ -29,13 +28,11 @@ oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
                 if CapturedRemote ~= self then
                     CapturedRemote = self
                     RemoteFormat = "Table"
-                    print("✅ تم التقاط الريموت (Table)")
                 end
             elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart") then
                 if CapturedRemote ~= self then
                     CapturedRemote = self
                     RemoteFormat = "Instance"
-                    print("✅ تم التقاط الريموت (Instance)")
                 end
             end
         end
@@ -59,8 +56,9 @@ local autoFarmConnection = nil
 local Settings = { 
     AuraEnabled = true, Range = 10, MaxHitsPerSecond = 3, 
     FlySpeed = 50, Noclip = false, AntiVoid = false, 
-    Godmode = true, AntiRagdoll = true, WalkSpeed = 16, JumpPower = 50, 
-    Fullbright = false, ESP = false 
+    Godmode = true, AntiRagdoll = true, AntiKnockback = true, 
+    WalkSpeed = 16, JumpPower = 50, 
+    Fullbright = false, ESP = false, CandyFarm = false
 }
 
 -- ============================================================
@@ -85,7 +83,7 @@ HUDCorner.CornerRadius = UDim.new(0, 6)
 HUDCorner.Parent = HUDFrame
 
 local HUDStroke = Instance.new("UIStroke")
-HUDStroke.Color = Color3.fromRGB(255, 140, 0) -- برتقالي هالوين
+HUDStroke.Color = Color3.fromRGB(255, 140, 0)
 HUDStroke.Thickness = 1.5
 HUDStroke.Parent = HUDFrame
 
@@ -128,7 +126,6 @@ LocalPlayer.CharacterAdded:Connect(function(char)
     end)
 end)
 
--- 💡 دالة الـ Refresh (تمت إضافتها هنا)
 local function RefreshGlove()
     CapturedRemote = nil
     RemoteFormat = "None"
@@ -142,7 +139,7 @@ local function RefreshGlove()
 end
 
 -- ============================================================
--- 🎬 4. شاشة التحميل (خفيفة وسريعة)
+-- 🎬 4. شاشة التحميل
 -- ============================================================
 local LoadingGui = Instance.new("ScreenGui")
 LoadingGui.Name = "SlapAuraLoader"
@@ -158,7 +155,7 @@ Backdrop.BackgroundTransparency = 0.1
 Backdrop.Parent = LoadingGui
 
 local MainFrame = Instance.new("Frame")
-MainFrame.Size = UDim2.new(0, 360, 0, 180) -- حجم صغير وخفيف
+MainFrame.Size = UDim2.new(0, 360, 0, 180)
 MainFrame.Position = UDim2.new(0.5, -180, 0.5, -90)
 MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20)
 MainFrame.BorderSizePixel = 0
@@ -169,7 +166,7 @@ MainCorner.CornerRadius = UDim.new(0, 12)
 MainCorner.Parent = MainFrame
 
 local MainStroke = Instance.new("UIStroke")
-MainStroke.Color = Color3.fromRGB(255, 140, 0) -- برتقالي هالوين
+MainStroke.Color = Color3.fromRGB(255, 140, 0)
 MainStroke.Thickness = 2
 MainStroke.Parent = MainFrame
 
@@ -214,13 +211,11 @@ local BarFillCorner = Instance.new("UICorner")
 BarFillCorner.CornerRadius = UDim.new(1, 0)
 BarFillCorner.Parent = BarFill
 
--- أنيميشن شريط التحميل (2.5 ثانية فقط)
 local loadTween = TweenService:Create(BarFill, TweenInfo.new(2.5, Enum.EasingStyle.Linear), {Size = UDim2.new(1, 0, 1, 0)})
 loadTween:Play()
 
 loadTween.Completed:Connect(function()
     task.wait(0.2)
-    -- تأثير الخروج السريع
     local fadeOut = TweenService:Create(MainFrame, TweenInfo.new(0.3), {BackgroundTransparency = 1})
     local fadeStroke = TweenService:Create(MainStroke, TweenInfo.new(0.3), {Transparency = 1})
     local fadeBack = TweenService:Create(Backdrop, TweenInfo.new(0.3), {BackgroundTransparency = 1})
@@ -230,7 +225,7 @@ loadTween.Completed:Connect(function()
     
     task.wait(0.3)
     LoadingGui:Destroy()
-    LoadMainGUI() -- فتح الواجهة
+    LoadMainGUI() 
 end)
 
 -- ============================================================
@@ -306,7 +301,7 @@ local function enableESP()
         if plr ~= LocalPlayer and plr.Character then
             local hl = Instance.new("Highlight")
             hl.Name = "SlapAuraESP"
-            hl.FillColor = Color3.fromRGB(255, 140, 0) -- برتقالي
+            hl.FillColor = Color3.fromRGB(255, 140, 0)
             hl.OutlineColor = Color3.fromRGB(255, 255, 255)
             hl.Parent = plr.Character
             table.insert(espHighlights, hl)
@@ -347,33 +342,45 @@ local function toggleAutoFarm(state)
         if autoFarmConnection then autoFarmConnection:Disconnect() end
     end
 end
-local function setupCharacterProtections(char)
+
 -- ============================================================
 -- 💡 6. حلقة الحمايات
 -- ============================================================
+local function setupCharacterProtections(char)
+    local myHum = char:WaitForChild("Humanoid")
+    
+    myHum.HealthChanged:Connect(function(health)
+        if Settings.Godmode and health < myHum.MaxHealth then
+            myHum.Health = myHum.MaxHealth
+        end
+    end)
+
+    myHum.StateChanged:Connect(function(oldState, newState)
+        if Settings.AntiRagdoll then
+            if newState == Enum.HumanoidStateType.Physics or newState == Enum.HumanoidStateType.FallingDown then
+                myHum:ChangeState(Enum.HumanoidStateType.GettingUp)
+            end
+        end
+    end)
+end
+
+if LocalPlayer.Character then setupCharacterProtections(LocalPlayer.Character) end
+LocalPlayer.CharacterAdded:Connect(setupCharacterProtections)
+
 RunService.Heartbeat:Connect(function()
     if not LocalPlayer.Character then return end
     local myHum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
     local myRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
     if not myHum or not myRoot then return end
 
-    -- 1. الجود مود (تصليح الصحة فوراً)
     if Settings.Godmode then
         myHum.MaxHealth = math.huge
-        if myHum.Health < myHum.MaxHealth then 
-            myHum.Health = myHum.MaxHealth 
-        end
+        if myHum.Health < myHum.MaxHealth then myHum.Health = myHum.MaxHealth end
     end
-    
-    -- 2. منع السقوط (Anti-Ragdoll)
     if Settings.AntiRagdoll then
         if myHum.PlatformStand then myHum.PlatformStand = false end
-        if myHum:GetState() == Enum.HumanoidStateType.Physics or myHum:GetState() == Enum.HumanoidStateType.FallingDown then
-            myHum:ChangeState(Enum.HumanoidStateType.GettingUp)
-        end
     end
-
-    -- 3. منع الطيران (Anti-Knockback) - السرعة العالية
+    
     if Settings.AntiKnockback then
         local velocity = myRoot.AssemblyLinearVelocity
         if velocity.Magnitude > 40 then
@@ -381,19 +388,12 @@ RunService.Heartbeat:Connect(function()
         end
     end
 
-    -- 4. منع السقوط في الفراغ (Anti-Void)
-    if Settings.AntiVoid then
-        if myRoot.Position.Y < -40 then
-            myRoot.CFrame = CFrame.new(0, 50, 0) 
-        end
-    end
-
-    -- 5. السرعة والقفز
     if not isFlying then
         myHum.WalkSpeed = Settings.WalkSpeed
         myHum.JumpPower = Settings.JumpPower
     end
 end)
+
 -- ============================================================
 -- 🥊 7. حلقة الأورا
 -- ============================================================
@@ -402,7 +402,7 @@ local lastHitTime, hitsThisSecond, currentSecond = 0, 0, math.floor(tick())
 RunService.Stepped:Connect(function()
     if Settings.AntiVoid and LocalPlayer.Character then
         local root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if root and root.Position.Y < -50 then root.CFrame = CFrame.new(0, 50, 0) end
+        if root and root.Position.Y < -40 then root.CFrame = CFrame.new(0, 50, 0) end
     end
     if Settings.Noclip and LocalPlayer.Character then
         for _, p in ipairs(LocalPlayer.Character:GetDescendants()) do 
@@ -448,18 +448,17 @@ RunService.Stepped:Connect(function()
 end)
 
 -- ============================================================
--- 🎨 8. واجهة WindUI (مع ثيم Halloween)
+-- 🎨 8. واجهة WindUI
 -- ============================================================
 function LoadMainGUI()
     local success, err = pcall(function()
         local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
         
-        -- إنشاء ثيم Halloween مخصص
         WindUI:AddTheme({
             Name = "Halloween",
             Accent = WindUI:Gradient({
-                ["0"] = { Color = Color3.fromHex("#FF8C00"), Transparency = 0 }, -- برتقالي
-                ["100"] = { Color = Color3.fromHex("#800080"), Transparency = 0 }, -- بنفسجي
+                ["0"] = { Color = Color3.fromHex("#FF8C00"), Transparency = 0 },
+                ["100"] = { Color = Color3.fromHex("#800080"), Transparency = 0 },
             }, { Rotation = 45 }),
             Dialog = Color3.fromHex("#1A1A1A"),
             Outline = Color3.fromHex("#FF8C00"),
@@ -472,23 +471,18 @@ function LoadMainGUI()
         
         MainWindow = WindUI:CreateWindow({
             Title = "Slap Aura | Halloween", 
-            Icon = "ghost", -- أيقونة شبح
-            Author = "Premium Dev", 
+            Icon = "ghost",
+            Author = "Muhammad Majed", 
             Folder = "SlapAuraHalloween", 
             Size = UDim2.fromOffset(580, 460), 
             Transparent = true, 
-            Theme = "Halloween" -- تطبيق الثيم
+            Theme = "Halloween"
         })
 
         local CombatTab = MainWindow:Tab({ Title = "Combat", Icon = "crosshair" })
         StatusLabel = CombatTab:Paragraph({Title = "Status", Desc = "⏳ Waiting for Calibration... Slap a player ONCE.", Image = "info"})
         
-        -- 💡 زرار الريفريش تمت إضافته هنا
-        CombatTab:Button({
-            Title = "🔄 Refresh / Re-learn Glove", 
-            Desc = "دوس هنا لو غيرت القفاز", 
-            Callback = RefreshGlove
-        })
+        CombatTab:Button({ Title = "🔄 Refresh / Re-learn Glove", Desc = "دوس هنا لو غيرت القفاز", Callback = RefreshGlove })
         
         CombatTab:Toggle({Title = "Enable Auto Slap", Value = true, Callback = function(state) Settings.AuraEnabled = state end})
         CombatTab:Slider({Title = "Range", Step = 1, Value = { Min = 1, Max = 50, Default = 10 }, Callback = function(value) Settings.Range = value end})
@@ -509,53 +503,49 @@ function LoadMainGUI()
         AntisTab:Toggle({ Title = "Anti-Void", Value = false, Callback = function(state) Settings.AntiVoid = state end })
         AntisTab:Toggle({ Title = "Godmode (Anti-Overkill)", Value = true, Callback = function(state) Settings.Godmode = state end })
         AntisTab:Toggle({ Title = "Anti-Ragdoll", Value = true, Callback = function(state) Settings.AntiRagdoll = state end })
+        AntisTab:Toggle({ Title = "Anti-Knockback", Desc = "منع الطيران عند الضربة القوية", Value = true, Callback = function(state) Settings.AntiKnockback = state end })
 
         local FarmsTab = MainWindow:Tab({ Title = "Farms", Icon = "tractor" })
         FarmsTab:Toggle({ Title = "Slap AutoFarm", Desc = "يضرب ويلم فلوس تلقائياً", Value = false, Callback = function(state) toggleAutoFarm(state) end })
-FarmsTab:Toggle({ 
-    Title = "Auto Candy Farm (Touch)", 
-    Desc = "يلم الكاندي باللمس المباشر", 
-    Value = false, 
-    Callback = function(state) 
-        Settings.CandyFarm = state 
-        if state then
-            task.spawn(function()
-                while Settings.CandyFarm do
-                    task.wait(0.3) 
-                    local myChar = LocalPlayer.Character
-                    if myChar and myChar:FindFirstChild("HumanoidRootPart") then
-                        local root = myChar.HumanoidRootPart
-                        
-                        -- 1. لو فيه مجلد CandyCorns في اللعبة
-                        local candyFolder = workspace:FindFirstChild("CandyCorns")
-                        if candyFolder then
-                            for _, candy in pairs(candyFolder:GetChildren()) do
-                                if not Settings.CandyFarm then break end
-                                if candy:IsA("BasePart") then
-                                    -- نسحب الكاندي ناحية اللاعب عشان اللمس يحصل
-                                    candy.CFrame = root.CFrame
-                                    task.wait(0.1)
-                                end
-                            end
-                        else
-                            -- 2. لو مفيش مجلد، بندور على أي كاندي في الماب
-                            for _, obj in pairs(workspace:GetDescendants()) do
-                                if not Settings.CandyFarm then break end
-                                local nameCheck = string.lower(obj.Name)
-                                if obj:IsA("BasePart") and (string.find(nameCheck, "candy") or string.find(nameCheck, "corn")) then
-                                    -- نوقف اللاعب جوه الكاندي
-                                    root.CFrame = obj.CFrame + Vector3.new(0, 3, 0)
-                                    task.wait(0.15)
+        
+        FarmsTab:Toggle({ 
+            Title = "Auto Candy Farm (Touch)", 
+            Desc = "يلم الكاندي باللمس المباشر", 
+            Value = false, 
+            Callback = function(state) 
+                Settings.CandyFarm = state 
+                if state then
+                    task.spawn(function()
+                        while Settings.CandyFarm do
+                            task.wait(0.3) 
+                            local myChar = LocalPlayer.Character
+                            if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                                local root = myChar.HumanoidRootPart
+                                local candyFolder = workspace:FindFirstChild("CandyCorns")
+                                if candyFolder then
+                                    for _, candy in pairs(candyFolder:GetChildren()) do
+                                        if not Settings.CandyFarm then break end
+                                        if candy:IsA("BasePart") then
+                                            candy.CFrame = root.CFrame
+                                            task.wait(0.1)
+                                        end
+                                    end
+                                else
+                                    for _, obj in pairs(workspace:GetDescendants()) do
+                                        if not Settings.CandyFarm then break end
+                                        local nameCheck = string.lower(obj.Name)
+                                        if obj:IsA("BasePart") and (string.find(nameCheck, "candy") or string.find(nameCheck, "corn")) then
+                                            root.CFrame = obj.CFrame + Vector3.new(0, 3, 0)
+                                            task.wait(0.15)
+                                        end
+                                    end
                                 end
                             end
                         end
-                    end
+                    end)
                 end
-            end)
-        end
-    end 
-})
-        print("✅ [Slap Aura] الواجهة اشتغلت بنجاح.")
+            end 
+        })
     end)
     if not success then warn("❌ خطأ في الواجهة: " .. tostring(err)) end
-end 
+end
