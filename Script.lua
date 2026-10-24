@@ -582,43 +582,54 @@ function LoadMainGUI()
         FarmsTab:Toggle({ Title = "Slap AutoFarm", Desc = "يضرب ويلم فلوس تلقائياً", Value = false, Callback = function(state) toggleAutoFarm(state) end })
         
         FarmsTab:Toggle({ 
-            Title = "Auto Candy Farm (Touch)", 
-            Desc = "يلم الكاندي باللمس المباشر", 
-            Value = false, 
-            Callback = function(state) 
-                Settings.CandyFarm = state 
-                if state then
-                    task.spawn(function()
-                        while Settings.CandyFarm do
-                            task.wait(0.3) 
-                            local myChar = LocalPlayer.Character
-                            if myChar and myChar:FindFirstChild("HumanoidRootPart") then
-                                local root = myChar.HumanoidRootPart
-                                local candyFolder = workspace:FindFirstChild("CandyCorns")
-                                if candyFolder then
-                                    for _, candy in pairs(candyFolder:GetChildren()) do
-                                        if not Settings.CandyFarm then break end
-                                        if candy:IsA("BasePart") then
-                                            candy.CFrame = root.CFrame
-                                            task.wait(0.1)
-                                        end
-                                    end
-                                else
-                                    for _, obj in pairs(workspace:GetDescendants()) do
-                                        if not Settings.CandyFarm then break end
-                                        local nameCheck = string.lower(obj.Name)
-                                        if obj:IsA("BasePart") and (string.find(nameCheck, "candy") or string.find(nameCheck, "corn")) then
-                                            root.CFrame = obj.CFrame + Vector3.new(0, 3, 0)
-                                            task.wait(0.15)
-                                        end
-                                    end
+    Title = "Auto Candy Farm (Ultra Speed)", 
+    Desc = "أسرع طريقة لجمع الكاندي (0.03s)", 
+    Value = false, 
+    Callback = function(state) 
+        Settings.CandyFarm = state 
+        if state then
+            task.spawn(function()
+                local TweenService = game:GetService("TweenService")
+                local tweenInfo = TweenInfo.new(0.03, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+                
+                while Settings.CandyFarm do
+                    local myChar = LocalPlayer.Character
+                    if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                        local hrp = myChar.HumanoidRootPart
+                        
+                        -- البحث عن فولدر الكاندي
+                        local folder = workspace:FindFirstChild("CandyCorns") or workspace:FindFirstChild("Candy") or workspace:FindFirstChild("HalloweenCandy")
+                        
+                        if folder then
+                            local candies = folder:GetChildren()
+                            for i = 1, #candies do
+                                if not Settings.CandyFarm then break end
+                                local candy = candies[i]
+                                
+                                if candy:IsA("BasePart") and candy.Parent == folder then
+                                    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = candy.CFrame})
+                                    tween:Play()
+                                    tween.Completed:Wait() 
+                                end
+                            end
+                        else
+                            -- خطة بديلة
+                            for _, obj in pairs(workspace:GetDescendants()) do
+                                if not Settings.CandyFarm then break end
+                                local nameCheck = string.lower(obj.Name)
+                                if obj:IsA("BasePart") and (string.find(nameCheck, "candy") or string.find(nameCheck, "corn")) then
+                                    local tween = TweenService:Create(hrp, tweenInfo, {CFrame = obj.CFrame})
+                                    tween:Play()
+                                    tween.Completed:Wait()
                                 end
                             end
                         end
-                    end)
+                    end
+                    task.wait(0.1) 
                 end
-            end 
-        })
-    end)
+            end)
+        end
+    end 
+})
     if not success then warn("❌ خطأ في الواجهة: " .. tostring(err)) end
 end
