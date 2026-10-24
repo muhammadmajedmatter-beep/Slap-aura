@@ -1,5 +1,5 @@
 -- ============================================================
--- 🔐 SLAP AURA | Ultimate Premium Key System (Owner Key + UI)
+-- 🔐 SLAP AURA | Ultimate Premium Key System (Val.town & Mobile)
 -- ============================================================
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -13,12 +13,11 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local KeySystem = {
     LinkvertiseURL = "https://direct-link.net/10307604/kQmsbPuU0YF4",   
     VerifyAPI      = "https://muhammadmajedmatter--5e403a30ceda11f18f921607ee4eb77e.web.val.run", 
-    ScriptURL      = "https://raw.githubusercontent.com/muhammadmajedmatter-beep/Slap-aura/main/Script.lua?v=1", 
+    ScriptURL      = "https://raw.githubusercontent.com/muhammadmajedmatter-beep/Slap-aura/refs/heads/main/Script.lua", 
     Duration       = 7 * 24 * 60 * 60,
     SaveFile       = "SlapAura_CloudKey.json",
     HWID           = tostring(LocalPlayer.UserId),
     DeveloperName  = "Muhammad Majed",
-    OwnerKey       = "MAJED-OWNER-2025" -- 👈 مفتاح الأونر الخاص بك
 }
 
 local COLORS = {
@@ -46,14 +45,8 @@ local function loadData()
     end
 end
 
--- ================= [3] التحقق عبر السيرفر أو مفتاح الأونر =================
+-- ================= [3] التحقق عبر السيرفر =================
 local function verifyKeyOnline(inputKey)
-    -- 1. لو المفتاح هو مفتاح الأونر، هيعدي على طول
-    if inputKey == KeySystem.OwnerKey then
-        return true
-    end
-
-    -- 2. التحقق العادي من السيرفر
     local success, result = pcall(function()
         local url = KeySystem.VerifyAPI .. "/?userId=" .. LocalPlayer.UserId
         return game:HttpGet(url)
@@ -67,7 +60,6 @@ end
 local function checkLocalSession()
     local saved = loadData()
     if saved and saved.hwid == KeySystem.HWID and os.time() < saved.expires then 
-        if saved.key == KeySystem.OwnerKey then return true end
         if verifyKeyOnline(saved.key) then return true end
     end
     return false
