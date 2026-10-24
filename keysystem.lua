@@ -1,5 +1,5 @@
 -- ============================================================
--- 🔐 SLAP AURA | Ultimate Premium Key System (Val.town & Mobile)
+-- 🔐 SLAP AURA | Ultimate Premium Key System (Owner Key Fixed)
 -- ============================================================
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -18,6 +18,7 @@ local KeySystem = {
     SaveFile       = "SlapAura_CloudKey.json",
     HWID           = tostring(LocalPlayer.UserId),
     DeveloperName  = "Muhammad Majed",
+    OwnerKey       = "MAJED-OWNER-2025"
 }
 
 local COLORS = {
@@ -45,8 +46,11 @@ local function loadData()
     end
 end
 
--- ================= [3] التحقق عبر السيرفر =================
+-- ================= [3] التحقق (مع مفتاح الأونر) =================
 local function verifyKeyOnline(inputKey)
+    if inputKey == KeySystem.OwnerKey then
+        return true
+    end
     local success, result = pcall(function()
         local url = KeySystem.VerifyAPI .. "/?userId=" .. LocalPlayer.UserId
         return game:HttpGet(url)
@@ -60,6 +64,7 @@ end
 local function checkLocalSession()
     local saved = loadData()
     if saved and saved.hwid == KeySystem.HWID and os.time() < saved.expires then 
+        if saved.key == KeySystem.OwnerKey then return true end
         if verifyKeyOnline(saved.key) then return true end
     end
     return false
@@ -250,4 +255,4 @@ end)
 if not success then
     showNotification("Error", "فشل تحميل السكربت، تأكد من الرابط.", false)
     warn("❌ Error: " .. tostring(err))
-end 
+end
