@@ -578,18 +578,10 @@ if touch then
     task.wait(0.01)
     firetouchinterest(hrp, obj, 1)
     task.wait(math.random(15, 30) / 100)
-
-
-                                     end   
-                                   end
-                                end
-                            end
-                            task.wait(0.1) 
-                        end
-                    end)
-                end
-            end 
-        })
-    end)
-    if not success then warn("❌ خطأ في الواجهة: " .. tostring(err)) end
+end
+end
+end
+end
+task.wait(0.1)
+if not success then warn("❌ خطأ في الواجهة: " .. tostring(err)) end
 end
