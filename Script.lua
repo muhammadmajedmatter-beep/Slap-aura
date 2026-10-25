@@ -52,7 +52,7 @@ local flyConnection = nil
 local espHighlights = {}
 local autoFarmRunning = false
 local autoFarmConnection = nil
-
+local CandyFarmConnection = nil
 local Settings = { 
     AuraEnabled = true, Range = 10, MaxHitsPerSecond = 3, 
     FlySpeed = 50, Noclip = false, AntiVoid = false, 
