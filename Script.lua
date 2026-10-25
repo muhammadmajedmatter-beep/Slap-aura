@@ -572,10 +572,15 @@ function LoadMainGUI()
                                         if not Settings.CandyFarm then break end
                                         local nameCheck = string.lower(obj.Name)
                                         if obj:IsA("BasePart") and (string.find(nameCheck, "candy") or string.find(nameCheck, "corn")) then
-                                            local tween = TweenService:Create(hrp, tweenInfo, {CFrame = obj.CFrame})
-                                            tween:Play()
-                                            tween.Completed:Wait()
-                                        end
+                                            local touch = obj:FindFirstChildOfClass("TouchTransmitter") or obj
+if touch then
+    firetouchinterest(hrp, obj, 0)
+    task.wait(0.01)
+    firetouchinterest(hrp, obj, 1)
+    task.wait(math.random(15, 30) / 100)
+end
+
+                                        
                                     end
                                 end
                             end
