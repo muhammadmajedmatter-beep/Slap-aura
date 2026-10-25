@@ -19,7 +19,7 @@ local oldNamecall
 oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
     local method = getnamecallmethod()
     if method == "FireServer" then
-        if self.Name == "Ban" or self.Name == "AdminGUI" or self.Name == "Kick" or self.Name == "WalkSpeedChanged" then
+        if self.Name == "Ban" or self.Name == "AdminGUI" or self.Name == "Kick" or self.Name == "WalkSpeedChanged" or self.Name == "AntiCheat" or self.Name == "Detect" or self.Name == "Report" or self.Name == "SpeedCheck" then
             return 
         end
         local args = {...}
