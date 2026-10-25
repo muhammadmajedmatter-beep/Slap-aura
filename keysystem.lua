@@ -20,57 +20,7 @@ local KeySystem = {
         DeveloperName = "Muhammad Majed",
     OwnerKey      = "MAJED-OWNER-2025",
  GiveawayCheck = "giveway=muhammadmajed994giveways"
-}
- -- دالة التحقق من مفتاح الـ Giveaway مع حساب المدة (14 يوم)
-local function VerifyGiveawayKey(enteredKey)
-    -- 1. التأكد من أن المستخدم أدخل شيئاً
-    if not enteredKey or enteredKey == "" then
-        return false, "الرجاء إدخال المفتاح أولاً."
-    end
-
-    -- 2. المفتاح الصحيح الذي تريده (بدون كلمة giveway=)
-    local correctKey = "muhammadmajed994giveways"
-    
-    -- التحقق من صحة المفتاح
-    if enteredKey ~= correctKey then
-        return false, "المفتاح غير صحيح، حاول مرة أخرى."
-    end
-
-    -- 3. التحقق من المدة الزمنية (14 يوم)
-    local fileName = "SlapAura_GiveawayTime.json"
-    local durationInSeconds = 14 * 24 * 60 * 60 
-    
-    -- محاولة قراءة الملف إذا كان موجوداً
-    local fileExists = isfile and isfile(fileName)
-    
-    if fileExists then
-        local success, savedTimeStr = pcall(function()
-            return readfile(fileName)
-        end)
-        
-        if success and savedTimeStr then
-            local firstUsedTime = tonumber(savedTimeStr)
-            local currentTime = os.time() 
-            local timePassed = currentTime - firstUsedTime
-            
-            if timePassed > durationInSeconds then
-                return false, "انتهت صلاحية هذا المفتاح (14 يوم). يرجى الحصول على مفتاح جديد."
-            end
-        end
-    else
-        -- إذا كان الملف غير موجود، فهذه أول مرة يستخدم فيها المفتاح
-        local success, err = pcall(function()
-            writefile(fileName, tostring(os.time()))
-        end)
-        
-        if not success then
-            print("تحذير: لم يتمكن النظام من حفظ وقت المفتاح: " .. tostring(err))
-        end
-    end
-
-    -- إذا وصلنا إلى هنا، المفتاح صحيح ولم تنتهِ مدته
-    return true, "تم التحقق بنجاح! المفتاح صالح لمدة 14 يوم."
-end
+}                                                 
 local COLORS = {
     Bg1     = Color3.fromRGB(15, 15, 20),
     Bg2     = Color3.fromRGB(25, 25, 32),
@@ -84,7 +34,48 @@ local COLORS = {
     Text    = Color3.fromRGB(255, 255, 255),
     TextDim = Color3.fromRGB(160, 160, 170),
 }
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local VerifyAPI = "https://muhammadmajed54.val.run/"
+local hwid = tostring(Players.LocalPlayer.UserId)
 
+local function VerifyDiscordGiveaway(enteredKey)
+    if not enteredKey or enteredKey == "" then
+        return false, "الرجاء إدخال مفتاح الجيف أواي."
+    end
+
+    local url = VerifyAPI .. "?type=giveaway&key=" .. HttpService:UrlEncode(enteredKey) .. "&hwid=" .. hwid
+    
+    local success, response = pcall(function()
+        return HttpService:GetAsync(url)
+    end)
+
+    if success then
+        local data = HttpService:JSONDecode(response)
+        return data.success, data.message
+    else
+        return false, "فشل الاتصال بالسيرفر."
+    end
+end
+
+local function VerifyLinkvertiseKey(enteredKey)
+    if not enteredKey or enteredKey == "" then
+        return false, "الرجاء إدخال مفتاح اللينك."
+    end
+
+    local url = VerifyAPI .. "?key=" .. HttpService:UrlEncode(enteredKey) .. "&hwid=" .. hwid
+    
+    local success, response = pcall(function()
+        return HttpService:GetAsync(url)
+    end)
+
+    if success then
+        local data = HttpService:JSONDecode(response)
+        return data.success, data.message
+    else
+        return false, "فشل الاتصال بالسيرفر."
+    end
+end
 -- ================= [2] التشفير والحفظ =================
 local function encrypt(s) local r = "" for i = 1, #s do r = r .. string.char((string.byte(s, i) + 13) % 256) end return r end
 local function decrypt(s) local r = "" for i = 1, #s do r = r .. string.char((string.byte(s, i) - 13) % 256) end return r end
