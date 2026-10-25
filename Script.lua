@@ -580,7 +580,7 @@ if touch then
     task.wait(math.random(15, 30) / 100)
 end
 
-                                        
+                                     end   
                                     end
                                 end
                             end
