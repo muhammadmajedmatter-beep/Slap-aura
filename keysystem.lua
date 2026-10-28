@@ -1,5 +1,5 @@
 -- ============================================================
--- 🔐 SLAP AURA | Ultimate Premium Key System (Fort Knox Edition)
+-- 🔐 SLAP AURA | Ultimate Premium Key System (Fixed)
 -- ============================================================
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -12,41 +12,32 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 -- ================= [1] الإعدادات =================
 local KeySystem = {
     LinkvertiseURL = "https://direct-link.net/10307604/kQmsbPuU0YF4",   
-    -- رابط سيرفر Val Town الخاص بك
+    -- ✅ رابط سيرفر Val Town الجديد
     VerifyAPI      = "https://muhammadmajed54.val.run/", 
-    -- رابط احتياطي في حال كان اللاعب أونر
-    FallbackURL    = "https://raw.githubusercontent.com/muhammadmajedmatter-beep/Slap-aura/refs/heads/main/Script.lua",
+    -- ✅ رابط السكربت الأساسي (keyless) من GitHub
+    ScriptURL      = "https://raw.githubusercontent.com/muhammadmajedmatter-beep/Slap-aura/refs/heads/main/Script.lua", 
     Duration       = 14 * 24 * 60 * 60,
     SaveFile       = "SlapAura_CloudKey.json",
     DeveloperName  = "Muhammad Majed",
     OwnerKey       = "MAJED-OWNER-2025"
 }
 
--- 👇 توليد HWID حقيقي (لا يتغير بتغيير الحساب)
+-- دالة توليد HWID (معرف الجهاز)
 local function getRealHWID()
     local success, hwid = pcall(function()
         return game:GetService("RbxAnalyticsService"):GetClientId()
     end)
-    if success and hwid and hwid ~= "" then
-        return hwid
-    end
-    local execHwid = gethwid and gethwid() or tostring(LocalPlayer.UserId)
-    return execHwid
+    if success and hwid and hwid ~= "" then return hwid end
+    return gethwid and gethwid() or tostring(LocalPlayer.UserId)
 end
-
 local HWID = getRealHWID()
 
 local COLORS = {
-    Bg1     = Color3.fromRGB(15, 15, 20),
-    Bg2     = Color3.fromRGB(25, 25, 32),
-    Card    = Color3.fromRGB(35, 35, 45),
-    Surface = Color3.fromRGB(45, 45, 55),
-    Stroke  = Color3.fromRGB(60, 60, 70),
-    Accent1 = Color3.fromRGB(255, 140, 0),
-    Accent2 = Color3.fromRGB(160, 70, 220),
-    Success = Color3.fromRGB(50, 220, 130),
-    Error   = Color3.fromRGB(255, 80, 80),
-    Text    = Color3.fromRGB(255, 255, 255),
+    Bg1     = Color3.fromRGB(15, 15, 20), Bg2     = Color3.fromRGB(25, 25, 32),
+    Card    = Color3.fromRGB(35, 35, 45), Surface = Color3.fromRGB(45, 45, 55),
+    Stroke  = Color3.fromRGB(60, 60, 70), Accent1 = Color3.fromRGB(255, 140, 0),
+    Accent2 = Color3.fromRGB(160, 70, 220), Success = Color3.fromRGB(50, 220, 130),
+    Error   = Color3.fromRGB(255, 80, 80), Text    = Color3.fromRGB(255, 255, 255),
     TextDim = Color3.fromRGB(160, 160, 170),
 }
 
@@ -63,9 +54,7 @@ end
 
 -- ================= [3] التحقق من السيرفر =================
 local function verifyKeyOnline(inputKey)
-    if inputKey == KeySystem.OwnerKey then 
-        return true, KeySystem.FallbackURL
-    end
+    if inputKey == KeySystem.OwnerKey then return true end
     
     local success, response = pcall(function()
         local url = KeySystem.VerifyAPI .. "?key=" .. HttpService:UrlEncode(inputKey) .. "&hwid=" .. HWID .. "&userid=" .. tostring(LocalPlayer.UserId)
@@ -74,10 +63,13 @@ local function verifyKeyOnline(inputKey)
     
     if success and response then
         local decodeSuccess, data = pcall(function() return HttpService:JSONDecode(response) end)
-        if decodeSuccess and data and data.success == true then
-            return true, data.script_url
+        if decodeSuccess and data and data.success == true then 
+            return true 
         else
-            return false, data and data.message or "المفتاح غير صحيح."
+            if data and data.message then
+                -- لو الشخص محظور، الرسالة دي هتظهر له
+                return false, data.message
+            end
         end
     end
     return false, "فشل الاتصال بالسيرفر."
@@ -86,10 +78,11 @@ end
 local function checkLocalSession()
     local saved = loadData()
     if saved and saved.hwid == HWID and os.time() < saved.expires then 
-        local isValid, url = verifyKeyOnline(saved.key)
-        if isValid then return true, url end
+        if saved.key == KeySystem.OwnerKey then return true end
+        local isValid = verifyKeyOnline(saved.key)
+        if isValid then return true end
     end
-    return false, nil
+    return false
 end
 
 -- ================= [4] نظام الإشعارات =================
@@ -116,7 +109,6 @@ end
 
 -- ================= [5] واجهة المفتاح (Supreme UI) =================
 local isVerified = false
-local ScriptURL_ToLoad = nil
 
 local function createSupremeUI()
     local gui = Instance.new("ScreenGui")
@@ -144,7 +136,6 @@ local function createSupremeUI()
         while window.Parent do r = (r + 1) % 360 winGrad.Rotation = r task.wait(0.03) end
     end)
 
-    -- الجزء الشمال
     local sidebar = Instance.new("Frame"); sidebar.Size = UDim2.fromOffset(210, 320); sidebar.BackgroundColor3 = COLORS.Surface; sidebar.BackgroundTransparency = 0.5; sidebar.BorderSizePixel = 0; sidebar.Parent = window
     local sideCorner = Instance.new("UICorner"); sideCorner.CornerRadius = UDim.new(0, 14); sideCorner.Parent = sidebar
 
@@ -170,7 +161,6 @@ local function createSupremeUI()
     local devStroke = Instance.new("UIStroke"); devStroke.Color = COLORS.Accent2; devStroke.Thickness = 1; devStroke.Parent = devBadge
     local devText = Instance.new("TextLabel"); devText.Size = UDim2.new(1, 0, 1, 0); devText.BackgroundTransparency = 1; devText.Text = "⚡ Dev: " .. KeySystem.DeveloperName; devText.TextColor3 = COLORS.TextDim; devText.Font = Enum.Font.GothamBold; devText.TextSize = 11; devText.Parent = devBadge
 
-    -- الجزء اليمين
     local rightPanel = Instance.new("Frame"); rightPanel.Size = UDim2.fromOffset(330, 320); rightPanel.Position = UDim2.fromOffset(210, 0); rightPanel.BackgroundTransparency = 1; rightPanel.Parent = window
 
     local header = Instance.new("Frame"); header.Size = UDim2.new(1, 0, 0, 50); header.BackgroundTransparency = 1; header.Parent = rightPanel
@@ -200,33 +190,27 @@ local function createSupremeUI()
     local vbc = Instance.new("UICorner"); vbc.CornerRadius = UDim.new(0, 8); vbc.Parent = verifyBtn
     local vbg = Instance.new("UIGradient"); vbg.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, COLORS.Accent1), ColorSequenceKeypoint.new(1, COLORS.Accent2)}); vbg.Parent = verifyBtn
 
-    -- Draggable
     local dragging, dragInput, dragStart, startPos
     header.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = true; dragStart = input.Position; startPos = window.Position; input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end) end end)
     header.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
     UserInputService.InputChanged:Connect(function(input) if input == dragInput and dragging then local delta = input.Position - dragStart window.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
 
-    -- المنطق
     local isCooldown = false
     getBtn.MouseButton1Click:Connect(function()
         if isCooldown then return end
         isCooldown = true
-        
         if setclipboard then 
             local uniqueLink = KeySystem.LinkvertiseURL .. "?userId=" .. LocalPlayer.UserId
             pcall(setclipboard, uniqueLink) 
         end
-        
         for i = 15, 1, -1 do
             getBtn.Text = "Wait " .. i .. "s"
             getBtn.TextColor3 = COLORS.TextDim
             task.wait(1)
         end
-        
         getBtn.Text = "✅ Copied!"
         getBtn.TextColor3 = COLORS.Success
         task.wait(2)
-        
         getBtn.Text = "🔗 Get Key"
         getBtn.TextColor3 = COLORS.Text
         isCooldown = false
@@ -238,31 +222,28 @@ local function createSupremeUI()
         
         verifyBtn.Text = "⏳ Checking..."; verifyBtn.Active = false; vbg.Enabled = false
         
-        local isValid, urlOrMessage = verifyKeyOnline(k)
+        -- هنا بنستقبل الرد سواء بنجاح أو برسالة الحظر
+        local isValid, errorMsg = verifyKeyOnline(k)
         
         if isValid then
-            ScriptURL_ToLoad = urlOrMessage 
             saveData({key = k, expires = os.time() + KeySystem.Duration, hwid = HWID})
             isVerified = true
-            
             verifyBtn.Text = "✅ Success"; verifyBtn.BackgroundColor3 = COLORS.Success
             task.wait(0.8)
             TweenService:Create(blur, TweenInfo.new(0.4), {Size = 0}):Play()
             TweenService:Create(uiScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0}):Play()
             task.wait(0.4); gui:Destroy()
         else
-            verifyBtn.Text = "❌ " .. (urlOrMessage or "Invalid Key"); verifyBtn.BackgroundColor3 = COLORS.Error
-            task.wait(2); verifyBtn.Text = "Verify & Continue"; verifyBtn.BackgroundColor3 = COLORS.Accent1; vbg.Enabled = true; verifyBtn.Active = true
+            -- عرض رسالة الخطأ (لو محظور هيظهر له سبب الحظر هنا)
+            verifyBtn.Text = "❌ " .. (errorMsg or "Invalid Key"); verifyBtn.BackgroundColor3 = COLORS.Error
+            task.wait(2.5); verifyBtn.Text = "Verify & Continue"; verifyBtn.BackgroundColor3 = COLORS.Accent1; vbg.Enabled = true; verifyBtn.Active = true
         end
     end)
 end
 
--- ================= [6] التشغيل =================
-local isSessionValid, sessionURL = checkLocalSession()
-
-if isSessionValid then
+-- ================= [6] التشغيل وتحميل السكربت =================
+if checkLocalSession() then
     isVerified = true
-    ScriptURL_ToLoad = sessionURL
     showNotification("Slap Aura", "تم استرجاع المفتاح المحفوظ بنجاح!", true)
 else
     createSupremeUI()
@@ -273,21 +254,15 @@ end
 -- ⏳ تأخير بسيط لديلتا موبايل
 task.wait(1.5) 
 
--- ================= [7] تحميل السكربت الأساسي =================
+-- تحميل السكربت الأساسي من GitHub
 local success, err = pcall(function()
     if not isVerified then return end
-    
-    local finalURL = ScriptURL_ToLoad or KeySystem.FallbackURL 
-    
-    print("Fetching script from: " .. finalURL)
-    local code = game:HttpGet(finalURL)
+    local code = game:HttpGet(KeySystem.ScriptURL)
     local func = loadstring(code)
-    if func then 
-        func() 
-    else 
-        error("Failed to load script string") 
-    end
+    if func then func() else error("Failed to load script string") end
 end)
 
 if not success then
-    showNotification("Error", "فشل تحميل السكربت الأ
+    showNotification("Error", "فشل تحميل السكربت، تأكد من الرابط.", false)
+    warn("❌ Error: " .. tostring(err))
+end
