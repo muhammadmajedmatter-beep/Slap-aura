@@ -1,5 +1,5 @@
 -- ============================================================
--- 🔐 SLAP AURA | Ultimate Premium Key System (Complete)
+-- 🔐 SLAP AURA | Ultimate Premium Key System (Complete & Fixed)
 -- ============================================================
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -21,7 +21,7 @@ local KeySystem = {
     DiscordInvite  = "https://discord.gg/GXp87ZUg2" -- 👈 ضع رابط الديسكورد بتاعك هنا
 }
 
--- توليد HWID حقيقي
+-- ================= [2] توليد HWID حقيقي =================
 local function getRealHWID()
     local success, hwid = pcall(function()
         return game:GetService("RbxAnalyticsService"):GetClientId()
@@ -31,6 +31,7 @@ local function getRealHWID()
 end
 local HWID = getRealHWID()
 
+-- ================= [3] الألوان =================
 local COLORS = {
     Bg1     = Color3.fromRGB(15, 15, 20),
     Bg2     = Color3.fromRGB(25, 25, 32),
@@ -46,7 +47,7 @@ local COLORS = {
     Discord = Color3.fromRGB(88, 101, 242)
 }
 
--- ================= [2] التشفير والحفظ =================
+-- ================= [4] التشفير والحفظ =================
 local function encrypt(s) local r = "" for i = 1, #s do r = r .. string.char((string.byte(s, i) + 13) % 256) end return r end
 local function decrypt(s) local r = "" for i = 1, #s do r = r .. string.char((string.byte(s, i) - 13) % 256) end return r end
 local function saveData(t) if writefile then pcall(writefile, KeySystem.SaveFile, encrypt(HttpService:JSONEncode(t))) end end
@@ -57,9 +58,8 @@ local function loadData()
     end
 end
 
--- ================= [3] التحقق (مع مفتاح الأونر) =================
+-- ================= [5] التحقق من السيرفر =================
 local function verifyKeyOnline(inputKey)
-    -- تخطي الأونر
     if inputKey == KeySystem.OwnerKey then
         return true, KeySystem.Duration
     end
@@ -75,7 +75,13 @@ local function verifyKeyOnline(inputKey)
             local expiryTime = data.expires_at and math.floor(data.expires_at / 1000) or (os.time() + KeySystem.Duration)
             return true, expiryTime 
         else
-            if data and data.message then return false, data.message end
+            if data and data.message then 
+                -- 🚨 لو الرسالة فيها كلمة "محظور" أو "اكتشاف"، هنعتبرها محاولة بايباس
+                if string.find(data.message, "محظور") or string.find(data.message, "اكتشاف") then
+                    return false, "BAN_TRIGGERED"
+                end
+                return false, data.message 
+            end
         end
     end
     return false, "فشل الاتصال بالسيرفر."
@@ -91,7 +97,7 @@ local function checkLocalSession()
     return false
 end
 
--- ================= [4] نظام الإشعارات =================
+-- ================= [6] نظام الإشعارات =================
 local function showNotification(title, text, isSuccess)
     local notifGui = Instance.new("ScreenGui")
     notifGui.Name = "SlapAuraNotifs"; notifGui.ResetOnSpawn = false; notifGui.DisplayOrder = 99999
@@ -113,7 +119,7 @@ local function showNotification(title, text, isSuccess)
     end)
 end
 
--- ================= [5] واجهة المفتاح =================
+-- ================= [7] واجهة المفتاح =================
 local isVerified = false
 
 local function createSupremeUI()
@@ -191,7 +197,6 @@ local function createSupremeUI()
     local vbc = Instance.new("UICorner"); vbc.CornerRadius = UDim.new(0, 8); vbc.Parent = verifyBtn
     local vbg = Instance.new("UIGradient"); vbg.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, COLORS.Accent1), ColorSequenceKeypoint.new(1, COLORS.Accent2)}); vbg.Parent = verifyBtn
 
-    -- زر الديسكورد
     local discordBtn = Instance.new("TextButton")
     discordBtn.Size = UDim2.new(1, -40, 0, 40)
     discordBtn.Position = UDim2.fromOffset(20, 230)
@@ -217,7 +222,6 @@ local function createSupremeUI()
         end
     end)
 
-    -- الملاحظة
     local noteLabel = Instance.new("TextLabel")
     noteLabel.Size = UDim2.new(1, -40, 0, 40)
     noteLabel.Position = UDim2.fromOffset(20, 280)
@@ -261,13 +265,19 @@ local function createSupremeUI()
             TweenService:Create(uiScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0}):Play()
             task.wait(0.4); gui:Destroy()
         else
+            if errorMsgOrTime == "BAN_TRIGGERED" then
+                gui:Destroy()
+                LocalPlayer:Kick("⛔ تم اكتشاف محاولات تخطي (Bypass)!\n\nتم حظر جهازك لمدة 7 أيام بسبب محاولات البيباس.")
+                return
+            end
+            
             verifyBtn.Text = "❌ " .. (errorMsgOrTime or "Invalid Key"); verifyBtn.BackgroundColor3 = COLORS.Error
             task.wait(2.5); verifyBtn.Text = "Verify & Continue"; verifyBtn.BackgroundColor3 = COLORS.Accent1; vbg.Enabled = true; verifyBtn.Active = true
         end
     end)
 end
 
--- ================= [6] التشغيل =================
+-- ================= [8] التشغيل وتحميل السكربت =================
 if checkLocalSession() then
     isVerified = true
     showNotification("Slap Aura", "تم استرجاع المفتاح المحفوظ بنجاح!", true)
@@ -279,7 +289,6 @@ end
 
 task.wait(1.5) 
 
--- ================= [7] تحميل السكربت الأساسي =================
 local success, err = pcall(function()
     if not isVerified then return end
     local code = game:HttpGet(KeySystem.ScriptURL)
