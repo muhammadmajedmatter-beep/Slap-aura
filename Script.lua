@@ -508,8 +508,8 @@ RunService.Stepped:Connect(function()
     end)
 end
 
--- ============================================================
--- 💎 الدوال (محرك السرعة والكاندي)
+-- -- ============================================================
+-- 💎 محرك السرعة والكاندي (النسخة القصوى - Ultra Snap)
 -- ============================================================
 local isSpeedEnabled = false
 local SpeedConnection = nil
@@ -518,27 +518,21 @@ function TogglePremiumSpeed(state)
     isSpeedEnabled = state
     if state then
         if SpeedConnection then SpeedConnection:Disconnect() end
-        SpeedConnection = RunService.RenderStepped:Connect(function()
+        SpeedConnection = RunService.Heartbeat:Connect(function()
             if not isSpeedEnabled then return end
             local myChar = LocalPlayer.Character
-            local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
             local myHum = myChar and myChar:FindFirstChildOfClass("Humanoid")
-            
-            if myRoot and myHum then
-                myHum.WalkSpeed = 16 -- السرعة العادية
-                local moveDir = myHum.MoveDirection
-                if moveDir.Magnitude > 0 then
-                    -- الحركة بالفيزياء عشان تتخطى الحماية
-                    myRoot.Velocity = Vector3.new(moveDir.X * Settings.PremiumSpeed, myRoot.Velocity.Y, moveDir.Z * Settings.PremiumSpeed)
-                end
+            if myHum then
+                myHum.WalkSpeed = Settings.PremiumSpeed -- السرعة من الإعدادات
             end
         end)
     else
         if SpeedConnection then SpeedConnection:Disconnect(); SpeedConnection = nil end
+        local myHum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if myHum then myHum.WalkSpeed = 16 end
     end
 end
 
--- 🍬 محرك الكاندي فارم المدفوع (Tween Glide - آمن وبيجيب باند)
 local isCandyFarming = false
 function TogglePremiumCandyFarm(state)
     isCandyFarming = state
@@ -549,50 +543,42 @@ function TogglePremiumCandyFarm(state)
                 local hrp = myChar and myChar:FindFirstChild("HumanoidRootPart")
                 
                 if hrp then
+                    -- تخزين مكانك الأصلي والسرعة
                     local originalCFrame = hrp.CFrame
-                    local closestCandy = nil
-                    local shortestDist = 50 -- مسافة بحث 50 متر (مناسبة جداً)
-                    
-                    -- البحث عن الحلوى
+                    local originalVel = hrp.AssemblyLinearVelocity
+
+                    -- البحث عن الحلوى (نطاق 100 متر عشان نلقط أكبر عدد)
                     for _, obj in pairs(workspace:GetDescendants()) do
                         if not isCandyFarming then break end
                         local name = string.lower(obj.Name)
                         if obj:IsA("BasePart") and string.find(name, "corn") then
                             local dist = (hrp.Position - obj.Position).Magnitude
-                            if dist < shortestDist then
-                                shortestDist = dist
-                                closestCandy = obj
+                            
+                            -- لو الحلوى في النطاق
+                            if dist < 100 then
+                                pcall(function()
+                                    -- الخطوة 1: نطير للحلوى في لمح البصر
+                                    hrp.CFrame = CFrame.new(obj.Position)
+                                    
+                                    -- الخطوة 2: نلمسها ونحسبها
+                                    firetouchinterest(hrp, obj, 0)
+                                    task.wait(0.01)
+                                    firetouchinterest(hrp, obj, 1)
+                                    
+                                    -- الخطوة 3: نرجع مكاننا فوراً
+                                    hrp.CFrame = originalCFrame
+                                    hrp.AssemblyLinearVelocity = originalVel
+                                end)
+                                task.wait(0.05) -- تأخير بسيط جداً بين كل حلوى
                             end
                         end
                     end
-                    
-                    -- الحركة السلسة (Tween) بدل التيليبورت الفوري
-                    if closestCandy then
-                        pcall(function()
-                            -- 1. طيران سلس للحلوى (0.2 ثانية)
-                            local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Linear)
-                            local tween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(closestCandy.Position)})
-                            tween:Play()
-                            tween.Completed:Wait() -- بنستنى لحد ما نوصل
-                            
-                            -- 2. اللمس
-                            firetouchinterest(hrp, closestCandy, 0)
-                            task.wait(0.1)
-                            firetouchinterest(hrp, closestCandy, 1)
-                            
-                            -- 3. الرجوع السلس لمكانك الأصلي (0.2 ثانية)
-                            local tweenBack = TweenService:Create(hrp, TweenInfo.new(0.2, Enum.EasingStyle.Linear), {CFrame = originalCFrame})
-                            tweenBack:Play()
-                            tweenBack.Completed:Wait()
-                        end)
-                    end
                 end
-                task.wait(0.3) -- استراحة 0.3 ثانية بين كل حلوى والتانية
+                task.wait(0.1)
             end
         end)
     end
 end
-
 -- ============================================================
 -- 🎨 دالة الواجهة (WindUI)
 -- ============================================================
