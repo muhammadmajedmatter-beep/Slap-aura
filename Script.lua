@@ -581,6 +581,7 @@ function LoadMainGUI()
             Theme = "Halloween"
         })
 
+        -- تبويب القتال
         local CombatTab = MainWindow:Tab({ Title = "Combat", Icon = "crosshair" })
         StatusLabel = CombatTab:Paragraph({Title = "Status", Desc = "⏳ Waiting for Calibration... Slap a player ONCE.", Image = "info"})
         
@@ -589,6 +590,7 @@ function LoadMainGUI()
         CombatTab:Slider({Title = "Range", Step = 1, Value = { Min = 1, Max = 50, Default = 10 }, Callback = function(value) Settings.Range = value end})
         CombatTab:Slider({Title = "Speed", Step = 1, Value = { Min = 1, Max = 4, Default = 3 }, Callback = function(value) Settings.MaxHitsPerSecond = value end})
 
+        -- تبويب الحركة
         local UtilityTab = MainWindow:Tab({ Title = "Utility", Icon = "settings" })
         UtilityTab:Toggle({ Title = "Fly", Value = false, Callback = function(state) if state then startFly() else stopFly() end end })
         UtilityTab:Slider({ Title = "Fly Speed", Step = 10, Value = { Min = 20, Max = 200, Default = 50 }, Callback = function(value) Settings.FlySpeed = value end })
@@ -596,73 +598,41 @@ function LoadMainGUI()
         UtilityTab:Slider({ Title = "WalkSpeed", Step = 1, Value = { Min = 16, Max = 100, Default = 16 }, Callback = function(value) Settings.WalkSpeed = value end })
         UtilityTab:Slider({ Title = "JumpPower", Step = 1, Value = { Min = 50, Max = 200, Default = 50 }, Callback = function(value) Settings.JumpPower = value end })
 
-        -- 👇 هنا ضفنا زرار السرعة المدفوعة الآمنة 👇
-        UtilityTab:Toggle({ 
-            Title = "Premium Physics Speed", 
-            Desc = "سرعة عالية بدون باند (تخطي الحماية)", 
-            Value = false, 
-            Callback = function(state) TogglePremiumSpeed(state) end 
-        })
-        UtilityTab:Slider({ 
-            Title = "Premium Speed Value", 
-            Step = 1, 
-            Value = { Min = 20, Max = 100, Default = 35 }, 
-            Callback = function(value) Settings.PremiumSpeed = value end 
-        })
-        -- 👆 ------------------------------------ 👆
-
+        -- تبويب الرؤية
         local VisualsTab = MainWindow:Tab({ Title = "Visuals", Icon = "eye" })
         VisualsTab:Toggle({ Title = "Fullbright", Value = false, Callback = function(state) Settings.Fullbright = state; if state then Lighting.Ambient = Color3.fromRGB(255,255,255); Lighting.OutdoorAmbient = Color3.fromRGB(255,255,255) else Lighting.Ambient = Color3.fromRGB(70,70,70); Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128) end end })
         VisualsTab:Toggle({ Title = "Player ESP", Value = false, Callback = function(state) if state then enableESP() else disableESP() end end })
 
+        -- تبويب الحمايات
         local AntisTab = MainWindow:Tab({ Title = "Antis", Icon = "shield" })
         AntisTab:Toggle({ Title = "Anti-Void", Value = false, Callback = function(state) Settings.AntiVoid = state end })
         AntisTab:Toggle({ Title = "Godmode (Anti-Overkill)", Value = true, Callback = function(state) Settings.Godmode = state end })
         AntisTab:Toggle({ Title = "Anti-Ragdoll", Value = true, Callback = function(state) Settings.AntiRagdoll = state end })
         AntisTab:Toggle({ Title = "Anti-Knockback", Desc = "منع الطيران عند الضربة", Value = true, Callback = function(state) Settings.AntiKnockback = state end })
 
+        -- تبويب الفارم
         local FarmsTab = MainWindow:Tab({ Title = "Farms", Icon = "tractor" })
         FarmsTab:Toggle({ Title = "Slap AutoFarm", Desc = "يضرب ويلم فلوس تلقائياً", Value = false, Callback = function(state) toggleAutoFarm(state) end })
         
-        -- 👇 هنا غيرنا الكاندي فارم من التيليبورت (اللي بيجيب باند) للنسخة الآمنة 👇
+        -- 👇 هنا الزراير الجديدة (بتنادي على المحرك اللي أنت حطيته فوق) 👇
         FarmsTab:Toggle({ 
             Title = "Auto Candy Farm (Safe)", 
             Desc = "جمع الحلوى بأمان (واقف مكانك)", 
             Value = false, 
             Callback = function(state) 
-                Settings.CandyFarm = state 
-                if state then
-                    task.spawn(function()
-                        while Settings.CandyFarm do
-                            local myChar = LocalPlayer.Character
-                            local hrp = myChar and myChar:FindFirstChild("HumanoidRootPart")
-                            
-                            if hrp then
-                                for _, obj in pairs(workspace:GetDescendants()) do
-                                    if not Settings.CandyFarm then break end
-                                    local name = string.lower(obj.Name)
-                                    
-                                    -- بندور على الحلوى القريبة منك
-                                    if obj:IsA("BasePart") and (string.find(name, "candy") or string.find(name, "corn")) then
-                                        -- مسافة 25 متر (عشان تلمسها من غير ما تتحرك وتتبند)
-                                        if (hrp.Position - obj.Position).Magnitude < 25 then
-                                            pcall(function()
-                                                firetouchinterest(hrp, obj, 0)
-                                                task.wait(0.01)
-                                                firetouchinterest(hrp, obj, 1)
-                                            end)
-                                            task.wait(0.1) 
-                                        end
-                                    end
-                                end
-                            end
-                            task.wait(0.2) 
-                        end
-                    end)
-                end
+                TogglePremiumCandyFarm(state)
             end 
         })
-        -- 👆 --------------------------------- 👆
+
+        FarmsTab:Toggle({ 
+            Title = "Auto Server Hopper", 
+            Desc = "يجمع الحلوى وينقلك لسيرفر جديد", 
+            Value = false, 
+            Callback = function(state) 
+                ToggleServerHopper(state)
+            end 
+        })
+        -- 👆 ------------------------------------------------ 👆
     end)
     if not success then warn("❌ خطأ في الواجهة: " .. tostring(err)) end
 end
