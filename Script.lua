@@ -538,28 +538,30 @@ function TogglePremiumSpeed(state)
     end
 end
 
+-- 🍬 محرك الكاندي فارم (الإصدار النهائي - آمن وبنجح)
 local isCandyFarming = false
 function TogglePremiumCandyFarm(state)
     isCandyFarming = state
     if state then
+        print("🍬 [Candy Farm] Started!")
         task.spawn(function()
             while isCandyFarming do
                 local myChar = LocalPlayer.Character
                 local hrp = myChar and myChar:FindFirstChild("HumanoidRootPart")
                 
                 if hrp then
-                    -- 1. بنحفظ مكانك الأصلي
+                    -- حفظ المكان الأصلي
                     local originalCFrame = hrp.CFrame
                     local originalVel = hrp.AssemblyLinearVelocity
 
                     local closestCandy = nil
-                    local shortestDist = 50 -- مسافة البحث (متزودهاش عن 50 عشان ميتكشفش)
+                    local shortestDist = 60 -- مسافة البحث (60 متر كافية جداً)
 
-                    -- 2. بندور على الحلوى اللي حواليك
+                    -- البحث عن الحلوى
                     for _, obj in pairs(workspace:GetDescendants()) do
                         if not isCandyFarming then break end
                         local name = string.lower(obj.Name)
-                        if obj:IsA("BasePart") and (string.find(name, "candy") or string.find(name, "corn")) then
+                        if obj:IsA("BasePart") and (string.find(name, "candy") or string.find(name, "corn") or string.find(name, "sweet")) then
                             local dist = (hrp.Position - obj.Position).Magnitude
                             if dist < shortestDist then
                                 shortestDist = dist
@@ -568,24 +570,25 @@ function TogglePremiumCandyFarm(state)
                         end
                     end
 
-                    -- 3. لو لقينا حلوى، بنعمل الخطفة السريعة
+                    -- لو لقينا حلوى، بنطير ونلمس
                     if closestCandy then
                         pcall(function()
-                            hrp.CFrame = CFrame.new(closestCandy.Position) -- طير للحلوى
-                            firetouchinterest(hrp, closestCandy, 0) -- المسها
-                            task.wait(0.01)
-                            firetouchinterest(hrp, closestCandy, 1) -- سيبها
+                            hrp.CFrame = CFrame.new(closestCandy.Position) -- نطير للحلوى
+                            firetouchinterest(hrp, closestCandy, 0) -- لمسة (Touch)
+                            task.wait(0.05) -- استنى شوية عشان السيرفر يسجل
+                            firetouchinterest(hrp, closestCandy, 1) -- سيب (Untouch)
                             
-                            hrp.CFrame = originalCFrame -- ارجع مكانك
+                            hrp.CFrame = originalCFrame -- ارجع مكانك الأصلي
                             hrp.AssemblyLinearVelocity = originalVel 
                         end)
                     end
                 end
-                -- تأخير عشوائي بشري عشان السيرفر ميشكش
-                task.wait(math.random(10, 20) / 100) 
+                -- تأخير عشان ميعملش كراش وميتكشفش
+                task.wait(0.1) 
             end
         end)
-        showNotification("Premium", "Candy Farm (Touch) Activated!", true)
+    else
+        print("🍬 [Candy Farm] Stopped.")
     end
 end
 
