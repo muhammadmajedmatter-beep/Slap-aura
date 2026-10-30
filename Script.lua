@@ -62,7 +62,7 @@ local Settings = {
     CandyFarm = false,
     PremiumSpeed = 45
 }
--- 💎 محرك السرعة المدفوعة (الآمن - بيضرب وبيجري)
+-- 💎 دالة السرعة (Premium Speed) - النسخة النظيفة
 local isSpeedEnabled = false
 local SpeedConnection = nil
 
@@ -75,7 +75,7 @@ function TogglePremiumSpeed(state)
             local myChar = LocalPlayer.Character
             local myHum = myChar and myChar:FindFirstChildOfClass("Humanoid")
             if myHum then
-                -- بنغير الـ WalkSpeed العادي، والـ Ghost Protocol بيخبيه عن السيرفر
+                -- بنغير السرعة العادية، وكود الحماية فوق بيحميها
                 myHum.WalkSpeed = Settings.PremiumSpeed 
             end
         end)
