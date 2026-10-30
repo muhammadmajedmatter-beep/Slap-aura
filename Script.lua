@@ -482,7 +482,73 @@ RunService.Stepped:Connect(function()
         lastHitTime = tick()
     end
 end)
+-- 🍬 محرك الكاندي (الآمن - بدون تيليبورت)
+local isCandyFarming = false
+function TogglePremiumCandyFarm(state)
+    isCandyFarming = state
+    if state then
+        task.spawn(function()
+            while isCandyFarming do
+                local myChar = LocalPlayer.Character
+                local hrp = myChar and myChar:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    for _, obj in pairs(workspace:GetDescendants()) do
+                        if not isCandyFarming then break end
+                        local name = string.lower(obj.Name)
+                        if obj:IsA("BasePart") and (string.find(name, "corn") or string.find(name, "candy")) then
+                            if (hrp.Position - obj.Position).Magnitude < 30 then
+                                pcall(function()
+                                    firetouchinterest(hrp, obj, 0)
+                                    task.wait(0.01)
+                                    firetouchinterest(hrp, obj, 1)
+                                end)
+                                task.wait(0.1) 
+                            end
+                        end
+                    end
+                end
+                task.wait(0.2) 
+            end
+        end)
+    end
+end
 
+-- 🚀 محرك السيرفر هوبر (أسرع طريقة لجمع الحلوى)
+local isHopping = false
+function ToggleServerHopper(state)
+    isHopping = state
+    if state then
+        task.spawn(function()
+            while isHopping do
+                local char = LocalPlayer.Character
+                local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                if hrp then
+                    for _, obj in pairs(workspace:GetDescendants()) do
+                        if not isHopping then break end
+                        local name = string.lower(obj.Name)
+                        if obj:IsA("BasePart") and (string.find(name, "corn") or string.find(name, "candy")) then
+                            if (hrp.Position - obj.Position).Magnitude < 30 then
+                                pcall(function()
+                                    firetouchinterest(hrp, obj, 0)
+                                    task.wait(0.01)
+                                    firetouchinterest(hrp, obj, 1)
+                                end)
+                                task.wait(0.1)
+                            end
+                        end
+                    end
+                end
+                task.wait(5) -- بيستنى 5 ثواني يجمع اللي حواليه
+                if isHopping then
+                    pcall(function()
+                        game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
+                    end)
+                    break
+                end
+            end
+        end)
+    end
+end
 -- ============================================================
 -- 🎨 8. واجهة WindUI
 -- ============================================================
