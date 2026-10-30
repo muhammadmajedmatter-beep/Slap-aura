@@ -538,30 +538,26 @@ function TogglePremiumSpeed(state)
     end
 end
 
--- 🍬 محرك الكاندي فارم (الإصدار النهائي - آمن وبنجح)
+-- 🍬 محرك الكاندي فارم المدفوع (Tween Glide - آمن وبيجيب باند)
 local isCandyFarming = false
 function TogglePremiumCandyFarm(state)
     isCandyFarming = state
     if state then
-        print("🍬 [Candy Farm] Started!")
         task.spawn(function()
             while isCandyFarming do
                 local myChar = LocalPlayer.Character
                 local hrp = myChar and myChar:FindFirstChild("HumanoidRootPart")
                 
                 if hrp then
-                    -- حفظ المكان الأصلي
                     local originalCFrame = hrp.CFrame
-                    local originalVel = hrp.AssemblyLinearVelocity
-
                     local closestCandy = nil
-                    local shortestDist = 60 -- مسافة البحث (60 متر كافية جداً)
-
+                    local shortestDist = 50 -- مسافة بحث 50 متر (مناسبة جداً)
+                    
                     -- البحث عن الحلوى
                     for _, obj in pairs(workspace:GetDescendants()) do
                         if not isCandyFarming then break end
                         local name = string.lower(obj.Name)
-                        if obj:IsA("BasePart") and (string.find(name, "candy") or string.find(name, "corn") or string.find(name, "sweet")) then
+                        if obj:IsA("BasePart") and string.find(name, "corn") then
                             local dist = (hrp.Position - obj.Position).Magnitude
                             if dist < shortestDist then
                                 shortestDist = dist
@@ -569,29 +565,33 @@ function TogglePremiumCandyFarm(state)
                             end
                         end
                     end
-
-                    -- لو لقينا حلوى، بنطير ونلمس
+                    
+                    -- الحركة السلسة (Tween) بدل التيليبورت الفوري
                     if closestCandy then
                         pcall(function()
-                            hrp.CFrame = CFrame.new(closestCandy.Position) -- نطير للحلوى
-                            firetouchinterest(hrp, closestCandy, 0) -- لمسة (Touch)
-                            task.wait(0.05) -- استنى شوية عشان السيرفر يسجل
-                            firetouchinterest(hrp, closestCandy, 1) -- سيب (Untouch)
+                            -- 1. طيران سلس للحلوى (0.2 ثانية)
+                            local tweenInfo = TweenInfo.new(0.2, Enum.EasingStyle.Linear)
+                            local tween = TweenService:Create(hrp, tweenInfo, {CFrame = CFrame.new(closestCandy.Position)})
+                            tween:Play()
+                            tween.Completed:Wait() -- بنستنى لحد ما نوصل
                             
-                            hrp.CFrame = originalCFrame -- ارجع مكانك الأصلي
-                            hrp.AssemblyLinearVelocity = originalVel 
+                            -- 2. اللمس
+                            firetouchinterest(hrp, closestCandy, 0)
+                            task.wait(0.1)
+                            firetouchinterest(hrp, closestCandy, 1)
+                            
+                            -- 3. الرجوع السلس لمكانك الأصلي (0.2 ثانية)
+                            local tweenBack = TweenService:Create(hrp, TweenInfo.new(0.2, Enum.EasingStyle.Linear), {CFrame = originalCFrame})
+                            tweenBack:Play()
+                            tweenBack.Completed:Wait()
                         end)
                     end
                 end
-                -- تأخير عشان ميعملش كراش وميتكشفش
-                task.wait(0.1) 
+                task.wait(0.3) -- استراحة 0.3 ثانية بين كل حلوى والتانية
             end
         end)
-    else
-        print("🍬 [Candy Farm] Stopped.")
     end
 end
-
 
 -- ============================================================
 -- 🎨 دالة الواجهة (WindUI)
