@@ -12,36 +12,85 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local Camera = workspace.CurrentCamera
 
--- 🛑 1. درع الحماية + الالتقاط الفوري
+-- ============================================================
+-- 👑 SLAP AURA | PREMIUM EDITION (Protection + Hooks)
+-- ============================================================
+print("🚀 [Slap Aura] Starting Premium Engine...")
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local Lighting = game:GetService("Lighting")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+local Camera = workspace.CurrentCamera
+
+-- ============================================================
+-- 🛡️ 1. درع الحماية (Ghost Protocol) + التقاط الريموت
+-- ============================================================
 local CapturedRemote = nil
 local RemoteFormat = "None"
-local oldNamecall
-oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-    local method = getnamecallmethod()
-    if method == "FireServer" then
-        if self.Name == "Ban" or self.Name == "AdminGUI" or self.Name == "Kick" or self.Name == "WalkSpeedChanged" then
-            return 
+
+-- تمويه الذاكرة والفيزياء
+pcall(function()
+    local mt = getrawmetatable(game)
+    local oldIndex = mt.__index
+    local oldNewIndex = mt.__newindex
+    setreadonly(mt, false)
+
+    mt.__index = newcclosure(function(t, k)
+        if (k == "WalkSpeed" or k == "JumpPower") and t:IsA("Humanoid") and t.Parent == LocalPlayer.Character then
+            return k == "WalkSpeed" and 16 or 50
         end
-        local args = {...}
-        if #args > 0 then
-            if type(args[1]) == "table" and args[1]["victim"] then
-                if CapturedRemote ~= self then
-                    CapturedRemote = self
-                    RemoteFormat = "Table"
-                end
-            elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart") then
-                if CapturedRemote ~= self then
-                    CapturedRemote = self
-                    RemoteFormat = "Instance"
-                end
+        if k == "AssemblyLinearVelocity" and t.Parent == LocalPlayer.Character then
+            local realVel = oldIndex(t, k)
+            if realVel.Magnitude > 40 then
+                return Vector3.new(realVel.X / 2, realVel.Y / 2, realVel.Z / 2)
             end
         end
-    elseif method == "Kick" and self == LocalPlayer then
-        return
-    end
-    return oldNamecall(self, ...)
+        return oldIndex(t, k)
+    end)
+
+    mt.__newindex = newcclosure(function(t, k, v)
+        if (k == "WalkSpeed" or k == "JumpPower") and t:IsA("Humanoid") and t.Parent == LocalPlayer.Character then
+            return 
+        end
+        return oldNewIndex(t, k, v)
+    end)
+    setreadonly(mt, true)
 end)
 
+-- اعتراض الريموتات (منع الطرد + منع البلاغات + التقاط الضرب)
+local oldNamecall
+oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+    local args = {...}
+    
+    -- منع الطرد
+    if method == "Kick" and self == LocalPlayer then return end
+    
+    -- منع البلاغات
+    if method == "FireServer" then
+        local remoteName = string.lower(self.Name)
+        local badRemotes = {"ban", "kick", "anticheat", "detect", "report", "speedcheck", "walkspeedchanged", "flag", "monitor"}
+        for _, bad in ipairs(badRemotes) do
+            if string.find(remoteName, bad) then return end
+        end
+    end
+    
+    -- التقاط ريموت الضرب
+    if method == "FireServer" and #args > 0 then
+        if type(args[1]) == "table" and args[1]["victim"] then
+            CapturedRemote = self; RemoteFormat = "Table"
+        elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart") then
+            CapturedRemote = self; RemoteFormat = "Instance"
+        end
+    end
+    
+    return oldNamecall(self, ...)
+end))
+-- ============================================================
 -- المتغيرات
 local CurrentGloveIcon = "rbxassetid://15315284749"
 local StatusLabel = nil
@@ -58,7 +107,9 @@ local Settings = {
     FlySpeed = 50, Noclip = false, AntiVoid = false, 
     Godmode = true, AntiRagdoll = true, AntiKnockback = true, 
     WalkSpeed = 16, JumpPower = 50, 
-    Fullbright = false, ESP = false, CandyFarm = false
+    Fullbright = false, ESP = false, 
+    CandyFarm = false,
+    PremiumSpeed = 35
 }
 
 -- ================= نظام الإشعارات المخصص =================
@@ -549,7 +600,28 @@ function ToggleServerHopper(state)
         end)
     end
 end
--- ============================================================
+-- 💎 محرك السرعة (Premium Speed Engine)
+local isSpeedEnabled = false
+local SpeedConnection = nil
+
+function TogglePremiumSpeed(state)
+    isSpeedEnabled = state
+    if state then
+        if SpeedConnection then SpeedConnection:Disconnect() end
+        SpeedConnection = RunService.Heartbeat:Connect(function()
+            if not isSpeedEnabled then return end
+            local myChar = LocalPlayer.Character
+            local myHum = myChar and myChar:FindFirstChildOfClass("Humanoid")
+            if myHum then
+                myHum.WalkSpeed = Settings.PremiumSpeed 
+            end
+        end)
+    else
+        if SpeedConnection then SpeedConnection:Disconnect(); SpeedConnection = nil end
+        local myHum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if myHum then myHum.WalkSpeed = 16 end
+    end
+end ============================================================
 -- 🎨 8. واجهة WindUI
 -- ============================================================
 function LoadMainGUI()
