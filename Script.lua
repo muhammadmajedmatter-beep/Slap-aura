@@ -530,6 +530,21 @@ function LoadMainGUI()
         UtilityTab:Slider({ Title = "WalkSpeed", Step = 1, Value = { Min = 16, Max = 100, Default = 16 }, Callback = function(value) Settings.WalkSpeed = value end })
         UtilityTab:Slider({ Title = "JumpPower", Step = 1, Value = { Min = 50, Max = 200, Default = 50 }, Callback = function(value) Settings.JumpPower = value end })
 
+        -- 👇 هنا ضفنا زرار السرعة المدفوعة الآمنة 👇
+        UtilityTab:Toggle({ 
+            Title = "Premium Physics Speed", 
+            Desc = "سرعة عالية بدون باند (تخطي الحماية)", 
+            Value = false, 
+            Callback = function(state) TogglePremiumSpeed(state) end 
+        })
+        UtilityTab:Slider({ 
+            Title = "Premium Speed Value", 
+            Step = 1, 
+            Value = { Min = 20, Max = 100, Default = 35 }, 
+            Callback = function(value) Settings.PremiumSpeed = value end 
+        })
+        -- 👆 ------------------------------------ 👆
+
         local VisualsTab = MainWindow:Tab({ Title = "Visuals", Icon = "eye" })
         VisualsTab:Toggle({ Title = "Fullbright", Value = false, Callback = function(state) Settings.Fullbright = state; if state then Lighting.Ambient = Color3.fromRGB(255,255,255); Lighting.OutdoorAmbient = Color3.fromRGB(255,255,255) else Lighting.Ambient = Color3.fromRGB(70,70,70); Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128) end end })
         VisualsTab:Toggle({ Title = "Player ESP", Value = false, Callback = function(state) if state then enableESP() else disableESP() end end })
@@ -543,48 +558,45 @@ function LoadMainGUI()
         local FarmsTab = MainWindow:Tab({ Title = "Farms", Icon = "tractor" })
         FarmsTab:Toggle({ Title = "Slap AutoFarm", Desc = "يضرب ويلم فلوس تلقائياً", Value = false, Callback = function(state) toggleAutoFarm(state) end })
         
+        -- 👇 هنا غيرنا الكاندي فارم من التيليبورت (اللي بيجيب باند) للنسخة الآمنة 👇
         FarmsTab:Toggle({ 
-            Title = "Auto Candy Farm (Ultra Speed)", 
-            Desc = "أسرع طريقة لجمع الكاندي", 
+            Title = "Auto Candy Farm (Safe)", 
+            Desc = "جمع الحلوى بأمان (واقف مكانك)", 
             Value = false, 
             Callback = function(state) 
                 Settings.CandyFarm = state 
                 if state then
                     task.spawn(function()
-                        local tweenInfo = TweenInfo.new(0.03, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
                         while Settings.CandyFarm do
                             local myChar = LocalPlayer.Character
-                            if myChar and myChar:FindFirstChild("HumanoidRootPart") then
-                                local hrp = myChar.HumanoidRootPart
-                                local folder = workspace:FindFirstChild("CandyCorns") or workspace:FindFirstChild("Candy") or workspace:FindFirstChild("HalloweenCandy")
-                                if folder then
-                                    for i = 1, #folder:GetChildren() do
-                                        if not Settings.CandyFarm then break end
-                                        local candy = folder:GetChildren()[i]
-                                        if candy:IsA("BasePart") then
-                                            local tween = TweenService:Create(hrp, tweenInfo, {CFrame = candy.CFrame})
-                                            tween:Play()
-                                            tween.Completed:Wait() 
-                                        end
-                                    end
-                                else
-                                    for _, obj in pairs(workspace:GetDescendants()) do
-                                        if not Settings.CandyFarm then break end
-                                        local nameCheck = string.lower(obj.Name)
-                                        if obj:IsA("BasePart") and (string.find(nameCheck, "candy") or string.find(nameCheck, "corn")) then
-                                            local tween = TweenService:Create(hrp, tweenInfo, {CFrame = obj.CFrame})
-                                            tween:Play()
-                                            tween.Completed:Wait()
+                            local hrp = myChar and myChar:FindFirstChild("HumanoidRootPart")
+                            
+                            if hrp then
+                                for _, obj in pairs(workspace:GetDescendants()) do
+                                    if not Settings.CandyFarm then break end
+                                    local name = string.lower(obj.Name)
+                                    
+                                    -- بندور على الحلوى القريبة منك
+                                    if obj:IsA("BasePart") and (string.find(name, "candy") or string.find(name, "corn")) then
+                                        -- مسافة 25 متر (عشان تلمسها من غير ما تتحرك وتتبند)
+                                        if (hrp.Position - obj.Position).Magnitude < 25 then
+                                            pcall(function()
+                                                firetouchinterest(hrp, obj, 0)
+                                                task.wait(0.01)
+                                                firetouchinterest(hrp, obj, 1)
+                                            end)
+                                            task.wait(0.1) 
                                         end
                                     end
                                 end
                             end
-                            task.wait(0.1) 
+                            task.wait(0.2) 
                         end
                     end)
                 end
             end 
         })
+        -- 👆 --------------------------------- 👆
     end)
     if not success then warn("❌ خطأ في الواجهة: " .. tostring(err)) end
 end
