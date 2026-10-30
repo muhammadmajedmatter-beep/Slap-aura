@@ -62,32 +62,27 @@ local Settings = {
     CandyFarm = false,
     PremiumSpeed = 45
 }
--- 💎 كود السرعة المدفوعة (Premium Speed)
+-- 💎 محرك السرعة المدفوعة (الآمن - بيضرب وبيجري)
 local isSpeedEnabled = false
 local SpeedConnection = nil
 
-local function TogglePremiumSpeed(state)
+function TogglePremiumSpeed(state)
     isSpeedEnabled = state
     if state then
         if SpeedConnection then SpeedConnection:Disconnect() end
-        SpeedConnection = RunService.RenderStepped:Connect(function()
+        SpeedConnection = RunService.Heartbeat:Connect(function()
             if not isSpeedEnabled then return end
             local myChar = LocalPlayer.Character
-            local myRoot = myChar and myChar:FindFirstChild("HumanoidRootPart")
             local myHum = myChar and myChar:FindFirstChildOfClass("Humanoid")
-            
-            if myRoot and myHum then
-                myHum.WalkSpeed = 16 -- السرعة العادية
-            
-                local moveDir = myHum.MoveDirection
-                if moveDir.Magnitude > 0 then
-                    -- الحركة بالفيزياء عشان تتخطى الحماية
-                    myRoot.Velocity = Vector3.new(moveDir.X * Settings.PremiumSpeed, myRoot.Velocity.Y, moveDir.Z * Settings.PremiumSpeed)
-                end
+            if myHum then
+                -- بنغير الـ WalkSpeed العادي، والـ Ghost Protocol بيخبيه عن السيرفر
+                myHum.WalkSpeed = Settings.PremiumSpeed 
             end
         end)
     else
         if SpeedConnection then SpeedConnection:Disconnect(); SpeedConnection = nil end
+        local myHum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if myHum then myHum.WalkSpeed = 16 end
     end
 end
 -- ================= نظام الإشعارات المخصص =================
@@ -499,7 +494,8 @@ RunService.Stepped:Connect(function()
         end
     end
 
-    if closestPlayer and closestPlayer.Character:FindFirstChild("Head") then
+    if closestPlayer and closestPlayer.Character and closestPlayer.Character:FindFirstChild("Head") then
+    pcall(function() -- pcall عشان لو حصل أي خطأ ميعملش كراش
         if RemoteFormat == "Table" then
             CapturedRemote:FireServer({["victim"] = closestPlayer.Character.Head, ["attacker"] = LocalPlayer, ["icon"] = CurrentGloveIcon})
         elseif RemoteFormat == "Instance" then
@@ -509,8 +505,8 @@ RunService.Stepped:Connect(function()
         hitsThisSecond = hitsThisSecond + 1
         HUDText.Text = "🎃 Slap Aura: ACTIVE ("..HitCount.." Hits)"
         lastHitTime = tick()
-    end
-end)
+    end)
+end
 
 -- ============================================================
 -- 💎 الدوال (محرك السرعة والكاندي)
@@ -546,19 +542,50 @@ local isCandyFarming = false
 function TogglePremiumCandyFarm(state)
     isCandyFarming = state
     if state then
-        if not CapturedCandyRemote then
-            showNotification("Candy Farm", "الرجاء جمع حلوى واحدة يدوياً أولاً!", false)
-            return
-        end
         task.spawn(function()
             while isCandyFarming do
-                pcall(function()
-                    CapturedCandyRemote:FireServer(unpack(CandyArgs))
-                end)
-                task.wait(math.random(10, 25) / 100) 
+                local myChar = LocalPlayer.Character
+                local hrp = myChar and myChar:FindFirstChild("HumanoidRootPart")
+                
+                if hrp then
+                    -- 1. بنحفظ مكانك الأصلي
+                    local originalCFrame = hrp.CFrame
+                    local originalVel = hrp.AssemblyLinearVelocity
+
+                    local closestCandy = nil
+                    local shortestDist = 50 -- مسافة البحث (متزودهاش عن 50 عشان ميتكشفش)
+
+                    -- 2. بندور على الحلوى اللي حواليك
+                    for _, obj in pairs(workspace:GetDescendants()) do
+                        if not isCandyFarming then break end
+                        local name = string.lower(obj.Name)
+                        if obj:IsA("BasePart") and (string.find(name, "candy") or string.find(name, "corn")) then
+                            local dist = (hrp.Position - obj.Position).Magnitude
+                            if dist < shortestDist then
+                                shortestDist = dist
+                                closestCandy = obj
+                            end
+                        end
+                    end
+
+                    -- 3. لو لقينا حلوى، بنعمل الخطفة السريعة
+                    if closestCandy then
+                        pcall(function()
+                            hrp.CFrame = CFrame.new(closestCandy.Position) -- طير للحلوى
+                            firetouchinterest(hrp, closestCandy, 0) -- المسها
+                            task.wait(0.01)
+                            firetouchinterest(hrp, closestCandy, 1) -- سيبها
+                            
+                            hrp.CFrame = originalCFrame -- ارجع مكانك
+                            hrp.AssemblyLinearVelocity = originalVel 
+                        end)
+                    end
+                end
+                -- تأخير عشوائي بشري عشان السيرفر ميشكش
+                task.wait(math.random(10, 20) / 100) 
             end
         end)
-        showNotification("Premium", "Candy Farm Activated!", true)
+        showNotification("Premium", "Candy Farm (Touch) Activated!", true)
     end
 end
 
