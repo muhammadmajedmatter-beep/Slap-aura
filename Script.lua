@@ -58,7 +58,8 @@ local Settings = {
     FlySpeed = 50, Noclip = false, AntiVoid = false, 
     Godmode = true, AntiRagdoll = true, AntiKnockback = true, 
     WalkSpeed = 16, JumpPower = 50, 
-    Fullbright = false, ESP = false, CandyFarm = false
+    Fullbright = false, ESP = false,     CandyFarm = false,
+    PremiumSpeed = 45
 }
 -- 💎 كود السرعة المدفوعة (Premium Speed)
 local isSpeedEnabled = false
