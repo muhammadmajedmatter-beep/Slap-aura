@@ -1,8 +1,7 @@
 -- ============================================================
--- 👑 SLAP AURA HUB | V59 | CANDY FARM PRO EDITION
--- (Original Loading + Notifications + Ghost Protocol V9
---  + All Antis + ESP Auto-Detect + Candy Farm PRO
---  + Server Hopper + Floating Button + Debug)
+-- 👑 SLAP AURA HUB | V59 | CANDY FARM V3 ENHANCED
+-- (Legacy System + Enhanced Search + Live Monitor + Counter
+--  + No firetouchinterest + Safe Hopper)
 -- ============================================================
 
 local Players = game:GetService("Players")
@@ -11,13 +10,12 @@ local TweenService = game:GetService("TweenService")
 local VirtualUser = game:GetService("VirtualUser")
 local UserInputService = game:GetService("UserInputService")
 local TeleportService = game:GetService("TeleportService")
-local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local Camera = workspace.CurrentCamera
 
 -- ============================================================
--- 🎬 0. LOADING SCREEN (ORIGINAL - Full Design)
+-- 🎬 0. LOADING SCREEN
 -- ============================================================
 local LoadingGui = Instance.new("ScreenGui")
 LoadingGui.Name = "SlapAuraLoading"
@@ -87,7 +85,7 @@ local Version = Instance.new("TextLabel")
 Version.Size = UDim2.new(1, 0, 0, 20)
 Version.Position = UDim2.fromOffset(0, 75)
 Version.BackgroundTransparency = 1
-Version.Text = "V59  •  Candy Farm PRO Edition"
+Version.Text = "V59  •  Candy Farm V3 Enhanced"
 Version.TextColor3 = Color3.fromRGB(160, 160, 175)
 Version.Font = Enum.Font.Gotham
 Version.TextSize = 13
@@ -160,7 +158,7 @@ local loadSteps = {
     {p = 45, text = "Injecting Remote Hooks..."},
     {p = 60, text = "Building HUD..."},
     {p = 75, text = "Loading WindUI Framework..."},
-    {p = 90, text = "Preparing Candy Farm PRO..."},
+    {p = 90, text = "Preparing Candy Farm V3..."},
     {p = 100, text = "Ready! Launching..."}
 }
 
@@ -174,7 +172,6 @@ local function runLoadingScreen()
         task.wait(0.35 + math.random() * 0.15)
     end
     task.wait(0.4)
-
     TweenService:Create(Container, TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
         Position = UDim2.new(0.5, 0, 0.4, 0),
         BackgroundTransparency = 1
@@ -183,12 +180,10 @@ local function runLoadingScreen()
     TweenService:Create(Backdrop, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
         BackgroundTransparency = 1
     }):Play()
-
     task.wait(0.7)
     LoadingGui:Destroy()
 end
 runLoadingScreen()
-print("🚀 [Slap Aura] Booting V59 Candy Farm PRO...")
 
 -- ============================================================
 -- 🛑 1. GHOST PROTOCOL V9 (Delta-Safe)
@@ -260,8 +255,6 @@ if hasHooks then
             return oldNamecall(self, ...)
         end))
     end)
-else
-    warn("[Slap Aura] Delta: Hooks not fully supported.")
 end
 
 -- ============================================================
@@ -292,7 +285,7 @@ local HUDStroke = Instance.new("UIStroke"); HUDStroke.Color = Color3.fromRGB(255
 local HUDText = Instance.new("TextLabel"); HUDText.Size = UDim2.new(1, -10, 1, 0); HUDText.Position = UDim2.new(0, 5, 0, 0); HUDText.BackgroundTransparency = 1; HUDText.Text = "🎃 Slap Aura: WAITING"; HUDText.TextColor3 = Color3.fromRGB(255, 255, 255); HUDText.Font = Enum.Font.GothamBold; HUDText.TextSize = 14; HUDText.Parent = HUDFrame
 
 -- ============================================================
--- 🔔 4. NOTIFICATIONS (ORIGINAL)
+-- 🔔 4. NOTIFICATIONS
 -- ============================================================
 local function showNotification(title, text, isSuccess)
     local notifGui = Instance.new("ScreenGui")
@@ -499,151 +492,153 @@ function ToggleGodmode(state)
 end
 
 -- ============================================================
--- 🚀 6. SERVER HOPPER
+-- 🚀 6. SERVER HOPPER (SAFE)
 -- ============================================================
 local function HopToNewServer()
     pcall(function()
-        showNotification("Hopper", "Searching for new server...", true)
-        local success, response = pcall(function()
-            return game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")
-        end)
-        if success and response then
-            local servers = HttpService:JSONDecode(response)
-            if servers and servers.data and #servers.data > 0 then
-                for _, server in ipairs(servers.data) do
-                    if server.playing < server.maxPlayers - 1 and server.id ~= game.JobId then
-                        TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
-                        return
+        showNotification("Hopper", "Teleporting to new server...", true)
+    end)
+    task.wait(0.5)
+    pcall(function()
+        local player = Players.LocalPlayer
+        if player then
+            TeleportService:Teleport(game.PlaceId, player)
+        end
+    end)
+end
+
+-- ============================================================
+-- 🍬 7. CANDY FARM V3 (Enhanced Legacy System)
+-- ============================================================
+local CandyFarm = {
+    Running = false,
+    Collected = 0,
+    Thread = nil,
+    Monitor = nil,
+    LastCount = 0,
+    LoopSpeed = 0.1,
+    LastCollectTime = 0,
+    FolderFound = false,
+    FolderName = "",
+}
+
+local function FindCandyFolder()
+    local folder = workspace:FindFirstChild("CandyCorns")
+    if folder then
+        CandyFarm.FolderFound = true
+        CandyFarm.FolderName = "CandyCorns"
+        return folder
+    end
+    
+    for _, obj in ipairs(workspace:GetChildren()) do
+        if obj:IsA("Folder") then
+            local n = string.lower(obj.Name)
+            if string.find(n, "candy") or string.find(n, "corn") or string.find(n, "sweet") then
+                CandyFarm.FolderFound = true
+                CandyFarm.FolderName = obj.Name
+                return obj
+            end
+        end
+    end
+    
+    CandyFarm.FolderFound = false
+    return nil
+end
+
+local function GetCandyList()
+    local candies = {}
+    local folder = FindCandyFolder()
+    
+    if folder then
+        for _, item in ipairs(folder:GetChildren()) do
+            if item:IsA("BasePart") then
+                table.insert(candies, item)
+            end
+        end
+    else
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("BasePart") or obj:IsA("MeshPart") then
+                local n = string.lower(obj.Name)
+                if string.find(n, "candy") or string.find(n, "corn") or string.find(n, "sweet") then
+                    if not (LocalPlayer.Character and obj:IsDescendantOf(LocalPlayer.Character)) then
+                        table.insert(candies, obj)
                     end
                 end
             end
         end
-        TeleportService:Teleport(game.PlaceId, LocalPlayer)
-    end)
-end
-
--- ============================================================
--- 🍬 7. CANDY FARM PRO (3 Modes + Live Monitor + Counter)
--- ============================================================
-local CandyStats = { collected = 0, mode = "Pull", lastCollectTime = 0 }
-local candyDebugStats = {folderFound = false, folderName = "", count = 0, method = "None"}
-
-local function FindAllCandy()
-    local found = {}
-    local folder = workspace:FindFirstChild("CandyCorns")
-    if folder then
-        for _, item in ipairs(folder:GetChildren()) do
-            if item:IsA("BasePart") then table.insert(found, item) end
-        end
-        candyDebugStats.folderFound = true
-        candyDebugStats.folderName = "CandyCorns"
-        candyDebugStats.method = "Folder: CandyCorns"
-    else
-        for _, obj in pairs(workspace:GetDescendants()) do
-            if (obj:IsA("BasePart") or obj:IsA("MeshPart")) then
-                local name = string.lower(obj.Name)
-                if (string.find(name, "candy") or string.find(name, "corn") or string.find(name, "sweet") or string.find(name, "token")) and
-                   not (LocalPlayer.Character and obj:IsDescendantOf(LocalPlayer.Character)) then
-                    table.insert(found, obj)
-                end
-            end
-        end
-        candyDebugStats.method = "Name Search"
     end
-    candyDebugStats.count = #found
-    return found
+    
+    return candies
 end
 
-local function CollectByPull(candy, hrp)
-    pcall(function()
+local function CollectCandy(candy, hrp)
+    if not candy or not candy.Parent or not hrp then return false end
+    local success = pcall(function()
         candy.CFrame = hrp.CFrame
-        firetouchinterest(hrp, candy, 0)
-        task.wait(0.01)
-        firetouchinterest(hrp, candy, 1)
-        CandyStats.collected = CandyStats.collected + 1
-        CandyStats.lastCollectTime = tick()
+        CandyFarm.Collected = CandyFarm.Collected + 1
+        CandyFarm.LastCollectTime = tick()
     end)
-end
-
-local function CollectByTween(candy, hrp)
-    pcall(function()
-        local targetPos = candy.Position + Vector3.new(0, 2, 0)
-        local tween = TweenService:Create(hrp, TweenInfo.new(0.12, Enum.EasingStyle.Linear), {CFrame = CFrame.new(targetPos)})
-        tween:Play()
-        tween.Completed:Wait()
-        firetouchinterest(hrp, candy, 0)
-        task.wait(0.01)
-        firetouchinterest(hrp, candy, 1)
-        CandyStats.collected = CandyStats.collected + 1
-        CandyStats.lastCollectTime = tick()
-    end)
-end
-
-local function CollectByRemote(candy, hrp)
-    pcall(function()
-        firetouchinterest(hrp, candy, 0)
-        task.wait(0.02)
-        firetouchinterest(hrp, candy, 1)
-        CandyStats.collected = CandyStats.collected + 1
-        CandyStats.lastCollectTime = tick()
-    end)
+    return success
 end
 
 local function ToggleCandyFarm(state)
     Settings.CandyFarm = state
-    if Connections.Candy then Connections.Candy:Disconnect() end
-    if Connections.CandyMonitor then Connections.CandyMonitor:Disconnect() end
-
+    
+    if CandyFarm.Thread then pcall(function() task.cancel(CandyFarm.Thread) end); CandyFarm.Thread = nil end
+    if CandyFarm.Monitor then pcall(function() CandyFarm.Monitor:Disconnect() end); CandyFarm.Monitor = nil end
+    
     if not state then
+        CandyFarm.Running = false
         showNotification("Farm", "Candy Farm Stopped", false)
         return
     end
-
-    CandyStats.collected = 0
-    showNotification("Farm", "Candy Farm PRO Started ["..CandyStats.mode.."]", true)
-
-    Connections.CandyMonitor = workspace.DescendantAdded:Connect(function(obj)
-        if not Settings.CandyFarm then return end
+    
+    CandyFarm.Running = true
+    CandyFarm.Collected = 0
+    CandyFarm.LastCollectTime = tick()
+    showNotification("Farm", "Candy Farm V3 Started", true)
+    
+    -- Live Monitor: يلتقط الحلوى لحظة ظهورها
+    CandyFarm.Monitor = workspace.DescendantAdded:Connect(function(obj)
+        if not CandyFarm.Running then return end
         if obj:IsA("BasePart") or obj:IsA("MeshPart") then
             local n = string.lower(obj.Name)
-            if string.find(n, "candy") or string.find(n, "corn") or string.find(n, "sweet") or string.find(n, "token") then
+            if string.find(n, "candy") or string.find(n, "corn") or string.find(n, "sweet") then
                 task.spawn(function()
                     local char = LocalPlayer.Character
                     local hrp = char and char:FindFirstChild("HumanoidRootPart")
                     if hrp and obj:IsDescendantOf(workspace) then
-                        if CandyStats.mode == "Pull" then CollectByPull(obj, hrp)
-                        elseif CandyStats.mode == "Tween" then CollectByTween(obj, hrp)
-                        else CollectByRemote(obj, hrp) end
+                        CollectCandy(obj, hrp)
                     end
                 end)
             end
         end
     end)
-
-    Connections.Candy = task.spawn(function()
-        while Settings.CandyFarm do
+    
+    -- الحلقة الرئيسية (نفس النظام القديم بس محسن)
+    CandyFarm.Thread = task.spawn(function()
+        while CandyFarm.Running do
             local char = LocalPlayer.Character
             local hrp = char and char:FindFirstChild("HumanoidRootPart")
-
+            
             if hrp then
-                local candies = FindAllCandy()
-
+                local candies = GetCandyList()
+                CandyFarm.LastCount = #candies
+                
                 if #candies > 0 then
                     for _, candy in ipairs(candies) do
-                        if not Settings.CandyFarm then break end
+                        if not CandyFarm.Running then break end
                         if candy and candy.Parent then
-                            if CandyStats.mode == "Pull" then CollectByPull(candy, hrp)
-                            elseif CandyStats.mode == "Tween" then CollectByTween(candy, hrp)
-                            else CollectByRemote(candy, hrp) end
-                            task.wait(0.02)
+                            CollectCandy(candy, hrp)
+                            task.wait(0.01)
                         end
                     end
-                    task.wait(0.3)
+                    task.wait(0.2)
                 else
                     task.wait(0.5)
                     if Settings.ServerHopper then
                         task.wait(3)
-                        if Settings.CandyFarm and #FindAllCandy() == 0 then
+                        if CandyFarm.Running and #GetCandyList() == 0 then
                             showNotification("Hopper", "No Candy! Hopping...", true)
                             HopToNewServer()
                             break
@@ -1104,7 +1099,7 @@ end
 function LoadMainGUI()
     local success, err = pcall(function()
         local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-        local Window = WindUI:CreateWindow({ Title = "Slap Aura | V59 Candy PRO", Icon = "shield", Author = "Majed", Folder = "SlapAuraV59", Size = UDim2.fromOffset(600, 520), Transparent = true, Theme = "Dark" })
+        local Window = WindUI:CreateWindow({ Title = "Slap Aura | V59", Icon = "shield", Author = "Majed", Folder = "SlapAuraV59", Size = UDim2.fromOffset(600, 520), Transparent = true, Theme = "Dark" })
 
         -- ⚔️ Combat
         local CombatTab = Window:Tab({ Title = "Combat", Icon = "crosshair" })
@@ -1125,24 +1120,12 @@ function LoadMainGUI()
         MoveTab:Toggle({ Title = "Zero Gravity", Value = false, Callback = function(s) ToggleGravity(s) end })
         MoveTab:Toggle({ Title = "Noclip", Value = false, Callback = function(s) ToggleNoclip(s) end })
 
-        -- 🍬 Farm (PRO Edition)
+        -- 🍬 Farm
         local FarmTab = Window:Tab({ Title = "Farm", Icon = "leaf" })
-        FarmTab:Toggle({ Title = "🍬 Candy Farm PRO", Value = false, Callback = function(s) ToggleCandyFarm(s) end })
-        FarmTab:Dropdown({
-            Title = "Candy Collect Mode",
-            Values = {"Pull (Fastest)", "Tween (Safer)", "Remote (Stationary)"},
-            Default = "Pull (Fastest)",
-            Callback = function(option)
-                if option == "Pull (Fastest)" then CandyStats.mode = "Pull"
-                elseif option == "Tween (Safer)" then CandyStats.mode = "Tween"
-                else CandyStats.mode = "Remote" end
-                showNotification("Candy Farm", "Mode: " .. CandyStats.mode, true)
-            end
-        })
+        FarmTab:Toggle({ Title = "🍬 Candy Farm V3", Value = false, Callback = function(s) ToggleCandyFarm(s) end })
         FarmTab:Toggle({ Title = "Auto Server Hop (When Empty)", Value = false, Callback = function(s) Settings.ServerHopper = s end })
         FarmTab:Button({ Title = "🚀 Hop Now", Callback = function() HopToNewServer() end })
-        FarmTab:Paragraph({ Title = "Candy Stats", Desc = "Collected: 0 | Mode: Pull" })
-        FarmTab:Paragraph({ Title = "Info", Desc = "Floating Button on screen = quick toggle. Drag it anywhere." })
+        FarmTab:Paragraph({ Title = "Candy Stats", Desc = "Collected: 0 | Folder: None" })
 
         -- 👁️ Visuals
         local VisTab = Window:Tab({ Title = "Visuals", Icon = "eye" })
@@ -1170,7 +1153,7 @@ function LoadMainGUI()
 
         -- ⚙️ Settings
         local SetTab = Window:Tab({ Title = "Settings", Icon = "settings" })
-        SetTab:Button({ Title = "🔔 Test Notification", Callback = function() showNotification("Test", "Notifications Working!", true) end })
+        SetTab:Button({ Title = "🔔 Test Notification", Callback = function() showNotification("Test", "Working!", true) end })
         SetTab:Button({ Title = "📍 Set Safe Pos", Callback = function()
             local char = LocalPlayer.Character
             if char and char:FindFirstChild("HumanoidRootPart") then
@@ -1178,19 +1161,13 @@ function LoadMainGUI()
                 showNotification("Safe Pos", "Updated!", true)
             end
         end })
-        SetTab:Button({ Title = "🔍 Debug Speed", Callback = function()
-            local h = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if h then showNotification("Debug", "WalkSpeed: "..h.WalkSpeed.." | Target: "..Settings.PremiumSpeed, true) end
-        end })
-        SetTab:Button({ Title = "🔍 Scan Workspace for Candy", Callback = function()
-            local candies = FindAllCandy()
+        SetTab:Button({ Title = "🔍 Scan for Candy", Callback = function()
+            local candies = GetCandyList()
             if #candies == 0 then
                 showNotification("Scan", "No Candy Found", false)
             else
                 local names = {}
-                for i = 1, math.min(#candies, 5) do
-                    table.insert(names, candies[i].Name)
-                end
+                for i = 1, math.min(#candies, 5) do table.insert(names, candies[i].Name) end
                 showNotification("Scan", "Found "..#candies..": "..table.concat(names, ", "), true)
             end
         end })
@@ -1207,8 +1184,8 @@ function LoadMainGUI()
             end
         end })
         SetTab:Button({ Title = "📊 Candy Farm Status", Callback = function()
-            local msg = "Running: "..tostring(Settings.CandyFarm).." | Collected: "..CandyStats.collected.." | Mode: "..CandyStats.mode.." | Found: "..candyDebugStats.count
-            showNotification("Farm Status", msg, CandyStats.collected > 0)
+            local msg = "Running: "..tostring(Settings.CandyFarm).." | Collected: "..CandyFarm.Collected.." | Folder: "..(CandyFarm.FolderFound and CandyFarm.FolderName or "None").." | Found: "..CandyFarm.LastCount
+            showNotification("Farm Status", msg, CandyFarm.Collected > 0)
         end })
         SetTab:Button({ Title = "❌ Unload", Callback = function()
             for _, c in pairs(Connections) do pcall(function() c:Disconnect() end) end
@@ -1219,9 +1196,9 @@ function LoadMainGUI()
         -- تحديث الإحصائيات كل ثانية
         task.spawn(function()
             while task.wait(1) do
-                if Settings.CandyFarm and CandyStats.collected > 0 then
+                if Settings.CandyFarm then
                     pcall(function()
-                        FarmTab:SetDesc("Candy Stats", string.format("Collected: %d | Mode: %s | Last: %.1fs ago", CandyStats.collected, CandyStats.mode, tick() - CandyStats.lastCollectTime))
+                        FarmTab:SetDesc("Candy Stats", string.format("Collected: %d | Folder: %s | Found: %d", CandyFarm.Collected, CandyFarm.FolderFound and CandyFarm.FolderName or "None", CandyFarm.LastCount))
                     end)
                 end
             end
@@ -1231,9 +1208,9 @@ function LoadMainGUI()
         warn("[Slap Aura] GUI Error: " .. tostring(err))
         showNotification("GUI Error", "WindUI Failed to Load", false)
     else
-        showNotification("Slap Aura", "V59 Candy PRO Loaded!", true)
+        showNotification("Slap Aura", "V59 Candy V3 Loaded!", true)
     end
 end
 
 LoadMainGUI()
-print("✅ [Slap Aura] V59 Candy Farm PRO Edition Ready!")
+print("✅ [Slap Aura] V59 Candy Farm V3 Enhanced Ready!")
