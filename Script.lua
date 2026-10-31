@@ -1,6 +1,15 @@
 -- ============================================================
--- 👑 SLAP AURA HUB | V59 | CANDY FARM V4 (FULL CONTROL)
+-- 👑 SLAP AURA HUB | V59 | CANDY FARM V5
+-- (No Auto-Start + Full Manual Control + Fixed Float Button)
 -- ============================================================
+
+-- ⚠️ منع تشغيل السكربت مرتين
+if _G.SlapAuraAlreadyRunning then
+    warn("[Slap Aura] Script already running! Skipping duplicate.")
+    return
+end
+_G.SlapAuraAlreadyRunning = true
+_G.CandyFarmReady = false
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -83,7 +92,7 @@ local Version = Instance.new("TextLabel")
 Version.Size = UDim2.new(1, 0, 0, 20)
 Version.Position = UDim2.fromOffset(0, 75)
 Version.BackgroundTransparency = 1
-Version.Text = "V59  •  Candy Farm V4 (Full Control)"
+Version.Text = "V59  •  Candy Farm V5 (Manual Control)"
 Version.TextColor3 = Color3.fromRGB(160, 160, 175)
 Version.Font = Enum.Font.Gotham
 Version.TextSize = 13
@@ -156,8 +165,8 @@ local loadSteps = {
     {p = 45, text = "Injecting Remote Hooks..."},
     {p = 60, text = "Building HUD..."},
     {p = 75, text = "Loading WindUI Framework..."},
-    {p = 90, text = "Preparing Candy Farm V4..."},
-    {p = 100, text = "Ready! Launching..."}
+    {p = 90, text = "Preparing Candy Farm V5..."},
+    {p = 100, text = "Ready! All features OFF by default"}
 }
 
 local function runLoadingScreen()
@@ -256,11 +265,11 @@ if hasHooks then
 end
 
 -- ============================================================
--- ⚙️ 2. الإعدادات
+-- ⚙️ 2. الإعدادات (كل حاجة OFF)
 -- ============================================================
 local Settings = {
-    AuraEnabled = true, Range = 15, AuraMaxHits = 5,
-    FlySpeed = 50, Noclip = false, Godmode = true,
+    AuraEnabled = false, Range = 15, AuraMaxHits = 5,
+    FlySpeed = 50, Noclip = false, Godmode = false,
     PremiumSpeed = 35, ESP = false, AutoAim = false,
     HitboxExpander = false, GravityControl = false,
     CandyFarm = false, ServerHopper = false,
@@ -280,7 +289,7 @@ HUD.Name = "SlapAuraHUD"; HUD.ResetOnSpawn = false; HUD.DisplayOrder = 9998; HUD
 local HUDFrame = Instance.new("Frame"); HUDFrame.Size = UDim2.new(0, 220, 0, 40); HUDFrame.Position = UDim2.new(0, 20, 0.1, 0); HUDFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20); HUDFrame.BackgroundTransparency = 0.2; HUDFrame.BorderSizePixel = 0; HUDFrame.Parent = HUD
 local HUDCorner = Instance.new("UICorner"); HUDCorner.CornerRadius = UDim.new(0, 6); HUDCorner.Parent = HUDFrame
 local HUDStroke = Instance.new("UIStroke"); HUDStroke.Color = Color3.fromRGB(255, 140, 0); HUDStroke.Thickness = 1.5; HUDStroke.Parent = HUDFrame
-local HUDText = Instance.new("TextLabel"); HUDText.Size = UDim2.new(1, -10, 1, 0); HUDText.Position = UDim2.new(0, 5, 0, 0); HUDText.BackgroundTransparency = 1; HUDText.Text = "🎃 Slap Aura: WAITING"; HUDText.TextColor3 = Color3.fromRGB(255, 255, 255); HUDText.Font = Enum.Font.GothamBold; HUDText.TextSize = 14; HUDText.Parent = HUDFrame
+local HUDText = Instance.new("TextLabel"); HUDText.Size = UDim2.new(1, -10, 1, 0); HUDText.Position = UDim2.new(0, 5, 0, 0); HUDText.BackgroundTransparency = 1; HUDText.Text = "🎃 Slap Aura: READY"; HUDText.TextColor3 = Color3.fromRGB(255, 255, 255); HUDText.Font = Enum.Font.GothamBold; HUDText.TextSize = 14; HUDText.Parent = HUDFrame
 
 -- ============================================================
 -- 🔔 4. NOTIFICATIONS
@@ -493,51 +502,31 @@ end
 -- 🚀 6. SERVER HOPPER (SAFE)
 -- ============================================================
 local function HopToNewServer()
-    pcall(function()
-        showNotification("Hopper", "Teleporting to new server...", true)
-    end)
+    pcall(function() showNotification("Hopper", "Teleporting...", true) end)
     task.wait(0.5)
     pcall(function()
         local player = Players.LocalPlayer
-        if player then
-            TeleportService:Teleport(game.PlaceId, player)
-        end
+        if player then TeleportService:Teleport(game.PlaceId, player) end
     end)
 end
 
 -- ============================================================
--- 🍬 7. CANDY FARM V4 (FULL CONTROL - No Random Stops)
+-- 🍬 7. CANDY FARM V5 (Manual Control Only)
 -- ============================================================
 local CandyFarm = {
     Running = false,
     Collected = 0,
     Thread = nil,
     Monitor = nil,
+    CharConn = nil,
+    DeathConn = nil,
     LastCount = 0,
     FolderFound = false,
     FolderName = "",
-    ActiveRunID = 0  -- مهم: لضمان إن الـ thread القديم يتوقف
+    ActiveRunID = 0,
+    LastToggleTime = 0,
+    UI_Toggle = nil,
 }
-
-local candyFloatBtn = nil
-
-local function UpdateFloatButton(state)
-    if not candyFloatBtn then return end
-    local btn = candyFloatBtn.Button
-    local stroke = candyFloatBtn.Stroke
-    local label = candyFloatBtn.Label
-    if not btn then return end
-    
-    if state then
-        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 220, 130)}):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(100, 255, 180)}):Play()
-        label.Text = "ON"
-    else
-        TweenService:Create(btn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 140, 0)}):Play()
-        TweenService:Create(stroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(255, 200, 60)}):Play()
-        label.Text = "FARM"
-    end
-end
 
 local function FindCandyFolder()
     local folder = workspace:FindFirstChild("CandyCorns")
@@ -546,7 +535,6 @@ local function FindCandyFolder()
         CandyFarm.FolderName = "CandyCorns"
         return folder
     end
-    
     for _, obj in ipairs(workspace:GetChildren()) do
         if obj:IsA("Folder") then
             local n = string.lower(obj.Name)
@@ -557,7 +545,6 @@ local function FindCandyFolder()
             end
         end
     end
-    
     CandyFarm.FolderFound = false
     return nil
 end
@@ -565,12 +552,9 @@ end
 local function GetCandyList()
     local candies = {}
     local folder = FindCandyFolder()
-    
     if folder then
         for _, item in ipairs(folder:GetChildren()) do
-            if item:IsA("BasePart") then
-                table.insert(candies, item)
-            end
+            if item:IsA("BasePart") then table.insert(candies, item) end
         end
     else
         for _, obj in ipairs(workspace:GetDescendants()) do
@@ -584,111 +568,115 @@ local function GetCandyList()
             end
         end
     end
-    
     return candies
 end
 
--- الدالة الرئيسية - كل التحكم من هنا
-local function ToggleCandyFarm(state)
-    -- تحويل لـ boolean صريح
+local ToggleCandyFarm -- forward declaration
+
+function ToggleCandyFarm(state)
+    -- ⚠️ Grace Period: منع التشغيل في أول 3 ثواني
+    if not _G.CandyFarmReady then
+        return
+    end
+    
     state = state and true or false
     
-    -- لو نفس الحالة، متعملش حاجة
-    if CandyFarm.Running == state then
+    -- Debounce
+    if tick() - CandyFarm.LastToggleTime < 1 then
         return
     end
+    CandyFarm.LastToggleTime = tick()
     
-    -- تحديث الحالة
+    if CandyFarm.Running == state then return end
+
     CandyFarm.Running = state
     Settings.CandyFarm = state
-    
-    -- زوّد الـ RunID عشان الـ thread القديم يتوقف فورًا
     CandyFarm.ActiveRunID = CandyFarm.ActiveRunID + 1
     local currentRunID = CandyFarm.ActiveRunID
-    
-    -- إيقاف الـ Monitor
-    if CandyFarm.Monitor then
-        pcall(function() CandyFarm.Monitor:Disconnect() end)
-        CandyFarm.Monitor = nil
+
+    if CandyFarm.Monitor then pcall(function() CandyFarm.Monitor:Disconnect() end); CandyFarm.Monitor = nil end
+    if CandyFarm.CharConn then pcall(function() CandyFarm.CharConn:Disconnect() end); CandyFarm.CharConn = nil end
+    if CandyFarm.DeathConn then pcall(function() CandyFarm.DeathConn:Disconnect() end); CandyFarm.DeathConn = nil end
+
+    if _G.UpdateFloatButton then _G.UpdateFloatButton(state) end
+    if CandyFarm.UI_Toggle and CandyFarm.UI_Toggle.Set then
+        pcall(function() CandyFarm.UI_Toggle:Set(state) end)
     end
-    
-    -- تحديث الزر العائم
-    UpdateFloatButton(state)
-    
+
     if not state then
         showNotification("Farm", "Candy Farm Stopped", false)
-        CandyFarm.Thread = nil
         return
     end
-    
-    -- بدء التشغيل
+
     CandyFarm.Collected = 0
     showNotification("Farm", "Candy Farm Started", true)
-    
-    -- Live Monitor
-    CandyFarm.Monitor = workspace.DescendantAdded:Connect(function(obj)
-        if CandyFarm.ActiveRunID ~= currentRunID then return end
-        if not CandyFarm.Running then return end
-        if obj:IsA("BasePart") or obj:IsA("MeshPart") then
-            local n = string.lower(obj.Name)
-            if string.find(n, "candy") or string.find(n, "corn") or string.find(n, "sweet") then
-                task.spawn(function()
-                    if CandyFarm.ActiveRunID ~= currentRunID then return end
-                    local char = LocalPlayer.Character
-                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                    if hrp and obj:IsDescendantOf(workspace) and CandyFarm.Running then
-                        pcall(function()
-                            obj.CFrame = hrp.CFrame
-                            CandyFarm.Collected = CandyFarm.Collected + 1
-                        end)
-                    end
-                end)
-            end
+
+    local function attachCharWatcher(char)
+        if not char then return end
+        if CandyFarm.DeathConn then pcall(function() CandyFarm.DeathConn:Disconnect() end) end
+        local hum = char:FindFirstChildOfClass("Humanoid")
+        if hum then
+            CandyFarm.DeathConn = hum.Died:Connect(function()
+                if CandyFarm.Running then
+                    showNotification("Farm", "⚠️ Died! Farm continues after respawn", false)
+                end
+            end)
+        end
+    end
+
+    attachCharWatcher(LocalPlayer.Character)
+    CandyFarm.CharConn = LocalPlayer.CharacterAdded:Connect(function(newChar)
+        if CandyFarm.Running then
+            attachCharWatcher(newChar)
+            showNotification("Farm", "Respawned! Farm continues", true)
         end
     end)
-    
-    -- الحلقة الرئيسية
-    CandyFarm.Thread = task.spawn(function()
-        while CandyFarm.ActiveRunID == currentRunID and CandyFarm.Running do
-            local char = LocalPlayer.Character
-            local hrp = char and char:FindFirstChild("HumanoidRootPart")
-            
-            if hrp then
-                local candies = GetCandyList()
-                CandyFarm.LastCount = #candies
-                
-                if #candies > 0 then
-                    for _, candy in ipairs(candies) do
-                        if CandyFarm.ActiveRunID ~= currentRunID or not CandyFarm.Running then break end
-                        if candy and candy.Parent then
-                            pcall(function()
-                                candy.CFrame = hrp.CFrame
-                                CandyFarm.Collected = CandyFarm.Collected + 1
-                            end)
-                            task.wait(0.01)
-                        end
-                    end
-                    task.wait(0.2)
-                else
-                    task.wait(0.5)
-                    if Settings.ServerHopper and CandyFarm.Running and CandyFarm.ActiveRunID == currentRunID then
-                        task.wait(3)
-                        if CandyFarm.Running and CandyFarm.ActiveRunID == currentRunID and #GetCandyList() == 0 then
-                            showNotification("Hopper", "No Candy! Hopping...", true)
-                            HopToNewServer()
-                            break
-                        end
+
+    CandyFarm.Monitor = workspace.DescendantAdded:Connect(function(obj)
+        if CandyFarm.ActiveRunID ~= currentRunID or not CandyFarm.Running then return end
+        pcall(function()
+            if obj:IsA("BasePart") or obj:IsA("MeshPart") then
+                local n = string.lower(obj.Name)
+                if string.find(n, "candy") or string.find(n, "corn") or string.find(n, "sweet") then
+                    local char = LocalPlayer.Character
+                    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                    if hrp and obj:IsDescendantOf(workspace) then
+                        obj.CFrame = hrp.CFrame
+                        CandyFarm.Collected = CandyFarm.Collected + 1
                     end
                 end
-            else
-                task.wait(0.5)
             end
+        end)
+    end)
+
+    CandyFarm.Thread = task.spawn(function()
+        while true do
+            if not CandyFarm.Running or CandyFarm.ActiveRunID ~= currentRunID then break end
+            pcall(function()
+                local char = LocalPlayer.Character
+                if not char then return end
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                if not hrp then return end
+
+                local candies = GetCandyList()
+                CandyFarm.LastCount = #candies
+
+                for _, candy in ipairs(candies) do
+                    if not CandyFarm.Running or CandyFarm.ActiveRunID ~= currentRunID then break end
+                    if candy and candy.Parent then
+                        candy.CFrame = hrp.CFrame
+                        CandyFarm.Collected = CandyFarm.Collected + 1
+                        task.wait(0.02)
+                    end
+                end
+            end)
+            task.wait(0.3)
         end
     end)
 end
 
 -- ============================================================
--- 🍬 8. FLOATING BUTTON
+-- 🍬 8. FLOATING BUTTON (Fixed - No Double Trigger)
 -- ============================================================
 local FloatGui = Instance.new("ScreenGui")
 FloatGui.Name = "CandyFarmFloat"
@@ -706,6 +694,7 @@ FloatBtn.Font = Enum.Font.GothamBold
 FloatBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 FloatBtn.BorderSizePixel = 0
 FloatBtn.AutoButtonColor = false
+FloatBtn.Active = false -- منع التفعيل التلقائي
 FloatBtn.Parent = FloatGui
 
 local FloatCorner = Instance.new("UICorner")
@@ -727,31 +716,40 @@ FloatLabel.Font = Enum.Font.GothamBold
 FloatLabel.TextSize = 10
 FloatLabel.Parent = FloatBtn
 
--- ربط الزر العائم بالـ UpdateFloatButton
-candyFloatBtn = {Button = FloatBtn, Stroke = FloatStroke, Label = FloatLabel}
+_G.UpdateFloatButton = function(state)
+    if state then
+        TweenService:Create(FloatBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(50, 220, 130)}):Play()
+        TweenService:Create(FloatStroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(100, 255, 180)}):Play()
+        FloatLabel.Text = "ON"
+    else
+        TweenService:Create(FloatBtn, TweenInfo.new(0.2), {BackgroundColor3 = Color3.fromRGB(255, 140, 0)}):Play()
+        TweenService:Create(FloatStroke, TweenInfo.new(0.2), {Color = Color3.fromRGB(255, 200, 60)}):Play()
+        FloatLabel.Text = "FARM"
+    end
+end
 
+local dragStartPos = nil
+local btnStartPos = nil
 local isDragging = false
-local dragStartPos
-local btnStartPos
+local touchConsumed = false
 
 FloatBtn.InputBegan:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragStartPos = input.Position
         btnStartPos = FloatBtn.Position
         isDragging = false
+        touchConsumed = false
     end
 end)
 
 UserInputService.InputChanged:Connect(function(input)
-    if (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) and dragStartPos then
+    if dragStartPos and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
         local delta = input.Position - dragStartPos
-        if delta.Magnitude > 5 then
+        if delta.Magnitude > 8 then
             isDragging = true
             FloatBtn.Position = UDim2.new(
-                btnStartPos.X.Scale,
-                btnStartPos.X.Offset + delta.X,
-                btnStartPos.Y.Scale,
-                btnStartPos.Y.Offset + delta.Y
+                btnStartPos.X.Scale, btnStartPos.X.Offset + delta.X,
+                btnStartPos.Y.Scale, btnStartPos.Y.Offset + delta.Y
             )
         end
     end
@@ -759,11 +757,15 @@ end)
 
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        task.delay(0.05, function()
-            if not isDragging then
+        if dragStartPos and not isDragging and not touchConsumed then
+            touchConsumed = true
+            -- ⚠️ مايشتغلش لو _G.CandyFarmReady = false
+            if _G.CandyFarmReady then
                 ToggleCandyFarm(not CandyFarm.Running)
+            else
+                showNotification("Farm", "Please wait 3 seconds after script load", false)
             end
-        end)
+        end
         dragStartPos = nil
         isDragging = false
     end
@@ -861,7 +863,7 @@ function ToggleESP(state)
             end
         end)
 
-        showNotification("Visuals", "ESP Auto-Detect On", true)
+        showNotification("Visuals", "ESP On", true)
     else
         for _, data in pairs(activeESP) do
             pcall(function()
@@ -994,7 +996,7 @@ function ToggleAntiHoney(state)
                 end
             end
         end)
-        showNotification("Anti Honey", "Honey Removed", true)
+        showNotification("Anti Honey", "On", true)
     else showNotification("Anti Honey", "Off", false) end
 end
 
@@ -1016,7 +1018,7 @@ function ToggleAntiIce(state)
                 end
             end
         end)
-        showNotification("Anti Ice", "Ice Removed", true)
+        showNotification("Anti Ice", "On", true)
     else showNotification("Anti Ice", "Off", false) end
 end
 
@@ -1034,7 +1036,7 @@ function ToggleAntiMail(state)
                 end
             end
         end)
-        showNotification("Anti Mail", "Mail Removed", true)
+        showNotification("Anti Mail", "On", true)
     else showNotification("Anti Mail", "Off", false) end
 end
 
@@ -1052,7 +1054,7 @@ function ToggleAntiMR(state)
                 end
             end
         end)
-        showNotification("Anti MR", "MR Removed", true)
+        showNotification("Anti MR", "On", true)
     else showNotification("Anti MR", "Off", false) end
 end
 
@@ -1070,7 +1072,7 @@ function ToggleAntiMitten(state)
                 end
             end
         end)
-        showNotification("Anti Mitten", "Mitten Removed", true)
+        showNotification("Anti Mitten", "On", true)
     else showNotification("Anti Mitten", "Off", false) end
 end
 
@@ -1088,7 +1090,7 @@ function ToggleAntiSquid(state)
                 end
             end
         end)
-        showNotification("Anti Squid", "Squid Removed", true)
+        showNotification("Anti Squid", "On", true)
     else showNotification("Anti Squid", "Off", false) end
 end
 
@@ -1124,8 +1126,6 @@ end
 -- ============================================================
 -- 🎨 12. الواجهة (WindUI)
 -- ============================================================
-local candyToggleUI = nil  -- مرجع للـ Toggle في الـ UI
-
 function LoadMainGUI()
     local success, err = pcall(function()
         local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
@@ -1134,7 +1134,7 @@ function LoadMainGUI()
         -- ⚔️ Combat
         local CombatTab = Window:Tab({ Title = "Combat", Icon = "crosshair" })
         CombatTab:Button({ Title = "🔄 Refresh Glove", Callback = function() CapturedRemote = nil; RemoteFormat = "None"; showNotification("System", "Glove Reset", true) end })
-        CombatTab:Toggle({ Title = "Auto Slap", Value = true, Callback = function(s) Settings.AuraEnabled = s end })
+        CombatTab:Toggle({ Title = "Auto Slap", Value = false, Callback = function(s) Settings.AuraEnabled = s end })
         CombatTab:Slider({ Title = "Aura Range", Value = { Min = 5, Max = 50, Default = 15 }, Callback = function(v) Settings.Range = v end })
         CombatTab:Slider({ Title = "Aura Max Hits/sec", Value = { Min = 1, Max = 20, Default = 5 }, Callback = function(v) Settings.AuraMaxHits = v end })
         CombatTab:Toggle({ Title = "Auto Aim", Value = false, Callback = function(s) ToggleAutoAim(s) end })
@@ -1152,10 +1152,15 @@ function LoadMainGUI()
 
         -- 🍬 Farm
         local FarmTab = Window:Tab({ Title = "Farm", Icon = "leaf" })
-        candyToggleUI = FarmTab:Toggle({ Title = "🍬 Candy Farm V4", Value = false, Callback = function(s)
-            ToggleCandyFarm(s)
+        local farmToggle = FarmTab:Toggle({ Title = "🍬 Candy Farm V5", Value = false, Callback = function(s)
+            if not _G.CandyFarmReady then return end
+            if CandyFarm.Running ~= s then
+                ToggleCandyFarm(s)
+            end
         end })
-        FarmTab:Toggle({ Title = "Auto Server Hop (When Empty)", Value = false, Callback = function(s) Settings.ServerHopper = s end })
+        CandyFarm.UI_Toggle = farmToggle
+
+        FarmTab:Toggle({ Title = "⚠️ Auto Server Hop (Off by default)", Value = false, Callback = function(s) Settings.ServerHopper = s end })
         FarmTab:Button({ Title = "🚀 Hop Now", Callback = function() HopToNewServer() end })
         FarmTab:Paragraph({ Title = "Candy Stats", Desc = "Collected: 0 | Folder: None" })
 
@@ -1216,7 +1221,7 @@ function LoadMainGUI()
             end
         end })
         SetTab:Button({ Title = "📊 Candy Farm Status", Callback = function()
-            local msg = "Running: "..tostring(CandyFarm.Running).." | Collected: "..CandyFarm.Collected.." | Folder: "..(CandyFarm.FolderFound and CandyFarm.FolderName or "None").." | Found: "..CandyFarm.LastCount
+            local msg = "Running: "..tostring(CandyFarm.Running).." | Collected: "..CandyFarm.Collected.." | Folder: "..(CandyFarm.FolderFound and CandyFarm.FolderName or "None").." | Found: "..CandyFarm.LastCount.." | Ready: "..tostring(_G.CandyFarmReady)
             showNotification("Farm Status", msg, CandyFarm.Collected > 0)
         end })
         SetTab:Button({ Title = "❌ Unload", Callback = function()
@@ -1225,6 +1230,8 @@ function LoadMainGUI()
             if CandyFarm.Monitor then pcall(function() CandyFarm.Monitor:Disconnect() end) end
             for _, c in pairs(Connections) do pcall(function() c:Disconnect() end) end
             for _, c in pairs(espConnections) do pcall(function() c:Disconnect() end) end
+            _G.SlapAuraAlreadyRunning = false
+            _G.CandyFarmReady = false
             HUD:Destroy(); FloatGui:Destroy(); Window:Destroy()
         end })
 
@@ -1243,9 +1250,17 @@ function LoadMainGUI()
         warn("[Slap Aura] GUI Error: " .. tostring(err))
         showNotification("GUI Error", "WindUI Failed to Load", false)
     else
-        showNotification("Slap Aura", "V59 Candy V4 Loaded!", true)
+        showNotification("Slap Aura", "V59 Loaded - All OFF by default", true)
     end
 end
 
 LoadMainGUI()
-print("✅ [Slap Aura] V59 Candy Farm V4 (Full Control) Ready!")
+
+-- ⚠️ Grace Period: السماح بتشغيل الكاندي فارم بعد 3 ثواني
+task.delay(3, function()
+    _G.CandyFarmReady = true
+    print("✅ [Slap Aura] Candy Farm is now ready (manual toggle only)")
+    showNotification("Slap Aura", "Candy Farm ready! Press to start", true)
+end)
+
+print("✅ [Slap Aura] V59 Candy Farm V5 (Manual Control) Ready!")
