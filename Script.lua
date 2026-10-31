@@ -1,16 +1,16 @@
 --[[
 ============================================================
-👑 SLAP AURA HUB | V59 | Ultimate Final (Complete)
+👑 SLAP AURA HUB | V59 | Ultimate Final
 ============================================================
 Features:
 - Loading Screen
-- Ghost Protocol V9 (Crash-Fixed)
+- Ghost Protocol V9 (ORIGINAL - as you had it)
 - ESP PRO (Glove Detection + Danger Levels)
 - Auto Avoid
 - Any-Part Aura
 - Candy Farm V5 (Manual Control)
 - Floating Button
-- Server Hopper (Integrated into GUI)
+- Server Hopper (Integrated in Farm tab)
 - All Antis
 ============================================================
 ]]
@@ -186,66 +186,64 @@ task.wait(0.7)
 LoadingGui:Destroy()
 
 -- ============================================================
--- 🛑 GHOST PROTOCOL V9 (Crash-Fixed)
+-- 🛑 GHOST PROTOCOL V9 (ORIGINAL - كما كان)
 -- ============================================================
 local CapturedRemote = nil
 local RemoteFormat = "None"
 
-local hasHooks = pcall(function()
-    return hookmetamethod and getrawmetatable and setreadonly and newcclosure
+pcall(function()
+    local mt = getrawmetatable(game)
+    local oldIndex = mt.__index
+    local oldNewIndex = mt.__newindex
+    setreadonly(mt, false)
+
+    mt.__index = newcclosure(function(t, k)
+        -- تمويه السرعة والجامب
+        if (k == "WalkSpeed" or k == "JumpPower") and t:IsA("Humanoid") and t.Parent == LocalPlayer.Character then
+            return k == "WalkSpeed" and 16 or 50
+        end
+        -- تمويه السرعة الفيزيائية (عشان الطيران والكاندي فارم)
+        if (k == "AssemblyLinearVelocity" or k == "Velocity") and t.Parent == LocalPlayer.Character then
+            local realVel = oldIndex(t, k)
+            if type(realVel) == "Vector3" and realVel.Magnitude > 35 then
+                return realVel.Unit * 15 
+            end
+        end
+        return oldIndex(t, k)
+    end)
+
+    mt.__newindex = newcclosure(function(t, k, v)
+        if (k == "WalkSpeed" or k == "JumpPower") and t:IsA("Humanoid") and t.Parent == LocalPlayer.Character then
+            return 
+        end
+        return oldNewIndex(t, k, v)
+    end)
+    setreadonly(mt, true)
 end)
 
-if hasHooks then
-    pcall(function()
-        local mt = getrawmetatable(game)
-        local oldIndex = mt.__index
-        setreadonly(mt, false)
-        mt.__index = newcclosure(function(t, k)
-            if checkcaller and checkcaller() then return oldIndex(t, k) end
-            if typeof(t) == "Instance" and t.ClassName == "Humanoid" and t.Parent == LocalPlayer.Character then
-                if k == "WalkSpeed" then return 16 end
-                if k == "JumpPower" then return 50 end
-            end
-            if typeof(t) == "Instance" and t.Parent == LocalPlayer.Character and (k == "AssemblyLinearVelocity" or k == "Velocity") then
-                local ok, realVel = pcall(function() return oldIndex(t, k) end)
-                if ok and typeof(realVel) == "Vector3" and realVel.Magnitude > 35 then
-                    return realVel.Unit * 15
-                end
-            end
-            return oldIndex(t, k)
-        end)
-        setreadonly(mt, true)
-    end)
+local oldNamecall
+oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+    local method = getnamecallmethod()
+    if method == "Kick" and self == LocalPlayer then return end
+    
+    if method == "FireServer" then
+        local remoteName = string.lower(self.Name)
+        local badRemotes = {"ban", "kick", "admingui", "walkspeedchanged", "anticheat", "detect", "report", "speedcheck", "flag"}
+        for _, bad in ipairs(badRemotes) do
+            if string.find(remoteName, bad) then return end
+        end
 
-    local oldNamecall
-    pcall(function()
-        oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-            if checkcaller and checkcaller() then return oldNamecall(self, ...) end
-            local method = getnamecallmethod()
-            if method == "Kick" and self == LocalPlayer then return end
-            if method == "FireServer" then
-                local ok, remoteName = pcall(function() return string.lower(self.Name) end)
-                if ok and remoteName then
-                    local badRemotes = {"ban", "kick", "anticheat", "detect", "report", "speedcheck", "flag"}
-                    for _, bad in ipairs(badRemotes) do
-                        if string.find(remoteName, bad) then return end
-                    end
-                end
-                local args = {...}
-                if #args > 0 then
-                    pcall(function()
-                        if type(args[1]) == "table" and args[1]["victim"] then
-                            if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Table" end
-                        elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart" or args[1]:IsA("BasePart")) then
-                            if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Instance" end
-                        end
-                    end)
-                end
+        local args = {...}
+        if #args > 0 then
+            if type(args[1]) == "table" and args[1]["victim"] then
+                if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Table" end
+            elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart") then
+                if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Instance" end
             end
-            return oldNamecall(self, ...)
-        end))
-    end)
-end
+        end
+    end
+    return oldNamecall(self, ...)
+end)
 
 -- ============================================================
 -- ⚙️ SETTINGS
@@ -1133,7 +1131,6 @@ function LoadMainGUI()
         FarmTab:Toggle({ Title = "Auto Server Hop (When Empty)", Value = false, Callback = function(s) Settings.ServerHopper = s end })
         FarmTab:Paragraph({ Title = "Candy Stats", Desc = "Collected: 0 | Folder: None" })
 
-        -- 🚀 Server Hopper Section (NEW)
         FarmTab:Section({ Title = "🚀 Server Hopper" })
         FarmTab:Button({ Title = "🔍 Find & Join New Server", Callback = function() HopToNewServer() end })
         FarmTab:Button({ Title = "⚡ Quick Teleport (Random)", Callback = function() QuickTeleport() end })
@@ -1248,4 +1245,3 @@ task.delay(3, function()
 end)
 
 print("✅ [Slap Aura] V59 Ultimate Final Ready!")
-print("🚀 Server Hopper integrated in Farm tab")
