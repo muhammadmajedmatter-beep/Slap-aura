@@ -1,7 +1,7 @@
 -- ============================================================
--- 👑 SLAP AURA HUB | V55 | The Absolute God Edition
+-- 👑 SLAP AURA HUB | V59 | The Absolute Omega (Restored & Safe)
 -- ============================================================
-print("🚀 [Slap Aura] Booting Absolute God Engine...")
+print("🚀 [Slap Aura] Booting V59 Absolute Omega...")
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -13,7 +13,7 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local Camera = workspace.CurrentCamera
 
 -- ============================================================
--- 🛡️ 1. GHOST PROTOCOL (Anti-Cheat Bypass)
+-- 🛑 1. GHOST PROTOCOL V9 (Anti-Cheat Bypass & Spoofing)
 -- ============================================================
 local CapturedRemote = nil
 local RemoteFormat = "None"
@@ -25,13 +25,15 @@ pcall(function()
     setreadonly(mt, false)
 
     mt.__index = newcclosure(function(t, k)
+        -- تمويه السرعة والجامب
         if (k == "WalkSpeed" or k == "JumpPower") and t:IsA("Humanoid") and t.Parent == LocalPlayer.Character then
             return k == "WalkSpeed" and 16 or 50
         end
-        if k == "AssemblyLinearVelocity" and t.Parent == LocalPlayer.Character then
+        -- تمويه السرعة الفيزيائية (عشان الطيران والكاندي فارم)
+        if (k == "AssemblyLinearVelocity" or k == "Velocity") and t.Parent == LocalPlayer.Character then
             local realVel = oldIndex(t, k)
-            if realVel.Magnitude > 40 then
-                return Vector3.new(realVel.X / 2, realVel.Y / 2, realVel.Z / 2)
+            if type(realVel) == "Vector3" and realVel.Magnitude > 35 then
+                return realVel.Unit * 15 
             end
         end
         return oldIndex(t, k)
@@ -71,454 +73,330 @@ oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
 end)
 
 -- ============================================================
--- ⚙️ 2. الإعدادات الشاملة (Settings)
+-- ⚙️ 2. الإعدادات والمتغيرات
 -- ============================================================
 local Settings = { 
-    AuraEnabled = true, Range = 15, MaxHitsPerSecond = 3, 
-    FlySpeed = 50, Noclip = false, AntiVoid = false, 
-    Godmode = true, AntiRagdoll = true, AntiKnockback = true, 
-    WalkSpeed = 16, JumpPower = 50, 
-    Fullbright = false, ESP = false, CandyFarm = false,
-    PremiumSpeed = 35, AuraMaxHits = 6, 
-    AntiBlind = true, AntiIce = true, AntiHoney = true,
-    AntiFling = true, AuraRagdollCheck = true,
-    AutoEquip = false, InstantAbility = false,
-    HitboxExpander = false, RemoveCooldown = false,
-    InfiniteJump = false, SmartAntiVoid = false,
-    FOVCheck = false, LookAt = false,
-    AutoDodge = false, AutoFarmPlayers = false,
-    IgnoredGloves = {"Counter", "Reverse", "Overkill", "Error", "God's Hand", "Killstreak"}
+    AuraEnabled = true, Range = 15, AuraMaxHits = 5, 
+    FlySpeed = 50, Noclip = false, Godmode = true, 
+    PremiumSpeed = 35, ESP = false, AutoAim = false, 
+    HitboxExpander = false, GravityControl = false, FPSBooster = false,
+    CandyFarm = false, ServerHopper = false
 }
-
-local CurrentGloveIcon = "rbxassetid://15315284749"
+local HitCount = 0
+local Connections = {}
 
 -- ============================================================
--- 🔔 3. نظام الإشعارات (Notifications System)
+-- 🔔 3. شاشة الـ HUD (رجعت تاني)
+-- ============================================================
+local HUD = Instance.new("ScreenGui")
+HUD.Name = "SlapAuraHUD"; HUD.ResetOnSpawn = false; HUD.DisplayOrder = 9998; HUD.Parent = PlayerGui
+local HUDFrame = Instance.new("Frame"); HUDFrame.Size = UDim2.new(0, 220, 0, 40); HUDFrame.Position = UDim2.new(0, 20, 0.1, 0); HUDFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20); HUDFrame.BackgroundTransparency = 0.2; HUDFrame.BorderSizePixel = 0; HUDFrame.Parent = HUD
+local HUDCorner = Instance.new("UICorner"); HUDCorner.CornerRadius = UDim.new(0, 6); HUDCorner.Parent = HUDFrame
+local HUDStroke = Instance.new("UIStroke"); HUDStroke.Color = Color3.fromRGB(255, 140, 0); HUDStroke.Thickness = 1.5; HUDStroke.Parent = HUDFrame
+local HUDText = Instance.new("TextLabel"); HUDText.Size = UDim2.new(1, -10, 1, 0); HUDText.Position = UDim2.new(0, 5, 0, 0); HUDText.BackgroundTransparency = 1; HUDText.Text = "🎃 Slap Aura: WAITING"; HUDText.TextColor3 = Color3.fromRGB(255, 255, 255); HUDText.Font = Enum.Font.GothamBold; HUDText.TextSize = 14; HUDText.Parent = HUDFrame
+
+-- ============================================================
+-- 🔔 4. نظام الإشعارات
 -- ============================================================
 local function showNotification(title, text, isSuccess)
-    local notifGui = Instance.new("ScreenGui")
-    notifGui.Name = "SlapAuraNotifs"; notifGui.ResetOnSpawn = false; notifGui.DisplayOrder = 99999
-    pcall(function() notifGui.Parent = game:GetService("CoreGui") end)
-    if not notifGui.Parent then notifGui.Parent = PlayerGui end
-
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.fromOffset(280, 60); frame.Position = UDim2.new(1, 20, 0, 20)
-    frame.BackgroundColor3 = Color3.fromRGB(20, 20, 25); frame.BorderSizePixel = 0; frame.Parent = notifGui
-    
+    local notifGui = Instance.new("ScreenGui"); notifGui.Name = "SlapNotifs"; notifGui.ResetOnSpawn = false; notifGui.DisplayOrder = 99999; pcall(function() notifGui.Parent = game:GetService("CoreGui") end); if not notifGui.Parent then notifGui.Parent = PlayerGui end
+    local frame = Instance.new("Frame"); frame.Size = UDim2.fromOffset(280, 60); frame.Position = UDim2.new(1, 20, 0, 20); frame.BackgroundColor3 = Color3.fromRGB(20, 20, 25); frame.BorderSizePixel = 0; frame.Parent = notifGui
     local corner = Instance.new("UICorner"); corner.CornerRadius = UDim.new(0, 8); corner.Parent = frame
     local stroke = Instance.new("UIStroke"); stroke.Color = isSuccess and Color3.fromRGB(50, 220, 130) or Color3.fromRGB(255, 80, 80); stroke.Thickness = 1.5; stroke.Parent = frame
-    
     local icon = Instance.new("TextLabel"); icon.Size = UDim2.fromOffset(30, 30); icon.Position = UDim2.fromOffset(10, 15); icon.BackgroundTransparency = 1; icon.Text = isSuccess and "✅" or "⚠️"; icon.TextSize = 20; icon.Parent = frame
     local titleLbl = Instance.new("TextLabel"); titleLbl.Size = UDim2.new(1, -50, 0, 20); titleLbl.Position = UDim2.fromOffset(45, 10); titleLbl.BackgroundTransparency = 1; titleLbl.Text = title; titleLbl.TextColor3 = Color3.fromRGB(255,255,255); titleLbl.Font = Enum.Font.GothamBold; titleLbl.TextSize = 14; titleLbl.TextXAlignment = Enum.TextXAlignment.Left; titleLbl.Parent = frame
     local descLbl = Instance.new("TextLabel"); descLbl.Size = UDim2.new(1, -50, 0, 25); descLbl.Position = UDim2.fromOffset(45, 30); descLbl.BackgroundTransparency = 1; descLbl.Text = text; descLbl.TextColor3 = Color3.fromRGB(160, 160, 170); descLbl.Font = Enum.Font.Gotham; descLbl.TextSize = 12; descLbl.TextWrapped = true; descLbl.TextXAlignment = Enum.TextXAlignment.Left; descLbl.Parent = frame
-
     TweenService:Create(frame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(1, -300, 0, 20)}):Play()
-    task.delay(3, function()
-        TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Position = UDim2.new(1, 20, 0, 20)}):Play()
-        task.wait(0.3); notifGui:Destroy()
-    end)
+    task.delay(3, function() TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Position = UDim2.new(1, 20, 0, 20)}):Play(); task.wait(0.3); notifGui:Destroy() end)
 end
 
 -- ============================================================
--- 💎 4. المحركات الأساسية (Core Engines)
+-- 💎 5. المحركات (كل ميزة معزولة)
 -- ============================================================
--- السرعة الآمنة
-local isSpeedEnabled = false
-local SpeedConnection = nil
-function TogglePremiumSpeed(state)
-    isSpeedEnabled = state
+function ToggleSpeed(state)
+    if Connections.Speed then Connections.Speed:Disconnect() end
     if state then
-        if SpeedConnection then SpeedConnection:Disconnect() end
-        SpeedConnection = RunService.Heartbeat:Connect(function()
-            if not isSpeedEnabled then return end
-            local myHum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-            if myHum then myHum.WalkSpeed = Settings.PremiumSpeed end
+        Connections.Speed = RunService.Heartbeat:Connect(function()
+            local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+            if hum then hum.WalkSpeed = Settings.PremiumSpeed end
         end)
-        showNotification("Speed", "Premium Physics Speed Enabled", true)
+        showNotification("Speed", "Premium Speed On", true)
     else
-        if SpeedConnection then SpeedConnection:Disconnect(); SpeedConnection = nil end
-        local myHum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if myHum then myHum.WalkSpeed = 16 end
-        showNotification("Speed", "Premium Physics Speed Disabled", false)
+        local hum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+        if hum then hum.WalkSpeed = 16 end
+        showNotification("Speed", "Premium Speed Off", false)
     end
 end
 
--- كاندي فارم آمن
-local isCandyFarming = false
-function TogglePremiumCandyFarm(state)
-    isCandyFarming = state
+local isFlying = false
+function ToggleFly(state)
+    isFlying = state
+    if Connections.Fly then Connections.Fly:Disconnect() end
     if state then
-        showNotification("Farm", "Safe Candy Farm Enabled", true)
-        task.spawn(function()
-            while isCandyFarming do
+        local char = LocalPlayer.Character; local root = char and char:FindFirstChild("HumanoidRootPart"); local hum = char and char:FindFirstChildOfClass("Humanoid")
+        if root and hum then
+            hum:ChangeState(Enum.HumanoidStateType.Physics)
+            local bv = Instance.new("BodyVelocity", root); bv.Name = "FlyBV"; bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge); bv.Velocity = Vector3.new(0,0,0)
+            local bg = Instance.new("BodyGyro", root); bg.Name = "FlyBG"; bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge); bg.P = 5000; bg.D = 50
+            Connections.Fly = RunService.RenderStepped:Connect(function()
+                if not isFlying or not root or not hum then return end
+                local vel = hum.MoveDirection * Settings.FlySpeed
+                if Camera.CFrame.LookVector.Y > 0.4 then vel = vel + Vector3.new(0, Settings.FlySpeed, 0) elseif Camera.CFrame.LookVector.Y < -0.4 then vel = vel - Vector3.new(0, Settings.FlySpeed, 0) end
+                bv.Velocity = vel; bg.CFrame = Camera.CFrame
+            end)
+            showNotification("Fly", "Fly On", true)
+        end
+    else
+        local char = LocalPlayer.Character
+        if char then
+            local root = char:FindFirstChild("HumanoidRootPart"); local hum = char:FindFirstChildOfClass("Humanoid")
+            if hum then hum:ChangeState(Enum.HumanoidStateType.GettingUp) end
+            if root then local bv = root:FindFirstChild("FlyBV"); local bg = root:FindFirstChild("FlyBG"); if bv then bv:Destroy() end; if bg then bg:Destroy() end end
+        end
+        showNotification("Fly", "Fly Off", false)
+    end
+end
+
+function ToggleGravity(state)
+    if Connections.Gravity then Connections.Gravity:Disconnect() end
+    if state then
+        Connections.Gravity = RunService.Heartbeat:Connect(function()
+            local char = LocalPlayer.Character
+            if char and char:FindFirstChild("HumanoidRootPart") then char.HumanoidRootPart.CustomPhysicalProperties = PhysicalProperties.new(0.01, 0.01, 0.01, 0, 0) end
+        end)
+        showNotification("Physics", "Zero Gravity On", true)
+    else
+        local char = LocalPlayer.Character
+        if char and char:FindFirstChild("HumanoidRootPart") then char.HumanoidRootPart.CustomPhysicalProperties = nil end
+        showNotification("Physics", "Zero Gravity Off", false)
+    end
+end
+
+function ToggleAutoAim(state)
+    if Connections.Aim then Connections.Aim:Disconnect() end
+    if state then
+        Connections.Aim = RunService.RenderStepped:Connect(function()
+            local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if root then
+                local closest, dist = nil, 200
+                for _, p in ipairs(Players:GetPlayers()) do
+                    if p ~= LocalPlayer and p.Character then
+                        local r = p.Character:FindFirstChild("HumanoidRootPart")
+                        if r and (root.Position - r.Position).Magnitude < dist then dist = (root.Position - r.Position).Magnitude; closest = r end
+                    end
+                end
+                if closest then Camera.CFrame = CFrame.new(Camera.CFrame.Position, closest.Position) end
+            end
+        end)
+        showNotification("Combat", "Auto Aim On", true)
+    end
+end
+
+function ToggleHitbox(state)
+    if Connections.Hitbox then Connections.Hitbox:Disconnect() end
+    if state then
+        Connections.Hitbox = RunService.Heartbeat:Connect(function()
+            local tool = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Tool")
+            if tool and tool:FindFirstChild("Handle") then tool.Handle.Size = Vector3.new(5, 5, 5); tool.Handle.Transparency = 0.5 end
+        end)
+        showNotification("Combat", "Hitbox Expander On", true)
+    end
+end
+
+function ToggleFPS(state)
+    if state then
+        for _, v in ipairs(workspace:GetDescendants()) do
+            if v:IsA("ParticleEmitter") or v:IsA("Trail") or v:IsA("Smoke") or v:IsA("Fire") then pcall(function() v.Enabled = false end) end
+        end
+        showNotification("Perf", "FPS Boosted", true)
+    end
+end
+
+-- ============================================================
+-- 🍬 6. كاندي كورن فارم + سيرفر هوبر (المحرك الآمن)
+-- ============================================================
+local function ToggleCandyFarm(state)
+    Settings.CandyFarm = state
+    if Connections.Candy then Connections.Candy:Disconnect() end
+    
+    if state then
+        showNotification("Farm", "Corn Farm Started", true)
+        Connections.Candy = task.spawn(function()
+            while Settings.CandyFarm do
                 local char = LocalPlayer.Character
                 local hrp = char and char:FindFirstChild("HumanoidRootPart")
+                local foundCorn = false
+                
                 if hrp then
                     for _, obj in pairs(workspace:GetDescendants()) do
-                        if not isCandyFarming then break end
+                        if not Settings.CandyFarm then break end
                         local name = string.lower(obj.Name)
+                        -- بندور على كلمة corn أو candy
                         if obj:IsA("BasePart") and (string.find(name, "corn") or string.find(name, "candy")) then
-                            if (hrp.Position - obj.Position).Magnitude < 35 then
-                                pcall(function()
-                                    firetouchinterest(hrp, obj, 0)
-                                    task.wait(0.01)
-                                    firetouchinterest(hrp, obj, 1)
-                                end)
-                                task.wait(0.05) 
-                            end
+                            foundCorn = true
+                            pcall(function()
+                                -- الطيران للحلوى بسرعة آمنة (Tween) 0.2 ثانية
+                                local tween = TweenService:Create(hrp, TweenInfo.new(0.2, Enum.EasingStyle.Linear), {CFrame = CFrame.new(obj.Position)})
+                                tween:Play()
+                                tween.Completed:Wait()
+                                
+                                -- لمس الحلوى عشان تختفي
+                                firetouchinterest(hrp, obj, 0)
+                                task.wait(0.01)
+                                firetouchinterest(hrp, obj, 1)
+                            end)
+                            task.wait(0.1) -- تأخير بين كل حلوى
                         end
                     end
                 end
-                task.wait(0.1) 
-            end
-        end)
-    else
-        showNotification("Farm", "Safe Candy Farm Disabled", false)
-    end
-end
-
--- سيرفر هوبر
-local isHopping = false
-function ToggleServerHopper(state)
-    isHopping = state
-    if state then
-        showNotification("Hopper", "Server Hopper Enabled", true)
-        task.spawn(function()
-            while isHopping do
-                local char = LocalPlayer.Character
-                local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                if hrp then
-                    local foundCandy = false
-                    for _, obj in pairs(workspace:GetDescendants()) do
-                        if not isHopping then break end
-                        local name = string.lower(obj.Name)
-                        if obj:IsA("BasePart") and (string.find(name, "corn") or string.find(name, "candy")) then
-                            foundCandy = true
-                            pcall(function()
-                                local tween = TweenService:Create(hrp, TweenInfo.new(0.15), {CFrame = CFrame.new(obj.Position)})
-                                tween:Play(); tween.Completed:Wait()
-                                firetouchinterest(hrp, obj, 0); task.wait(0.01); firetouchinterest(hrp, obj, 1)
-                            end)
-                            task.wait(0.1)
-                        end
-                    end
-                    if not foundCandy then
+                
+                -- لو ملقاش حلوى تانية، ينتقل لسيرفر جديد (لو الهوبر شغال)
+                if not foundCorn then
+                    if Settings.ServerHopper then
+                        showNotification("Hopper", "Server Cleared! Hopping...", true)
                         task.wait(2)
-                        if isHopping then
+                        if Settings.CandyFarm then
                             pcall(function() game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer) end)
                             break
                         end
+                    else
+                        task.wait(3) -- استنى شوية يمكن حلوى جديدة تنزل
                     end
                 end
-                task.wait(0.5)
             end
         end)
     else
-        showNotification("Hopper", "Server Hopper Disabled", false)
+        showNotification("Farm", "Corn Farm Stopped", false)
     end
 end
 
--- دالة التصفير
-local function RefreshGlove()
-    CapturedRemote = nil; RemoteFormat = "None"
-    showNotification("System", "Glove Remote Reset! Slap someone.", true)
-end
-
 -- ============================================================
--- 👁️ 5. محرك الـ ESP الاحترافي (Advanced ESP)
+-- 👁️ 7. الـ ESP
 -- ============================================================
 local activeESP = {}
-local function createESP(plr)
-    if plr == LocalPlayer or not plr.Character then return end
-    local char = plr.Character
-    local head = char:FindFirstChild("Head")
-    if not head then return end
-    
-    local highlight = Instance.new("Highlight"); highlight.Name = "SlapESP"; highlight.Adornee = char; highlight.FillColor = Color3.fromRGB(255, 140, 0); highlight.FillTransparency = 0.5; highlight.OutlineColor = Color3.fromRGB(255, 255, 255); highlight.Parent = char
-    local billboard = Instance.new("BillboardGui"); billboard.Name = "SlapESPText"; billboard.Adornee = head; billboard.Size = UDim2.new(0, 200, 0, 50); billboard.StudsOffset = Vector3.new(0, 2.5, 0); billboard.AlwaysOnTop = true; billboard.Parent = head
-    local textLabel = Instance.new("TextLabel"); textLabel.Name = "ESPText"; textLabel.Size = UDim2.new(1, 0, 1, 0); textLabel.BackgroundTransparency = 1; textLabel.TextColor3 = Color3.fromRGB(255, 255, 255); textLabel.TextStrokeTransparency = 0; textLabel.Font = Enum.Font.GothamBold; textLabel.TextSize = 14; textLabel.RichText = true; textLabel.Parent = billboard
-
-    activeESP[plr.Name] = {Highlight = highlight, Billboard = billboard, Warned = false}
-end
-
-local function removeESP(plr)
-    if activeESP[plr.Name] then
-        if activeESP[plr.Name].Highlight then activeESP[plr.Name].Highlight:Destroy() end
-        if activeESP[plr.Name].Billboard then activeESP[plr.Name].Billboard:Destroy() end
-        activeESP[plr.Name] = nil
-    end
-end
-
-local function enableESP()
-    showNotification("ESP", "Advanced ESP Enabled", true)
-    for _, plr in ipairs(Players:GetPlayers()) do if plr ~= LocalPlayer then createESP(plr) end end
-    task.spawn(function()
-        while Settings.ESP do
+function ToggleESP(state)
+    Settings.ESP = state
+    if Connections.ESP then Connections.ESP:Disconnect() end
+    if state then
+        for _, plr in ipairs(Players:GetPlayers()) do
+            if plr ~= LocalPlayer and plr.Character then
+                local head = plr.Character:FindFirstChild("Head")
+                if head then
+                    local hl = Instance.new("Highlight", plr.Character); hl.FillColor = Color3.fromRGB(255, 140, 0); hl.FillTransparency = 0.5
+                    local bb = Instance.new("BillboardGui", head); bb.Size = UDim2.new(0, 200, 0, 50); bb.StudsOffset = Vector3.new(0, 2.5, 0); bb.AlwaysOnTop = true
+                    local txt = Instance.new("TextLabel", bb); txt.Size = UDim2.new(1, 0, 1, 0); txt.BackgroundTransparency = 1; txt.TextColor3 = Color3.fromRGB(255, 255, 255); txt.TextStrokeTransparency = 0; txt.Font = Enum.Font.GothamBold; txt.TextSize = 14; txt.RichText = true
+                    activeESP[plr.Name] = {Highlight = hl, Billboard = bb}
+                end
+            end
+        end
+        Connections.ESP = RunService.Heartbeat:Connect(function()
             for _, plr in ipairs(Players:GetPlayers()) do
                 if plr ~= LocalPlayer and plr.Character then
-                    if not activeESP[plr.Name] then createESP(plr) end
-                    local espData = activeESP[plr.Name]
-                    local myChar = LocalPlayer.Character
-                    if espData and myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                    local data = activeESP[plr.Name]; local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if data and myRoot then
                         local tRoot = plr.Character:FindFirstChild("HumanoidRootPart")
                         if tRoot then
-                            local dist = math.floor((myChar.HumanoidRootPart.Position - tRoot.Position).Magnitude)
-                            local tool = plr.Character:FindFirstChildOfClass("Tool")
-                            local gloveName = tool and tool.Name or "None"
-                            local nameColor = "#FFFFFF"
-                            local isDanger = false
-                            
-                            for _, bad in ipairs(Settings.IgnoredGloves) do
-                                if string.find(string.lower(gloveName), string.lower(bad)) then 
-                                    nameColor = "#FF3333" 
-                                    isDanger = true
-                                    break 
-                                end
-                            end
-                            
-                            -- إشعار لو اللاعب ماسك قفاز خطير
-                            if isDanger and not espData.Warned then 
-                                showNotification("⚠️ DANGER", plr.DisplayName .. " is holding " .. gloveName .. "!", false)
-                                espData.Warned = true 
-                            elseif not isDanger then 
-                                espData.Warned = false 
-                            end
-
-                            local text = espData.Billboard:FindFirstChild("ESPText")
-                            if text then
-                                text.Text = string.format('<font color="%s">%s</font>\n<font color="#FF8C00">[%s]</font>\n<font color="#AAAAAA">%d studs</font>', nameColor, plr.DisplayName, gloveName, dist)
-                            end
+                            local dist = math.floor((myRoot.Position - tRoot.Position).Magnitude)
+                            local glove = plr.Character:FindFirstChildOfClass("Tool")
+                            local text = data.Billboard:FindFirstChild("TextLabel")
+                            if text then text.Text = string.format('%s\n[%s]\n%d studs', plr.DisplayName, glove and glove.Name or "None", dist) end
                         end
                     end
                 end
             end
-            task.wait(0.1)
-        end
-    end)
-end
-
-local function disableESP()
-    showNotification("ESP", "Advanced ESP Disabled", false)
-    for name, _ in pairs(activeESP) do local p = Players:FindFirstChild(name); if p then removeESP(p) end end
-    activeESP = {}
+        end)
+    else
+        for _, v in pairs(activeESP) do if v.Highlight then v.Highlight:Destroy() end; if v.Billboard then v.Billboard:Destroy() end end
+        activeESP = {}
+    end
 end
 
 -- ============================================================
--- 🥊 6. محرك القتال (Combat Engine)
+-- 🥊 8. الأورا (Auto Slap)
 -- ============================================================
-local function isIgnored(glove)
-    for _, bad in ipairs(Settings.IgnoredGloves) do
-        if string.find(string.lower(glove), string.lower(bad)) then return true end
-    end
-    return false
-end
-
-local lastHitTime, hitsThisSecond, currentSecond = 0, 0, math.floor(tick())
-
-RunService.Stepped:Connect(function()
-    if Settings.AntiVoid and LocalPlayer.Character then
-        local root = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if root and root.Position.Y < -40 then root.CFrame = CFrame.new(0, 50, 0) end
-    end
-    if Settings.Noclip and LocalPlayer.Character then
-        for _, p in ipairs(LocalPlayer.Character:GetDescendants()) do if p:IsA("BasePart") then p.CanCollide = false end end
-    end
-
-    if Settings.AutoDodge and LocalPlayer.Character then
-        local myRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if myRoot then
-            for _, plr in ipairs(Players:GetPlayers()) do
-                if plr ~= LocalPlayer and plr.Character then
-                    local tRoot = plr.Character:FindFirstChild("HumanoidRootPart")
-                    if tRoot and (myRoot.Position - tRoot.Position).Magnitude < 12 then
-                        myRoot.CFrame = myRoot.CFrame + (myRoot.CFrame.LookVector * -15) + Vector3.new(0, 5, 0)
-                    end
-                end
-            end
-        end
-    end
-
+local lastHit, hits, sec = 0, 0, math.floor(tick())
+if Connections.Aura then Connections.Aura:Disconnect() end
+Connections.Aura = RunService.Stepped:Connect(function()
     if not Settings.AuraEnabled or not CapturedRemote then return end
-    local myChar = LocalPlayer.Character; if not myChar then return end
-    local myRoot = myChar:FindFirstChild("HumanoidRootPart"); local myTool = myChar:FindFirstChildOfClass("Tool")
-    if not myRoot or not myTool then return end
+    local char = LocalPlayer.Character; if not char then return end
+    local root = char:FindFirstChild("HumanoidRootPart"); local tool = char:FindFirstChildOfClass("Tool")
+    if not root or not tool then return end
+    local cSec = math.floor(tick()); if cSec ~= sec then sec = cSec; hits = 0 end
+    if hits >= Settings.AuraMaxHits then return end
+    if tick() - lastHit < (1 / Settings.AuraMaxHits) then return end
 
-    local sec = math.floor(tick()); if sec ~= currentSecond then currentSecond = sec; hitsThisSecond = 0 end
-    if hitsThisSecond >= Settings.AuraMaxHits then return end
-    if tick() - lastHitTime < (1 / Settings.AuraMaxHits) then return end
-
-    local closestPlayer, shortestDist = nil, Settings.Range
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr ~= LocalPlayer and plr.Character then
-            local tool = plr.Character:FindFirstChildOfClass("Tool")
-            local gloveName = tool and tool.Name or "None"
-            
-            if not isIgnored(gloveName) then
-                local r = plr.Character:FindFirstChild("HumanoidRootPart"); local h = plr.Character:FindFirstChildOfClass("Humanoid")
-                if r and h and h.Health > 0 then
-                    local isRagdolled = plr.Character:FindFirstChild("Ragdolled") and plr.Character.Ragdolled.Value
-                    if not (Settings.AuraRagdollCheck and isRagdolled) then
-                        local d = (myRoot.Position - r.Position).Magnitude
-                        if d <= shortestDist then shortestDist = d; closestPlayer = plr end
-                    end
-                end
+    local closest, dist = nil, Settings.Range
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local r = p.Character:FindFirstChild("HumanoidRootPart"); local h = p.Character:FindFirstChildOfClass("Humanoid")
+            if r and h and h.Health > 0 and (root.Position - r.Position).Magnitude <= dist then
+                dist = (root.Position - r.Position).Magnitude; closest = p
             end
         end
     end
-
-    if closestPlayer and closestPlayer.Character:FindFirstChild("Head") then
+    if closest and closest.Character:FindFirstChild("Head") then
         pcall(function()
-            if RemoteFormat == "Table" then CapturedRemote:FireServer({["victim"] = closestPlayer.Character.Head, ["attacker"] = LocalPlayer})
-            elseif RemoteFormat == "Instance" then CapturedRemote:FireServer(closestPlayer.Character.Head) end
-            hitsThisSecond = hitsThisSecond + 1; lastHitTime = tick()
+            if RemoteFormat == "Table" then CapturedRemote:FireServer({["victim"] = closest.Character.Head, ["attacker"] = LocalPlayer})
+            else CapturedRemote:FireServer(closest.Character.Head) end
+            hits = hits + 1; lastHit = tick()
+            HitCount = HitCount + 1
+            HUDText.Text = "🎃 Slap Aura: ACTIVE ("..HitCount.." Hits)"
         end)
     end
 end)
 
 -- ============================================================
--- 💡 7. الحمايات المتقدمة (Advanced Antis)
--- ============================================================
-pcall(function()
-    local mt = getrawmetatable(game); local oldIndex = mt.__index; setreadonly(mt, false)
-    mt.__index = newcclosure(function(t, k)
-        if k == "Health" and t == LocalPlayer.Character and t:FindFirstChild("Humanoid") then return math.huge end
-        return oldIndex(t, k)
-    end)
-    setreadonly(mt, true)
-end)
-
-local function setupProtections(char)
-    local myHum = char:WaitForChild("Humanoid")
-    pcall(function()
-        myHum:SetStateEnabled(Enum.HumanoidStateType.Ragdoll, false)
-        myHum:SetStateEnabled(Enum.HumanoidStateType.FallingDown, false)
-        myHum:SetStateEnabled(Enum.HumanoidStateType.Physics, false)
-    end)
-end
-if LocalPlayer.Character then setupProtections(LocalPlayer.Character) end
-LocalPlayer.CharacterAdded:Connect(setupProtections)
-
--- Infinite Jump
-UserInputService.JumpRequest:Connect(function()
-    if Settings.InfiniteJump and LocalPlayer.Character then
-        local hum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if hum then hum:ChangeState(Enum.HumanoidStateType.Jumping) end
-    end
-end)
-
--- Auto Ability & Cooldown
-task.spawn(function()
-    while task.wait(0.1) do
-        if LocalPlayer.Character then
-            local tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
-            if tool then
-                if Settings.AutoAbility then
-                    pcall(function()
-                        if tool:FindFirstChild("Activated") then tool.Activated:Fire() end
-                        if tool:FindFirstChild("Remote") then tool.Remote:FireServer() end
-                    end)
-                end
-                if Settings.RemoveCooldown then
-                    pcall(function() if tool:FindFirstChild("Cooldown") then tool.Cooldown.Value = 0 end end)
-                end
-            end
-        end
-    end
-end)
-
--- Hitbox Expander
-task.spawn(function()
-    while task.wait(1) do
-        if Settings.HitboxExpander and LocalPlayer.Character then
-            local tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
-            if tool and tool:FindFirstChild("Handle") then
-                pcall(function()
-                    tool.Handle.Size = Vector3.new(10, 10, 10)
-                    tool.Handle.Transparency = 0.5
-                end)
-            end
-        end
-    end
-end)
-
--- Advanced Protections Loop
-RunService.Heartbeat:Connect(function()
-    if not LocalPlayer.Character then return end
-    local myHum = LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-    local myRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-    if not myHum or not myRoot then return end
-
-    if Settings.Godmode then myHum.MaxHealth = math.huge; myHum.Health = math.huge end
-    if Settings.AntiRagdoll then if myHum.PlatformStand then myHum.PlatformStand = false end end
-    if Settings.AntiFling or Settings.AntiKnockback then
-        local vel = myRoot.AssemblyLinearVelocity
-        if Vector3.new(vel.X, 0, vel.Z).Magnitude > 45 then myRoot.AssemblyLinearVelocity = Vector3.new(0, vel.Y, 0) end
-    end
-    if Settings.AntiVoid and not Settings.SmartAntiVoid then
-        if myRoot.Position.Y < -40 then myRoot.CFrame = CFrame.new(0, 50, 0) end
-    end
-    if not isFlying and not isSpeedEnabled then myHum.WalkSpeed = Settings.WalkSpeed; myHum.JumpPower = Settings.JumpPower end
-end)
-
--- ============================================================
--- 🎨 8. الواجهة المدمجة (WindUI - God Tier)
+-- 🎨 9. الواجهة (WindUI) + الزرار العايم
 -- ============================================================
 function LoadMainGUI()
     local success, err = pcall(function()
         local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-        
-        WindUI:AddTheme({
-            Name = "GodTier", Accent = WindUI:Gradient({ ["0"] = { Color = Color3.fromHex("#FF0000"), Transparency = 0 }, ["100"] = { Color = Color3.fromHex("#000000"), Transparency = 0 } }, { Rotation = 45 }),
-            Dialog = Color3.fromHex("#1A1A1A"), Outline = Color3.fromHex("#FF0000"), Text = Color3.fromHex("#FFFFFF"), Placeholder = Color3.fromHex("#A0A0A0"), Background = Color3.fromHex("#0D0D0D"), Button = Color3.fromHex("#2A0000"), Icon = Color3.fromHex("#FF0000")
-        })
-        
-        MainWindow = WindUI:CreateWindow({ Title = "Slap Aura | V55", Icon = "skull", Author = "Muhammad Majed", Folder = "SlapAuraV55", Size = UDim2.fromOffset(600, 480), Transparent = true, Theme = "GodTier" })
+        local Window = WindUI:CreateWindow({ Title = "Slap Aura | V59", Icon = "shield", Author = "Majed", Folder = "SlapAuraV59", Size = UDim2.fromOffset(580, 460), Transparent = true, Theme = "Dark" })
 
-        -- Combat Tab
-        local CombatTab = MainWindow:Tab({ Title = "Combat", Icon = "crosshair" })
-        CombatTab:Button({ Title = "🔄 Refresh / Re-learn Glove", Callback = RefreshGlove })
-        CombatTab:Toggle({Title = "Enable Auto Slap", Value = true, Callback = function(state) Settings.AuraEnabled = state; showNotification("Combat", state and "Auto Slap Enabled" or "Auto Slap Disabled", state) end})
-        CombatTab:Slider({Title = "Range", Step = 1, Value = { Min = 1, Max = 50, Default = 15 }, Callback = function(value) Settings.Range = value end})
-        CombatTab:Slider({Title = "Hit Speed", Step = 1, Value = { Min = 1, Max = 10, Default = 6 }, Callback = function(value) Settings.AuraMaxHits = value end})
-        CombatTab:Toggle({Title = "Auto Dodge", Value = false, Callback = function(state) Settings.AutoDodge = state; showNotification("Combat", state and "Auto Dodge Enabled" or "Auto Dodge Disabled", state) end})
-        CombatTab:Toggle({Title = "Auto Ability", Value = false, Callback = function(state) Settings.AutoAbility = state; showNotification("Combat", state and "Auto Ability Enabled" or "Auto Ability Disabled", state) end})
-        CombatTab:Toggle({Title = "Hitbox Expander", Value = false, Callback = function(state) Settings.HitboxExpander = state; showNotification("Combat", state and "Hitbox Expander Enabled" or "Hitbox Expander Disabled", state) end})
-        CombatTab:Toggle({Title = "Remove Slap Cooldown", Value = false, Callback = function(state) Settings.RemoveCooldown = state; showNotification("Combat", state and "Cooldown Remover Enabled" or "Cooldown Remover Disabled", state) end})
-        CombatTab:Input({ Title = "Ignored Gloves", Value = table.concat(Settings.IgnoredGloves, ", "), Callback = function(text) 
-            Settings.IgnoredGloves = {}
-            for word in string.gmatch(text, '([^,]+)') do table.insert(Settings.IgnoredGloves, word:gsub("^%s*(.-)%s*$", "%1")) end
-            showNotification("Combat", "Ignored Gloves Updated", true)
-        end })
+        local CombatTab = Window:Tab({ Title = "Combat", Icon = "crosshair" })
+        CombatTab:Button({ Title = "🔄 Refresh Glove", Callback = function() CapturedRemote = nil; RemoteFormat = "None"; showNotification("System", "Glove Reset", true) end })
+        CombatTab:Toggle({Title = "Enable Auto Slap", Value = true, Callback = function(state) Settings.AuraEnabled = state; showNotification("Combat", state and "Aura On" or "Aura Off", state) end})
+        CombatTab:Slider({Title = "Hit Speed", Step = 1, Value = { Min = 1, Max = 8, Default = 5 }, Callback = function(value) Settings.AuraMaxHits = value end})
+        CombatTab:Toggle({Title = "Instant Kill (Hitbox)", Value = false, Callback = function(state) ToggleHitbox(state) end})
+        CombatTab:Toggle({Title = "Auto Aim", Value = false, Callback = function(state) ToggleAutoAim(state) end})
 
-        -- Movement Tab
-        local MoveTab = MainWindow:Tab({ Title = "Movement", Icon = "wind" })
-        MoveTab:Toggle({ Title = "Fly", Value = false, Callback = function(state) if state then startFly() else stopFly() end; showNotification("Movement", state and "Fly Enabled" or "Fly Disabled", state) end })
-        MoveTab:Slider({ Title = "Fly Speed", Step = 10, Value = { Min = 20, Max = 200, Default = 50 }, Callback = function(value) Settings.FlySpeed = value end })
-        MoveTab:Toggle({ Title = "Noclip", Value = false, Callback = function(state) Settings.Noclip = state; showNotification("Movement", state and "Noclip Enabled" or "Noclip Disabled", state) end })
-        MoveTab:Toggle({ Title = "Infinite Jump", Value = false, Callback = function(state) Settings.InfiniteJump = state; showNotification("Movement", state and "Infinite Jump Enabled" or "Infinite Jump Disabled", state) end })
-        MoveTab:Toggle({ Title = "Premium Speed", Value = false, Callback = function(state) TogglePremiumSpeed(state) end })
-        MoveTab:Slider({ Title = "Speed Value", Step = 1, Value = { Min = 20, Max = 100, Default = 35 }, Callback = function(value) Settings.PremiumSpeed = value end })
+        local MoveTab = Window:Tab({ Title = "Movement", Icon = "wind" })
+        MoveTab:Toggle({ Title = "Fly", Value = false, Callback = function(state) ToggleFly(state) end })
+        MoveTab:Slider({ Title = "Fly Speed", Step = 10, Value = { Min = 20, Max = 100, Default = 50 }, Callback = function(value) Settings.FlySpeed = value end })
+        MoveTab:Toggle({ Title = "Premium Speed", Value = false, Callback = function(state) ToggleSpeed(state) end })
+        MoveTab:Slider({ Title = "Speed Value", Step = 1, Value = { Min = 20, Max = 50, Default = 35 }, Callback = function(value) Settings.PremiumSpeed = value end })
+        MoveTab:Toggle({ Title = "Zero Gravity", Value = false, Callback = function(state) ToggleGravity(state) end })
 
-        -- Visuals Tab
-        local VisualsTab = MainWindow:Tab({ Title = "Visuals", Icon = "eye" })
-        VisualsTab:Toggle({ Title = "Fullbright", Value = false, Callback = function(state) Settings.Fullbright = state; if state then Lighting.Ambient = Color3.fromRGB(255,255,255); Lighting.OutdoorAmbient = Color3.fromRGB(255,255,255) else Lighting.Ambient = Color3.fromRGB(70,70,70); Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128) end; showNotification("Visuals", state and "Fullbright Enabled" or "Fullbright Disabled", state) end })
-        VisualsTab:Toggle({ Title = "Advanced ESP", Value = false, Callback = function(state) Settings.ESP = state; if state then enableESP() else disableESP() end end })
+        local VisualsTab = Window:Tab({ Title = "Visuals", Icon = "eye" })
+        VisualsTab:Toggle({ Title = "Advanced ESP", Value = false, Callback = function(state) ToggleESP(state) end })
+        VisualsTab:Toggle({ Title = "FPS Booster", Value = false, Callback = function(state) ToggleFPS(state) end })
 
-        -- Antis Tab
-        local AntisTab = MainWindow:Tab({ Title = "Antis", Icon = "shield" })
-        AntisTab:Toggle({ Title = "Godmode", Value = true, Callback = function(state) Settings.Godmode = state; showNotification("Antis", state and "Godmode Enabled" or "Godmode Disabled", state) end })
-        AntisTab:Toggle({ Title = "Anti-Void", Value = true, Callback = function(state) Settings.AntiVoid = state; showNotification("Antis", state and "Anti-Void Enabled" or "Anti-Void Disabled", state) end })
-        AntisTab:Toggle({ Title = "Anti-Fling / Knockback", Value = true, Callback = function(state) Settings.AntiFling = state; Settings.AntiKnockback = state; showNotification("Antis", state and "Anti-Fling Enabled" or "Anti-Fling Disabled", state) end })
-        AntisTab:Toggle({ Title = "Anti-Blind / Ice / Honey", Value = true, Callback = function(state) Settings.AntiBlind = state; Settings.AntiIce = state; Settings.AntiHoney = state; showNotification("Antis", state and "Anti-Effects Enabled" or "Anti-Effects Disabled", state) end })
-
-        -- Farms Tab
-        local FarmsTab = MainWindow:Tab({ Title = "Farms", Icon = "tractor" })
-        FarmsTab:Toggle({ Title = "Auto Candy Farm (Safe)", Value = false, Callback = function(state) TogglePremiumCandyFarm(state) end })
-        FarmsTab:Toggle({ Title = "Auto Server Hopper", Value = false, Callback = function(state) ToggleServerHopper(state) end })
+        local FarmsTab = Window:Tab({ Title = "Farms", Icon = "tractor" })
+        FarmsTab:Toggle({ Title = "Auto Candy Farm (Corn)", Value = false, Callback = function(state) ToggleCandyFarm(state) end })
+        FarmsTab:Toggle({ Title = "Auto Server Hopper", Value = false, Callback = function(state) Settings.ServerHopper = state; showNotification("Farm", state and "Hopper On" or "Hopper Off", state) end })
     end)
     if not success then warn("❌ UI Error: " .. tostring(err)) end
 end
 
--- تشغيل الواجهة
+-- الزرار العايم (عشان تشغل الكاندي بضغطة واحدة)
+local floatGui = Instance.new("ScreenGui")
+floatGui.Name = "SlapFloatBtn"; floatGui.ResetOnSpawn = false; floatGui.Parent = PlayerGui
+local floatBtn = Instance.new("TextButton")
+floatBtn.Size = UDim2.fromOffset(100, 40); floatBtn.Position = UDim2.new(1, -120, 0, 20)
+floatBtn.BackgroundColor3 = Color3.fromRGB(255, 140, 0); floatBtn.Text = "Candy: OFF"; floatBtn.TextColor3 = Color3.fromRGB(255,255,255); floatBtn.Font = Enum.Font.GothamBold; floatBtn.TextSize = 12
+floatBtn.Parent = floatGui; floatBtn.Active = true; floatBtn.Draggable = true
+Instance.new("UICorner", floatBtn).CornerRadius = UDim.new(0, 8)
+
+floatBtn.MouseButton1Click:Connect(function()
+    Settings.CandyFarm = not Settings.CandyFarm
+    if Settings.CandyFarm then
+        floatBtn.Text = "Candy: ON"
+        ToggleCandyFarm(true)
+    else
+        floatBtn.Text = "Candy: OFF"
+        ToggleCandyFarm(false)
+    end
+end)
+
 task.wait(1)
 LoadMainGUI()
