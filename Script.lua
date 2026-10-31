@@ -1,7 +1,7 @@
 -- ============================================================
--- 👑 SLAP AURA HUB | V59 | ESP PRO + AUTO AVOID EDITION
+-- 👑 SLAP AURA HUB | V59 | ESP PRO + AUTO AVOID + ANY-PART AURA
 -- (Glove Detection + Danger Levels + Auto Avoid
---  + Candy Farm V5 + All Antis + Manual Control)
+--  + Candy Farm V5 + All Antis + Aura hits ANY body part)
 -- ============================================================
 
 if _G.SlapAuraAlreadyRunning then
@@ -22,7 +22,7 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local Camera = workspace.CurrentCamera
 
 -- ============================================================
--- 🎬 0. LOADING SCREEN
+-- 🎬 LOADING SCREEN
 -- ============================================================
 local LoadingGui = Instance.new("ScreenGui")
 LoadingGui.Name = "SlapAuraLoading"
@@ -92,7 +92,7 @@ local Version = Instance.new("TextLabel")
 Version.Size = UDim2.new(1, 0, 0, 20)
 Version.Position = UDim2.fromOffset(0, 75)
 Version.BackgroundTransparency = 1
-Version.Text = "V59  •  ESP PRO + Auto Avoid"
+Version.Text = "V59  •  Any-Part Aura Edition"
 Version.TextColor3 = Color3.fromRGB(160, 160, 175)
 Version.Font = Enum.Font.Gotham
 Version.TextSize = 13
@@ -165,8 +165,8 @@ local loadSteps = {
     {p = 45, text = "Injecting Remote Hooks..."},
     {p = 60, text = "Building HUD..."},
     {p = 75, text = "Loading WindUI Framework..."},
-    {p = 90, text = "Preparing ESP PRO + Candy Farm V5..."},
-    {p = 100, text = "Ready! All features OFF by default"}
+    {p = 90, text = "Preparing Any-Part Aura..."},
+    {p = 100, text = "Ready! Punch once with glove"}
 }
 
 local function runLoadingScreen()
@@ -193,7 +193,7 @@ end
 runLoadingScreen()
 
 -- ============================================================
--- 🛑 1. GHOST PROTOCOL V9 (Delta-Safe)
+-- 🛑 GHOST PROTOCOL V9
 -- ============================================================
 local CapturedRemote = nil
 local RemoteFormat = "None"
@@ -254,7 +254,7 @@ if hasHooks then
                 if #args > 0 then
                     if type(args[1]) == "table" and args[1]["victim"] then
                         if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Table" end
-                    elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart") then
+                    elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart" or args[1]:IsA("BasePart")) then
                         if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Instance" end
                     end
                 end
@@ -265,10 +265,11 @@ if hasHooks then
 end
 
 -- ============================================================
--- ⚙️ 2. الإعدادات (كل حاجة OFF)
+-- ⚙️ الإعدادات
 -- ============================================================
 local Settings = {
-    AuraEnabled = false, Range = 15, AuraMaxHits = 5,
+    AuraEnabled = true, Range = 15, AuraMaxHits = 5,
+    HitPart = "Any", -- "Any" / "Head" / "HumanoidRootPart"
     FlySpeed = 50, Noclip = false, Godmode = false,
     PremiumSpeed = 35, ESP = false, AutoAim = false,
     HitboxExpander = false, GravityControl = false,
@@ -282,18 +283,35 @@ local Connections = {}
 local HitCount = 0
 
 -- ============================================================
--- 🔔 3. HUD
+-- 🎯 دالة اختيار جزء الهدف
+-- ============================================================
+local function GetTargetPart(char)
+    if not char then return nil end
+    
+    if Settings.HitPart == "Head" then
+        return char:FindFirstChild("Head")
+    elseif Settings.HitPart == "HumanoidRootPart" then
+        return char:FindFirstChild("HumanoidRootPart")
+    else
+        -- "Any" = جرب Head، بعدين HRP، بعدين أي BasePart
+        return char:FindFirstChild("Head")
+            or char:FindFirstChild("HumanoidRootPart")
+            or char:FindFirstChild("Torso")
+            or char:FindFirstChild("UpperTorso")
+            or char:FindFirstChildOfClass("BasePart")
+    end
+end
+
+-- ============================================================
+-- 🔔 HUD + NOTIFICATIONS
 -- ============================================================
 local HUD = Instance.new("ScreenGui")
 HUD.Name = "SlapAuraHUD"; HUD.ResetOnSpawn = false; HUD.DisplayOrder = 9998; HUD.Parent = PlayerGui
 local HUDFrame = Instance.new("Frame"); HUDFrame.Size = UDim2.new(0, 220, 0, 40); HUDFrame.Position = UDim2.new(0, 20, 0.1, 0); HUDFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20); HUDFrame.BackgroundTransparency = 0.2; HUDFrame.BorderSizePixel = 0; HUDFrame.Parent = HUD
 local HUDCorner = Instance.new("UICorner"); HUDCorner.CornerRadius = UDim.new(0, 6); HUDCorner.Parent = HUDFrame
 local HUDStroke = Instance.new("UIStroke"); HUDStroke.Color = Color3.fromRGB(255, 140, 0); HUDStroke.Thickness = 1.5; HUDStroke.Parent = HUDFrame
-local HUDText = Instance.new("TextLabel"); HUDText.Size = UDim2.new(1, -10, 1, 0); HUDText.Position = UDim2.new(0, 5, 0, 0); HUDText.BackgroundTransparency = 1; HUDText.Text = "🎃 Slap Aura: READY"; HUDText.TextColor3 = Color3.fromRGB(255, 255, 255); HUDText.Font = Enum.Font.GothamBold; HUDText.TextSize = 14; HUDText.Parent = HUDFrame
+local HUDText = Instance.new("TextLabel"); HUDText.Size = UDim2.new(1, -10, 1, 0); HUDText.Position = UDim2.new(0, 5, 0, 0); HUDText.BackgroundTransparency = 1; HUDText.Text = "🎃 Slap Aura: WAITING"; HUDText.TextColor3 = Color3.fromRGB(255, 255, 255); HUDText.Font = Enum.Font.GothamBold; HUDText.TextSize = 14; HUDText.Parent = HUDFrame
 
--- ============================================================
--- 🔔 4. NOTIFICATIONS
--- ============================================================
 local function showNotification(title, text, isSuccess)
     local notifGui = Instance.new("ScreenGui")
     notifGui.Name = "SlapNotifs"
@@ -358,7 +376,7 @@ local function showNotification(title, text, isSuccess)
 end
 
 -- ============================================================
--- 💎 5. المحركات الأساسية
+-- 💎 المحركات
 -- ============================================================
 function ToggleSpeed(state)
     if Connections.Speed then Connections.Speed:Disconnect() end
@@ -499,7 +517,7 @@ function ToggleGodmode(state)
 end
 
 -- ============================================================
--- 🚀 6. SERVER HOPPER (SAFE)
+-- 🚀 SERVER HOPPER
 -- ============================================================
 local function HopToNewServer()
     pcall(function() showNotification("Hopper", "Teleporting...", true) end)
@@ -511,21 +529,12 @@ local function HopToNewServer()
 end
 
 -- ============================================================
--- 🍬 7. CANDY FARM V5 (Manual Control Only)
+-- 🍬 CANDY FARM V5
 -- ============================================================
 local CandyFarm = {
-    Running = false,
-    Collected = 0,
-    Thread = nil,
-    Monitor = nil,
-    CharConn = nil,
-    DeathConn = nil,
-    LastCount = 0,
-    FolderFound = false,
-    FolderName = "",
-    ActiveRunID = 0,
-    LastToggleTime = 0,
-    UI_Toggle = nil,
+    Running = false, Collected = 0, Thread = nil, Monitor = nil,
+    CharConn = nil, DeathConn = nil, LastCount = 0, FolderFound = false,
+    FolderName = "", ActiveRunID = 0, LastToggleTime = 0, UI_Toggle = nil,
 }
 
 local function FindCandyFolder()
@@ -608,9 +617,7 @@ function ToggleCandyFarm(state)
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then
             CandyFarm.DeathConn = hum.Died:Connect(function()
-                if CandyFarm.Running then
-                    showNotification("Farm", "⚠️ Died! Farm continues after respawn", false)
-                end
+                if CandyFarm.Running then showNotification("Farm", "⚠️ Died! Farm continues after respawn", false) end
             end)
         end
     end
@@ -648,10 +655,8 @@ function ToggleCandyFarm(state)
                 if not char then return end
                 local hrp = char:FindFirstChild("HumanoidRootPart")
                 if not hrp then return end
-
                 local candies = GetCandyList()
                 CandyFarm.LastCount = #candies
-
                 for _, candy in ipairs(candies) do
                     if not CandyFarm.Running or CandyFarm.ActiveRunID ~= currentRunID then break end
                     if candy and candy.Parent then
@@ -667,7 +672,7 @@ function ToggleCandyFarm(state)
 end
 
 -- ============================================================
--- 🍬 8. FLOATING BUTTON
+-- 🍬 FLOATING BUTTON
 -- ============================================================
 local FloatGui = Instance.new("ScreenGui")
 FloatGui.Name = "CandyFarmFloat"
@@ -762,22 +767,19 @@ UserInputService.InputEnded:Connect(function(input)
 end)
 
 -- ============================================================
--- 👁️ 9. ESP PRO (Glove Detection + Danger + Auto Avoid)
+-- 👁️ ESP PRO
 -- ============================================================
 local GloveDanger = {
-    -- EXTREME
     ["killstreak"] = "EXTREME", ["god's hand"] = "EXTREME", ["gods hand"] = "EXTREME",
     ["error"] = "EXTREME", ["reaper"] = "EXTREME", ["thanos"] = "EXTREME",
     ["overkill"] = "EXTREME", ["megarock"] = "EXTREME", ["berserk"] = "EXTREME",
     ["hallow jack"] = "EXTREME", ["detonator"] = "EXTREME", ["bob"] = "EXTREME",
-    -- HIGH
     ["mitten"] = "HIGH", ["leash"] = "HIGH", ["fish"] = "HIGH", ["grab"] = "HIGH",
     ["pull"] = "HIGH", ["lure"] = "HIGH", ["phase"] = "HIGH", ["wormhole"] = "HIGH",
     ["blackhole"] = "HIGH", ["rattlebones"] = "HIGH", ["home run"] = "HIGH",
     ["jet"] = "HIGH", ["baller"] = "HIGH", ["za hando"] = "HIGH", ["recycler"] = "HIGH",
     ["bomb"] = "HIGH", ["sparky"] = "HIGH", ["conductor"] = "HIGH", ["tinkerer"] = "HIGH",
     ["rhythm"] = "HIGH", ["track"] = "HIGH",
-    -- MEDIUM
     ["ice"] = "MEDIUM", ["snowball"] = "MEDIUM", ["mr"] = "MEDIUM", ["mail"] = "MEDIUM",
     ["squid"] = "MEDIUM", ["honey"] = "MEDIUM", ["cloud"] = "MEDIUM", ["kinetic"] = "MEDIUM",
     ["slapple"] = "MEDIUM", ["moon"] = "MEDIUM",
@@ -800,26 +802,18 @@ local function GetPlayerGlove(plr)
     return tool.Name, danger
 end
 
-local AutoAvoidSettings = {
-    Enabled = false,
-    Distance = 30,
-    SafeDistance = 60,
-    OnlyExtreme = true,
-    LastAvoidTime = 0,
-}
+local AutoAvoidSettings = { Enabled = false, Distance = 30, SafeDistance = 60, OnlyExtreme = true, LastAvoidTime = 0 }
 
 local function AutoAvoidCheck(myRoot)
     if not AutoAvoidSettings.Enabled then return end
     if not myRoot then return end
     if tick() - AutoAvoidSettings.LastAvoidTime < 2 then return end
-
     for _, plr in ipairs(Players:GetPlayers()) do
         if plr ~= LocalPlayer and plr.Character then
             local tRoot = plr.Character:FindFirstChild("HumanoidRootPart")
             if tRoot then
                 local gloveName, danger = GetPlayerGlove(plr)
                 local shouldAvoid = (danger == "EXTREME") or (danger == "HIGH" and not AutoAvoidSettings.OnlyExtreme)
-                
                 if shouldAvoid then
                     local dist = (myRoot.Position - tRoot.Position).Magnitude
                     if dist < AutoAvoidSettings.Distance then
@@ -856,28 +850,14 @@ local function applyESPToPlayer(plr)
     if not plr.Character then return end
     local head = plr.Character:FindFirstChild("Head")
     if not head then return end
-
     removeESPFromPlayer(plr)
-
     local hl = Instance.new("Highlight", plr.Character)
-    hl.FillColor = Color3.fromRGB(255, 140, 0)
-    hl.FillTransparency = 0.5
-    hl.OutlineColor = Color3.fromRGB(255, 140, 0)
-
+    hl.FillColor = Color3.fromRGB(255, 140, 0); hl.FillTransparency = 0.5; hl.OutlineColor = Color3.fromRGB(255, 140, 0)
     local bb = Instance.new("BillboardGui", head)
-    bb.Size = UDim2.new(0, 220, 0, 70)
-    bb.StudsOffset = Vector3.new(0, 2.5, 0)
-    bb.AlwaysOnTop = true
-
+    bb.Size = UDim2.new(0, 220, 0, 70); bb.StudsOffset = Vector3.new(0, 2.5, 0); bb.AlwaysOnTop = true
     local txt = Instance.new("TextLabel", bb)
-    txt.Size = UDim2.new(1, 0, 1, 0)
-    txt.BackgroundTransparency = 1
-    txt.TextColor3 = Color3.fromRGB(255, 255, 255)
-    txt.TextStrokeTransparency = 0
-    txt.Font = Enum.Font.GothamBold
-    txt.TextSize = 13
-    txt.RichText = true
-
+    txt.Size = UDim2.new(1, 0, 1, 0); txt.BackgroundTransparency = 1; txt.TextColor3 = Color3.fromRGB(255, 255, 255)
+    txt.TextStrokeTransparency = 0; txt.Font = Enum.Font.GothamBold; txt.TextSize = 13; txt.RichText = true
     activeESP[plr.Name] = {Highlight = hl, Billboard = bb, Text = txt}
 end
 
@@ -898,7 +878,6 @@ function ToggleESP(state)
                 table.insert(espConnections, charConn)
             end
         end
-
         local addedConn = Players.PlayerAdded:Connect(function(plr)
             if plr == LocalPlayer then return end
             plr.CharacterAdded:Connect(function()
@@ -908,10 +887,7 @@ function ToggleESP(state)
             if plr.Character then applyESPToPlayer(plr) end
         end)
         table.insert(espConnections, addedConn)
-
-        local removedConn = Players.PlayerRemoving:Connect(function(plr)
-            removeESPFromPlayer(plr)
-        end)
+        local removedConn = Players.PlayerRemoving:Connect(function(plr) removeESPFromPlayer(plr) end)
         table.insert(espConnections, removedConn)
 
         Connections.ESP = RunService.Heartbeat:Connect(function()
@@ -919,36 +895,24 @@ function ToggleESP(state)
                 if plr ~= LocalPlayer and plr.Character then
                     local data = activeESP[plr.Name]
                     local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-                    
                     if data and myRoot and data.Text then
                         local tRoot = plr.Character:FindFirstChild("HumanoidRootPart")
                         if tRoot then
                             local dist = math.floor((myRoot.Position - tRoot.Position).Magnitude)
                             local gloveName, danger = GetPlayerGlove(plr)
                             local colorInfo = DangerColors[danger] or DangerColors.SAFE
-                            
                             local gloveDisplay = gloveName and ("["..gloveName.."]") or "[None]"
                             data.Text.Text = string.format('%s\n%s\n%d studs', plr.DisplayName, colorInfo.Text.." "..gloveDisplay, dist)
-                            
                             data.Highlight.FillColor = colorInfo.Fill
                             data.Highlight.OutlineColor = colorInfo.Fill
-                            
-                            if danger == "EXTREME" then
-                                data.Highlight.FillTransparency = 0.3
-                            else
-                                data.Highlight.FillTransparency = 0.5
-                            end
+                            data.Highlight.FillTransparency = (danger == "EXTREME") and 0.3 or 0.5
                         end
                     end
                 end
             end
-            
             local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-            if myRoot then
-                AutoAvoidCheck(myRoot)
-            end
+            if myRoot then AutoAvoidCheck(myRoot) end
         end)
-
         showNotification("ESP", "Glove Detection + Danger Levels ON", true)
     else
         for _, data in pairs(activeESP) do
@@ -963,15 +927,16 @@ function ToggleESP(state)
 end
 
 -- ============================================================
--- 🥊 10. AURA (Auto Slap)
+-- 🥊 AURA (Any-Part)
 -- ============================================================
 local lastHit, hits, sec = 0, 0, math.floor(tick())
 if Connections.Aura then Connections.Aura:Disconnect() end
 Connections.Aura = RunService.Stepped:Connect(function()
-    if not Settings.AuraEnabled or not CapturedRemote then return end
+    if not Settings.AuraEnabled then return end
+    if not CapturedRemote then return end
     local char = LocalPlayer.Character; if not char then return end
-    local root = char:FindFirstChild("HumanoidRootPart"); local tool = char:FindFirstChildOfClass("Tool")
-    if not root or not tool then return end
+    local root = char:FindFirstChild("HumanoidRootPart")
+    if not root then return end
     local cSec = math.floor(tick()); if cSec ~= sec then sec = cSec; hits = 0 end
     if hits >= Settings.AuraMaxHits then return end
     if tick() - lastHit < (1 / Settings.AuraMaxHits) then return end
@@ -979,24 +944,33 @@ Connections.Aura = RunService.Stepped:Connect(function()
     local closest, dist = nil, Settings.Range
     for _, p in ipairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
-            local r = p.Character:FindFirstChild("HumanoidRootPart"); local h = p.Character:FindFirstChildOfClass("Humanoid")
+            local r = p.Character:FindFirstChild("HumanoidRootPart")
+            local h = p.Character:FindFirstChildOfClass("Humanoid")
             if r and h and h.Health > 0 and (root.Position - r.Position).Magnitude <= dist then
                 dist = (root.Position - r.Position).Magnitude; closest = p
             end
         end
     end
-    if closest and closest.Character:FindFirstChild("Head") then
-        pcall(function()
-            if RemoteFormat == "Table" then CapturedRemote:FireServer({["victim"] = closest.Character.Head, ["attacker"] = LocalPlayer})
-            else CapturedRemote:FireServer(closest.Character.Head) end
-            hits = hits + 1; lastHit = tick(); HitCount = HitCount + 1
-            HUDText.Text = "🎃 Slap Aura: ACTIVE ("..HitCount.." Hits)"
-        end)
+    
+    if closest and closest.Character then
+        -- 🎯 استخدام دالة اختيار الجزء (Any / Head / HRP)
+        local targetPart = GetTargetPart(closest.Character)
+        if targetPart then
+            pcall(function()
+                if RemoteFormat == "Table" then
+                    CapturedRemote:FireServer({["victim"] = targetPart, ["attacker"] = LocalPlayer})
+                else
+                    CapturedRemote:FireServer(targetPart)
+                end
+                hits = hits + 1; lastHit = tick(); HitCount = HitCount + 1
+                HUDText.Text = "🎃 Slap Aura: ACTIVE ("..HitCount.." Hits)"
+            end)
+        end
     end
 end)
 
 -- ============================================================
--- 🛡️ 11. ANTI ENGINE
+-- 🛡️ ANTI ENGINE
 -- ============================================================
 function ToggleAntiVoid(state)
     Settings.AntiVoid = state
@@ -1006,9 +980,7 @@ function ToggleAntiVoid(state)
             local char = LocalPlayer.Character
             if not char then return end
             local hrp = char:FindFirstChild("HumanoidRootPart")
-            if hrp and hrp.Position.Y < -50 then
-                pcall(function() hrp.CFrame = CFrame.new(Settings.SafePos) end)
-            end
+            if hrp and hrp.Position.Y < -50 then pcall(function() hrp.CFrame = CFrame.new(Settings.SafePos) end) end
         end)
         showNotification("Anti Void", "On", true)
     else showNotification("Anti Void", "Off", false) end
@@ -1022,9 +994,7 @@ function ToggleAntiFling(state)
             local char = LocalPlayer.Character
             if not char then return end
             local hrp = char:FindFirstChild("HumanoidRootPart")
-            if hrp and hrp.AssemblyLinearVelocity.Magnitude > 200 then
-                hrp.AssemblyLinearVelocity = Vector3.zero
-            end
+            if hrp and hrp.AssemblyLinearVelocity.Magnitude > 200 then hrp.AssemblyLinearVelocity = Vector3.zero end
         end)
         showNotification("Anti Fling", "On", true)
     else showNotification("Anti Fling", "Off", false) end
@@ -1039,8 +1009,7 @@ function ToggleAntiRagdoll(state)
             if not char then return end
             local hum = char:FindFirstChildOfClass("Humanoid")
             if hum and (hum.PlatformStand or hum:GetState() == Enum.HumanoidStateType.Physics) then
-                hum.PlatformStand = false
-                hum:ChangeState(Enum.HumanoidStateType.Running)
+                hum.PlatformStand = false; hum:ChangeState(Enum.HumanoidStateType.Running)
             end
         end)
         showNotification("Anti Ragdoll", "On", true)
@@ -1057,9 +1026,7 @@ function ToggleAntiKnockback(state)
             local hrp = char:FindFirstChild("HumanoidRootPart")
             if hrp then
                 local vel = hrp.AssemblyLinearVelocity
-                if Vector3.new(vel.X, 0, vel.Z).Magnitude > 100 then
-                    hrp.AssemblyLinearVelocity = Vector3.new(0, vel.Y, 0)
-                end
+                if Vector3.new(vel.X, 0, vel.Z).Magnitude > 100 then hrp.AssemblyLinearVelocity = Vector3.new(0, vel.Y, 0) end
             end
         end)
         showNotification("Anti Knockback", "On", true)
@@ -1210,7 +1177,7 @@ function ToggleAutoRejoin(state)
 end
 
 -- ============================================================
--- 🎨 12. الواجهة (WindUI)
+-- 🎨 الواجهة (WindUI)
 -- ============================================================
 function LoadMainGUI()
     local success, err = pcall(function()
@@ -1220,9 +1187,26 @@ function LoadMainGUI()
         -- ⚔️ Combat
         local CombatTab = Window:Tab({ Title = "Combat", Icon = "crosshair" })
         CombatTab:Button({ Title = "🔄 Refresh Glove", Callback = function() CapturedRemote = nil; RemoteFormat = "None"; showNotification("System", "Glove Reset", true) end })
-        CombatTab:Toggle({ Title = "Auto Slap", Value = false, Callback = function(s) Settings.AuraEnabled = s end })
+        CombatTab:Toggle({ Title = "Auto Slap", Value = true, Callback = function(s)
+            Settings.AuraEnabled = s
+            if s and not CapturedRemote then
+                showNotification("Aura", "⚠️ Punch once with glove to capture remote", false)
+            end
+        end })
         CombatTab:Slider({ Title = "Aura Range", Value = { Min = 5, Max = 50, Default = 15 }, Callback = function(v) Settings.Range = v end })
         CombatTab:Slider({ Title = "Aura Max Hits/sec", Value = { Min = 1, Max = 20, Default = 5 }, Callback = function(v) Settings.AuraMaxHits = v end })
+        
+        -- 🎯 اختيار جزء الهدف
+        CombatTab:Dropdown({
+            Title = "🎯 Hit Target Part",
+            Values = {"Any", "Head", "HumanoidRootPart"},
+            Default = "Any",
+            Callback = function(option)
+                Settings.HitPart = option
+                showNotification("Aura", "Now hitting: "..option, true)
+            end
+        })
+        
         CombatTab:Toggle({ Title = "Auto Aim", Value = false, Callback = function(s) ToggleAutoAim(s) end })
         CombatTab:Toggle({ Title = "Hitbox", Value = false, Callback = function(s) ToggleHitbox(s) end })
         CombatTab:Toggle({ Title = "Godmode", Value = false, Callback = function(s) ToggleGodmode(s) end })
@@ -1250,22 +1234,14 @@ function LoadMainGUI()
         -- 👁️ Visuals
         local VisTab = Window:Tab({ Title = "Visuals", Icon = "eye" })
         VisTab:Toggle({ Title = "👁️ Player ESP (Glove Detection)", Value = false, Callback = function(s) ToggleESP(s) end })
-
         VisTab:Section({ Title = "🛡️ Auto Avoid" })
         VisTab:Toggle({ Title = "Enable Auto Avoid", Value = false, Callback = function(s)
             AutoAvoidSettings.Enabled = s
             showNotification("Auto Avoid", s and "ON" or "OFF", s)
         end })
-        VisTab:Toggle({ Title = "Only EXTREME Gloves", Value = true, Callback = function(s)
-            AutoAvoidSettings.OnlyExtreme = s
-        end })
-        VisTab:Slider({ Title = "Avoid Distance (studs)", Value = { Min = 10, Max = 100, Default = 30 }, Callback = function(v)
-            AutoAvoidSettings.Distance = v
-        end })
-        VisTab:Slider({ Title = "Teleport Away Distance", Value = { Min = 30, Max = 200, Default = 60 }, Callback = function(v)
-            AutoAvoidSettings.SafeDistance = v
-        end })
-        VisTab:Paragraph({ Title = "ℹ️ Danger Levels", Desc = "🔴 EXTREME = Killstreak, God's Hand, Error, Reaper, Thanos\n🟠 HIGH = Mitten, Leash, Fish, Grab, Pull, Lure\n🟡 MEDIUM = Ice, Honey, Squid, Mail, MR\n🟢 SAFE = Normal gloves" })
+        VisTab:Toggle({ Title = "Only EXTREME Gloves", Value = true, Callback = function(s) AutoAvoidSettings.OnlyExtreme = s end })
+        VisTab:Slider({ Title = "Avoid Distance (studs)", Value = { Min = 10, Max = 100, Default = 30 }, Callback = function(v) AutoAvoidSettings.Distance = v end })
+        VisTab:Slider({ Title = "Teleport Away Distance", Value = { Min = 30, Max = 200, Default = 60 }, Callback = function(v) AutoAvoidSettings.SafeDistance = v end })
 
         -- 🛡️ Anti
         local AntiTab = Window:Tab({ Title = "Anti", Icon = "shield" })
@@ -1274,7 +1250,6 @@ function LoadMainGUI()
         AntiTab:Toggle({ Title = "Anti Fling", Value = false, Callback = function(s) ToggleAntiFling(s) end })
         AntiTab:Toggle({ Title = "Anti Ragdoll", Value = false, Callback = function(s) ToggleAntiRagdoll(s) end })
         AntiTab:Toggle({ Title = "Anti Knockback", Value = false, Callback = function(s) ToggleAntiKnockback(s) end })
-
         AntiTab:Section({ Title = "Glove Effects" })
         AntiTab:Toggle({ Title = "🍯 Anti Honey", Value = false, Callback = function(s) ToggleAntiHoney(s) end })
         AntiTab:Toggle({ Title = "🧊 Anti Ice", Value = false, Callback = function(s) ToggleAntiIce(s) end })
@@ -1282,7 +1257,6 @@ function LoadMainGUI()
         AntiTab:Toggle({ Title = "🎭 Anti MR", Value = false, Callback = function(s) ToggleAntiMR(s) end })
         AntiTab:Toggle({ Title = "🧤 Anti Mitten", Value = false, Callback = function(s) ToggleAntiMitten(s) end })
         AntiTab:Toggle({ Title = "🦑 Anti Squid", Value = false, Callback = function(s) ToggleAntiSquid(s) end })
-
         AntiTab:Section({ Title = "System" })
         AntiTab:Toggle({ Title = "Anti AFK", Value = false, Callback = function(s) ToggleAntiAFK(s) end })
         AntiTab:Toggle({ Title = "Auto Rejoin", Value = false, Callback = function(s) ToggleAutoRejoin(s) end })
@@ -1299,8 +1273,7 @@ function LoadMainGUI()
         end })
         SetTab:Button({ Title = "🔍 Scan for Candy", Callback = function()
             local candies = GetCandyList()
-            if #candies == 0 then
-                showNotification("Scan", "No Candy Found", false)
+            if #candies == 0 then showNotification("Scan", "No Candy Found", false)
             else
                 local names = {}
                 for i = 1, math.min(#candies, 5) do table.insert(names, candies[i].Name) end
@@ -1312,8 +1285,7 @@ function LoadMainGUI()
             for _, obj in pairs(workspace:GetChildren()) do
                 if obj:IsA("Folder") then table.insert(folders, obj.Name) end
             end
-            if #folders == 0 then
-                showNotification("Folders", "No Folders Found", false)
+            if #folders == 0 then showNotification("Folders", "No Folders Found", false)
             else
                 showNotification("Folders", table.concat(folders, ", "), true)
                 print("📁 Workspace Folders:", folders)
@@ -1348,17 +1320,15 @@ function LoadMainGUI()
         warn("[Slap Aura] GUI Error: " .. tostring(err))
         showNotification("GUI Error", "WindUI Failed to Load", false)
     else
-        showNotification("Slap Aura", "V59 ESP PRO Loaded - All OFF", true)
+        showNotification("Slap Aura", "V59 Ready! Auto Slap ON", true)
     end
 end
 
 LoadMainGUI()
 
--- Grace Period
 task.delay(3, function()
     _G.CandyFarmReady = true
-    print("✅ [Slap Aura] Candy Farm ready (manual toggle only)")
-    showNotification("Slap Aura", "Ready! Press to start anything", true)
+    print("✅ [Slap Aura] Candy Farm ready")
 end)
 
-print("✅ [Slap Aura] V59 ESP PRO + Auto Avoid Ready!")
+print("✅ [Slap Aura] V59 Any-Part Aura Ready!")
