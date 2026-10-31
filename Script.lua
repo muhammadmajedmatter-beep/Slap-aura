@@ -1,24 +1,9 @@
---[[
-============================================================
-👑 SLAP AURA HUB | V59 | Ultimate Final
-============================================================
-Features:
-- Loading Screen
-- Ghost Protocol V9 (ORIGINAL - as you had it)
-- ESP PRO (Glove Detection + Danger Levels)
-- Auto Avoid
-- Any-Part Aura
-- Candy Farm V5 (Manual Control)
-- Floating Button
-- Server Hopper (Integrated in Farm tab)
-- All Antis
-============================================================
-]]
+-- ============================================================
+-- 👑 SLAP AURA HUB | V59 | WORKING VERSION
+-- (Crash-Fixed Ghost Protocol + All Features - NO Server Hopper)
+-- ============================================================
 
-if _G.SlapAuraAlreadyRunning then
-    warn("[Slap Aura] Script already running!")
-    return
-end
+if _G.SlapAuraAlreadyRunning then return end
 _G.SlapAuraAlreadyRunning = true
 _G.CandyFarmReady = false
 
@@ -27,8 +12,6 @@ local RunService = game:GetService("RunService")
 local TweenService = game:GetService("TweenService")
 local VirtualUser = game:GetService("VirtualUser")
 local UserInputService = game:GetService("UserInputService")
-local TeleportService = game:GetService("TeleportService")
-local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local Camera = workspace.CurrentCamera
@@ -40,10 +23,7 @@ local LoadingGui = Instance.new("ScreenGui")
 LoadingGui.Name = "SlapAuraLoading"
 LoadingGui.ResetOnSpawn = false
 LoadingGui.DisplayOrder = 999999
-LoadingGui.IgnoreGuiInset = true
-LoadingGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-pcall(function() LoadingGui.Parent = game:GetService("CoreGui") end)
-if not LoadingGui.Parent then LoadingGui.Parent = PlayerGui end
+LoadingGui.Parent = PlayerGui
 
 local Backdrop = Instance.new("Frame")
 Backdrop.Size = UDim2.fromScale(1, 1)
@@ -51,199 +31,143 @@ Backdrop.BackgroundColor3 = Color3.fromRGB(8, 8, 12)
 Backdrop.BorderSizePixel = 0
 Backdrop.Parent = LoadingGui
 
-local Gradient = Instance.new("UIGradient")
-Gradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(10, 10, 15)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(25, 10, 35)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(10, 10, 15))
-})
-Gradient.Rotation = 45
-Gradient.Parent = Backdrop
-
 local Container = Instance.new("Frame")
-Container.Size = UDim2.fromOffset(420, 260)
-Container.Position = UDim2.new(0.5, 0, 0.6, 0)
+Container.Size = UDim2.fromOffset(420, 240)
+Container.Position = UDim2.new(0.5, 0, 0.5, 0)
 Container.AnchorPoint = Vector2.new(0.5, 0.5)
 Container.BackgroundColor3 = Color3.fromRGB(15, 15, 22)
-Container.BackgroundTransparency = 1
-Container.BorderSizePixel = 0
 Container.Parent = LoadingGui
-
-local ContainerCorner = Instance.new("UICorner")
-ContainerCorner.CornerRadius = UDim.new(0, 14)
-ContainerCorner.Parent = Container
-
-local ContainerStroke = Instance.new("UIStroke")
-ContainerStroke.Color = Color3.fromRGB(255, 140, 0)
-ContainerStroke.Thickness = 1.5
-ContainerStroke.Transparency = 1
-ContainerStroke.Parent = Container
+local UICorner = Instance.new("UICorner")
+UICorner.CornerRadius = UDim.new(0, 14)
+UICorner.Parent = Container
 
 local Logo = Instance.new("TextLabel")
 Logo.Size = UDim2.new(1, 0, 0, 50)
-Logo.Position = UDim2.fromOffset(0, 25)
+Logo.Position = UDim2.fromOffset(0, 20)
 Logo.BackgroundTransparency = 1
 Logo.Text = "👑 SLAP AURA HUB"
 Logo.TextColor3 = Color3.fromRGB(255, 255, 255)
 Logo.Font = Enum.Font.GothamBlack
-Logo.TextSize = 28
+Logo.TextSize = 26
 Logo.Parent = Container
-
-local LogoGradient = Instance.new("UIGradient")
-LogoGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 180, 80)),
-    ColorSequenceKeypoint.new(0.5, Color3.fromRGB(255, 140, 0)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 80, 120))
-})
-LogoGradient.Parent = Logo
 
 local Version = Instance.new("TextLabel")
 Version.Size = UDim2.new(1, 0, 0, 20)
-Version.Position = UDim2.fromOffset(0, 75)
+Version.Position = UDim2.fromOffset(0, 70)
 Version.BackgroundTransparency = 1
-Version.Text = "V59 • Ultimate Final"
+Version.Text = "V59 • Working Edition"
 Version.TextColor3 = Color3.fromRGB(160, 160, 175)
 Version.Font = Enum.Font.Gotham
-Version.TextSize = 13
+Version.TextSize = 12
 Version.Parent = Container
 
 local BarBg = Instance.new("Frame")
 BarBg.Size = UDim2.new(1, -80, 0, 8)
-BarBg.Position = UDim2.new(0.5, 0, 0, 135)
+BarBg.Position = UDim2.new(0.5, 0, 0, 120)
 BarBg.AnchorPoint = Vector2.new(0.5, 0)
 BarBg.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
 BarBg.BorderSizePixel = 0
 BarBg.Parent = Container
-
-local BarBgCorner = Instance.new("UICorner")
-BarBgCorner.CornerRadius = UDim.new(1, 0)
-BarBgCorner.Parent = BarBg
+local BarCorner = Instance.new("UICorner")
+BarCorner.CornerRadius = UDim.new(1, 0)
+BarCorner.Parent = BarBg
 
 local BarFill = Instance.new("Frame")
 BarFill.Size = UDim2.fromScale(0, 1)
 BarFill.BackgroundColor3 = Color3.fromRGB(255, 140, 0)
 BarFill.BorderSizePixel = 0
 BarFill.Parent = BarBg
-
-local BarFillCorner = Instance.new("UICorner")
-BarFillCorner.CornerRadius = UDim.new(1, 0)
-BarFillCorner.Parent = BarFill
-
-local Percent = Instance.new("TextLabel")
-Percent.Size = UDim2.new(1, 0, 0, 20)
-Percent.Position = UDim2.new(0, 0, 0, 155)
-Percent.BackgroundTransparency = 1
-Percent.Text = "0%"
-Percent.TextColor3 = Color3.fromRGB(255, 140, 0)
-Percent.Font = Enum.Font.GothamBold
-Percent.TextSize = 14
-Percent.Parent = Container
+local FillCorner = Instance.new("UICorner")
+FillCorner.CornerRadius = UDim.new(1, 0)
+FillCorner.Parent = BarFill
 
 local Status = Instance.new("TextLabel")
-Status.Size = UDim2.new(1, -40, 0, 40)
-Status.Position = UDim2.new(0, 20, 1, -55)
+Status.Size = UDim2.new(1, -40, 0, 30)
+Status.Position = UDim2.new(0, 20, 1, -40)
 Status.BackgroundTransparency = 1
-Status.Text = "Initializing..."
+Status.Text = "Loading..."
 Status.TextColor3 = Color3.fromRGB(180, 180, 195)
 Status.Font = Enum.Font.Gotham
 Status.TextSize = 12
-Status.TextWrapped = true
 Status.Parent = Container
 
-TweenService:Create(Container, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-    Position = UDim2.new(0.5, 0, 0.5, 0),
-    BackgroundTransparency = 0.1
-}):Play()
-TweenService:Create(ContainerStroke, TweenInfo.new(0.6), {Transparency = 0.3}):Play()
-
-local loadSteps = {
-    {p = 15, text = "Loading Core Modules..."},
-    {p = 35, text = "Applying Ghost Protocol..."},
-    {p = 55, text = "Building HUD..."},
-    {p = 75, text = "Loading WindUI..."},
-    {p = 90, text = "Preparing Features..."},
-    {p = 100, text = "Ready! Punch once with glove"}
+local steps = {
+    {p = 25, t = "Loading Modules..."},
+    {p = 55, t = "Applying Ghost Protocol..."},
+    {p = 85, t = "Finalizing..."},
+    {p = 100, t = "Done!"}
 }
-
-for _, step in ipairs(loadSteps) do
-    Status.Text = step.text
-    TweenService:Create(BarFill, TweenInfo.new(0.35, Enum.EasingStyle.Quad), {
-        Size = UDim2.fromScale(step.p / 100, 1)
-    }):Play()
-    Percent.Text = step.p .. "%"
+for _, s in ipairs(steps) do
+    Status.Text = s.t
+    TweenService:Create(BarFill, TweenInfo.new(0.3), {Size = UDim2.fromScale(s.p/100, 1)}):Play()
     task.wait(0.3)
 end
-task.wait(0.4)
-TweenService:Create(Container, TweenInfo.new(0.45, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-    Position = UDim2.new(0.5, 0, 0.4, 0),
-    BackgroundTransparency = 1
-}):Play()
-TweenService:Create(ContainerStroke, TweenInfo.new(0.45), {Transparency = 1}):Play()
-TweenService:Create(Backdrop, TweenInfo.new(0.6, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {
-    BackgroundTransparency = 1
-}):Play()
-task.wait(0.7)
+task.wait(0.2)
 LoadingGui:Destroy()
 
 -- ============================================================
--- 🛑 GHOST PROTOCOL V9 (ORIGINAL - كما كان)
+-- 🛑 GHOST PROTOCOL V9 (CRASH-FIXED — بدون __newindex)
 -- ============================================================
 local CapturedRemote = nil
 local RemoteFormat = "None"
 
-pcall(function()
-    local mt = getrawmetatable(game)
-    local oldIndex = mt.__index
-    local oldNewIndex = mt.__newindex
-    setreadonly(mt, false)
-
-    mt.__index = newcclosure(function(t, k)
-        -- تمويه السرعة والجامب
-        if (k == "WalkSpeed" or k == "JumpPower") and t:IsA("Humanoid") and t.Parent == LocalPlayer.Character then
-            return k == "WalkSpeed" and 16 or 50
-        end
-        -- تمويه السرعة الفيزيائية (عشان الطيران والكاندي فارم)
-        if (k == "AssemblyLinearVelocity" or k == "Velocity") and t.Parent == LocalPlayer.Character then
-            local realVel = oldIndex(t, k)
-            if type(realVel) == "Vector3" and realVel.Magnitude > 35 then
-                return realVel.Unit * 15 
-            end
-        end
-        return oldIndex(t, k)
-    end)
-
-    mt.__newindex = newcclosure(function(t, k, v)
-        if (k == "WalkSpeed" or k == "JumpPower") and t:IsA("Humanoid") and t.Parent == LocalPlayer.Character then
-            return 
-        end
-        return oldNewIndex(t, k, v)
-    end)
-    setreadonly(mt, true)
+local hasHooks = pcall(function()
+    return hookmetamethod and getrawmetatable and setreadonly and newcclosure
 end)
 
-local oldNamecall
-oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
-    local method = getnamecallmethod()
-    if method == "Kick" and self == LocalPlayer then return end
-    
-    if method == "FireServer" then
-        local remoteName = string.lower(self.Name)
-        local badRemotes = {"ban", "kick", "admingui", "walkspeedchanged", "anticheat", "detect", "report", "speedcheck", "flag"}
-        for _, bad in ipairs(badRemotes) do
-            if string.find(remoteName, bad) then return end
-        end
-
-        local args = {...}
-        if #args > 0 then
-            if type(args[1]) == "table" and args[1]["victim"] then
-                if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Table" end
-            elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart") then
-                if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Instance" end
+if hasHooks then
+    -- __index فقط (بدون __newindex)
+    pcall(function()
+        local mt = getrawmetatable(game)
+        local oldIndex = mt.__index
+        setreadonly(mt, false)
+        mt.__index = newcclosure(function(t, k)
+            if checkcaller and checkcaller() then return oldIndex(t, k) end
+            if typeof(t) == "Instance" and t.ClassName == "Humanoid" and t.Parent == LocalPlayer.Character then
+                if k == "WalkSpeed" then return 16 end
+                if k == "JumpPower" then return 50 end
             end
-        end
-    end
-    return oldNamecall(self, ...)
-end)
+            if typeof(t) == "Instance" and t.Parent == LocalPlayer.Character and (k == "AssemblyLinearVelocity" or k == "Velocity") then
+                local ok, realVel = pcall(function() return oldIndex(t, k) end)
+                if ok and typeof(realVel) == "Vector3" and realVel.Magnitude > 35 then
+                    return realVel.Unit * 15
+                end
+            end
+            return oldIndex(t, k)
+        end)
+        setreadonly(mt, true)
+    end)
+
+    -- __namecall
+    local oldNamecall
+    pcall(function()
+        oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+            if checkcaller and checkcaller() then return oldNamecall(self, ...) end
+            local method = getnamecallmethod()
+            if method == "Kick" and self == LocalPlayer then return end
+            if method == "FireServer" then
+                local ok, remoteName = pcall(function() return string.lower(self.Name) end)
+                if ok and remoteName then
+                    local badRemotes = {"ban", "kick", "anticheat", "detect", "report", "speedcheck", "flag"}
+                    for _, bad in ipairs(badRemotes) do
+                        if string.find(remoteName, bad) then return end
+                    end
+                end
+                local args = {...}
+                if #args > 0 then
+                    pcall(function()
+                        if type(args[1]) == "table" and args[1]["victim"] then
+                            if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Table" end
+                        elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart" or args[1]:IsA("BasePart")) then
+                            if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Instance" end
+                        end
+                    end)
+                end
+            end
+            return oldNamecall(self, ...)
+        end))
+    end)
+end
 
 -- ============================================================
 -- ⚙️ SETTINGS
@@ -252,8 +176,7 @@ local Settings = {
     AuraEnabled = true, Range = 15, AuraMaxHits = 5, HitPart = "Any",
     FlySpeed = 50, Noclip = false, Godmode = false,
     PremiumSpeed = 35, ESP = false, AutoAim = false,
-    HitboxExpander = false, GravityControl = false,
-    CandyFarm = false, ServerHopper = false,
+    HitboxExpander = false, CandyFarm = false,
     AntiVoid = false, AntiFling = false, AntiRagdoll = false,
     AntiKnockback = false, AntiHoney = false, AntiIce = false,
     AntiMail = false, AntiMR = false, AntiMitten = false, AntiSquid = false,
@@ -277,27 +200,20 @@ end
 -- 🔔 HUD & NOTIFICATIONS
 -- ============================================================
 local HUD = Instance.new("ScreenGui")
-HUD.Name = "SlapAuraHUD"; HUD.ResetOnSpawn = false; HUD.DisplayOrder = 9998; HUD.Parent = PlayerGui
-local HUDFrame = Instance.new("Frame"); HUDFrame.Size = UDim2.new(0, 220, 0, 40); HUDFrame.Position = UDim2.new(0, 20, 0.1, 0); HUDFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20); HUDFrame.BackgroundTransparency = 0.2; HUDFrame.BorderSizePixel = 0; HUDFrame.Parent = HUD
+HUD.Name = "SlapAuraHUD"; HUD.ResetOnSpawn = false; HUD.Parent = PlayerGui
+local HUDFrame = Instance.new("Frame"); HUDFrame.Size = UDim2.new(0, 220, 0, 40); HUDFrame.Position = UDim2.new(0, 20, 0.1, 0); HUDFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 20); HUDFrame.Parent = HUD
 local HUDCorner = Instance.new("UICorner"); HUDCorner.CornerRadius = UDim.new(0, 6); HUDCorner.Parent = HUDFrame
-local HUDStroke = Instance.new("UIStroke"); HUDStroke.Color = Color3.fromRGB(255, 140, 0); HUDStroke.Thickness = 1.5; HUDStroke.Parent = HUDFrame
-local HUDText = Instance.new("TextLabel"); HUDText.Size = UDim2.new(1, -10, 1, 0); HUDText.Position = UDim2.new(0, 5, 0, 0); HUDText.BackgroundTransparency = 1; HUDText.Text = "🎃 Slap Aura: WAITING"; HUDText.TextColor3 = Color3.fromRGB(255, 255, 255); HUDText.Font = Enum.Font.GothamBold; HUDText.TextSize = 14; HUDText.Parent = HUDFrame
+local HUDText = Instance.new("TextLabel"); HUDText.Size = UDim2.new(1, -10, 1, 0); HUDText.Position = UDim2.new(0, 5, 0, 0); HUDText.BackgroundTransparency = 1; HUDText.Text = "🎃 Slap Aura: READY"; HUDText.TextColor3 = Color3.fromRGB(255, 255, 255); HUDText.Font = Enum.Font.GothamBold; HUDText.TextSize = 14; HUDText.Parent = HUDFrame
 
 local function showNotification(title, text, isSuccess)
-    local notifGui = Instance.new("ScreenGui"); notifGui.Name = "SlapNotifs"; notifGui.ResetOnSpawn = false; notifGui.DisplayOrder = 99999
-    pcall(function() notifGui.Parent = game:GetService("CoreGui") end)
-    if not notifGui.Parent then notifGui.Parent = PlayerGui end
-    local frame = Instance.new("Frame"); frame.Size = UDim2.fromOffset(280, 60); frame.Position = UDim2.new(1, 20, 0, 20); frame.BackgroundColor3 = Color3.fromRGB(20, 20, 25); frame.BorderSizePixel = 0; frame.Parent = notifGui
-    local corner = Instance.new("UICorner"); corner.CornerRadius = UDim.new(0, 8); corner.Parent = frame
-    local stroke = Instance.new("UIStroke"); stroke.Color = isSuccess and Color3.fromRGB(50, 220, 130) or Color3.fromRGB(255, 80, 80); stroke.Thickness = 1.5; stroke.Parent = frame
-    local icon = Instance.new("TextLabel"); icon.Size = UDim2.fromOffset(30, 30); icon.Position = UDim2.fromOffset(10, 15); icon.BackgroundTransparency = 1; icon.Text = isSuccess and "✅" or "⚠️"; icon.TextSize = 20; icon.Parent = frame
-    local titleLbl = Instance.new("TextLabel"); titleLbl.Size = UDim2.new(1, -50, 0, 20); titleLbl.Position = UDim2.fromOffset(45, 10); titleLbl.BackgroundTransparency = 1; titleLbl.Text = title; titleLbl.TextColor3 = Color3.fromRGB(255,255,255); titleLbl.Font = Enum.Font.GothamBold; titleLbl.TextSize = 14; titleLbl.TextXAlignment = Enum.TextXAlignment.Left; titleLbl.Parent = frame
-    local descLbl = Instance.new("TextLabel"); descLbl.Size = UDim2.new(1, -50, 0, 25); descLbl.Position = UDim2.fromOffset(45, 30); descLbl.BackgroundTransparency = 1; descLbl.Text = text; descLbl.TextColor3 = Color3.fromRGB(160, 160, 170); descLbl.Font = Enum.Font.Gotham; descLbl.TextSize = 12; descLbl.TextWrapped = true; descLbl.TextXAlignment = Enum.TextXAlignment.Left; descLbl.Parent = frame
-    TweenService:Create(frame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(1, -300, 0, 20)}):Play()
-    task.delay(3, function()
-        TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Position = UDim2.new(1, 20, 0, 20)}):Play()
-        task.wait(0.3); notifGui:Destroy()
-    end)
+    local ng = Instance.new("ScreenGui"); ng.Name = "Notif"; ng.ResetOnSpawn = false; ng.Parent = PlayerGui
+    local f = Instance.new("Frame"); f.Size = UDim2.fromOffset(280, 60); f.Position = UDim2.new(1, 20, 0, 20); f.BackgroundColor3 = Color3.fromRGB(20,20,25); f.Parent = ng
+    local c = Instance.new("UICorner"); c.CornerRadius = UDim.new(0, 8); c.Parent = f
+    local i = Instance.new("TextLabel"); i.Size = UDim2.fromOffset(30,30); i.Position = UDim2.fromOffset(10,15); i.BackgroundTransparency = 1; i.Text = isSuccess and "✅" or "⚠️"; i.TextSize = 20; i.Parent = f
+    local t = Instance.new("TextLabel"); t.Size = UDim2.new(1,-50,0,20); t.Position = UDim2.fromOffset(45,10); t.BackgroundTransparency = 1; t.Text = title; t.TextColor3 = Color3.fromRGB(255,255,255); t.Font = Enum.Font.GothamBold; t.TextSize = 14; t.Parent = f
+    local d = Instance.new("TextLabel"); d.Size = UDim2.new(1,-50,0,25); d.Position = UDim2.fromOffset(45,30); d.BackgroundTransparency = 1; d.Text = text; d.TextColor3 = Color3.fromRGB(160,160,170); d.Font = Enum.Font.Gotham; d.TextSize = 12; d.Parent = f
+    TweenService:Create(f, TweenInfo.new(0.4), {Position = UDim2.new(1,-300,0,20)}):Play()
+    task.delay(3, function() f:Destroy(); ng:Destroy() end)
 end
 
 -- ============================================================
@@ -310,7 +226,7 @@ function ToggleSpeed(state)
             local h = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
             if h then h.WalkSpeed = Settings.PremiumSpeed end
         end)
-        showNotification("Speed", "Premium Speed On", true)
+        showNotification("Speed", "On", true)
     else
         local h = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
         if h then h.WalkSpeed = 16 end
@@ -380,7 +296,7 @@ function ToggleAutoAim(state)
                 if closest then Camera.CFrame = CFrame.new(Camera.CFrame.Position, closest.Position) end
             end
         end)
-        showNotification("Auto Aim", "On", true)
+        showNotification("Aim", "On", true)
     end
 end
 
@@ -439,91 +355,6 @@ function ToggleGodmode(state)
         end
         showNotification("Godmode", "Off", false)
     end
-end
-
--- ============================================================
--- 🚀 SERVER HOPPER (Integrated)
--- ============================================================
-local function FetchServers()
-    local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
-    local response = nil
-    local method = "None"
-    
-    if syn and syn.request then
-        local ok, res = pcall(function() return syn.request({Url = url, Method = "GET"}) end)
-        if ok and res and res.Body and res.Body ~= "" then response = res.Body; method = "syn.request" end
-    end
-    if not response and request then
-        local ok, res = pcall(function() return request({Url = url, Method = "GET"}) end)
-        if ok and res and res.Body and res.Body ~= "" then response = res.Body; method = "request" end
-    end
-    if not response and http_request then
-        local ok, res = pcall(function() return http_request({Url = url, Method = "GET"}) end)
-        if ok and res and res.Body and res.Body ~= "" then response = res.Body; method = "http_request" end
-    end
-    if not response then
-        local ok, res = pcall(function() return game:HttpGet(url) end)
-        if ok and res and res ~= "" then response = res; method = "HttpGet" end
-    end
-    
-    return response, method
-end
-
-local function HopToNewServer()
-    showNotification("Hopper", "Searching...", true)
-    task.spawn(function()
-        local response, method = FetchServers()
-        if not response then
-            showNotification("Hopper", "❌ Fetch failed", false)
-            return
-        end
-        print("[Hopper] Method:", method)
-        
-        local ok, data = pcall(function() return HttpService:JSONDecode(response) end)
-        if not ok or not data or not data.data then
-            showNotification("Hopper", "❌ Invalid data", false)
-            return
-        end
-        
-        local validServers = {}
-        for _, server in ipairs(data.data) do
-            if server.playing < (server.maxPlayers * 0.95) and server.id ~= game.JobId then
-                table.insert(validServers, server)
-            end
-        end
-        
-        if #validServers == 0 then
-            showNotification("Hopper", "❌ No servers", false)
-            return
-        end
-        
-        local chosen = validServers[math.random(1, #validServers)]
-        showNotification("Hopper", "✅ Joining " .. chosen.playing .. "/" .. chosen.maxPlayers, true)
-        print("[Hopper] Joining:", chosen.id)
-        task.wait(1)
-        
-        local tpOk = pcall(function()
-            TeleportService:TeleportToPlaceInstance(game.PlaceId, chosen.id, LocalPlayer)
-        end)
-        
-        if not tpOk then
-            showNotification("Hopper", "⚠️ Trying basic...", false)
-            task.wait(1)
-            pcall(function() TeleportService:Teleport(game.PlaceId, LocalPlayer) end)
-        end
-    end)
-end
-
-local function QuickTeleport()
-    showNotification("Hopper", "Quick teleport...", true)
-    task.wait(0.5)
-    pcall(function() TeleportService:Teleport(game.PlaceId, LocalPlayer) end)
-end
-
-local function RejoinSame()
-    showNotification("Hopper", "Rejoining...", true)
-    task.wait(0.5)
-    pcall(function() TeleportService:TeleportToPlaceInstance(game.PlaceId, game.JobId, LocalPlayer) end)
 end
 
 -- ============================================================
@@ -597,20 +428,20 @@ function ToggleCandyFarm(state)
     CandyFarm.Collected = 0
     showNotification("Farm", "Started", true)
 
-    local function attachCharWatcher(char)
+    attachCharWatcher = function(char)
         if not char then return end
         if CandyFarm.DeathConn then pcall(function() CandyFarm.DeathConn:Disconnect() end) end
         local hum = char:FindFirstChildOfClass("Humanoid")
         if hum then
             CandyFarm.DeathConn = hum.Died:Connect(function()
-                if CandyFarm.Running then showNotification("Farm", "⚠️ Died! Continues after respawn", false) end
+                if CandyFarm.Running then showNotification("Farm", "⚠️ Died! Continues", false) end
             end)
         end
     end
 
     attachCharWatcher(LocalPlayer.Character)
     CandyFarm.CharConn = LocalPlayer.CharacterAdded:Connect(function(newChar)
-        if CandyFarm.Running then attachCharWatcher(newChar); showNotification("Farm", "Respawned!", true) end
+        if CandyFarm.Running then attachCharWatcher(newChar) end
     end)
 
     CandyFarm.Monitor = workspace.DescendantAdded:Connect(function(obj)
@@ -658,7 +489,7 @@ end
 -- 🍬 FLOATING BUTTON
 -- ============================================================
 local FloatGui = Instance.new("ScreenGui")
-FloatGui.Name = "CandyFarmFloat"; FloatGui.ResetOnSpawn = false; FloatGui.DisplayOrder = 99999; FloatGui.Parent = PlayerGui
+FloatGui.Name = "CandyFarmFloat"; FloatGui.ResetOnSpawn = false; FloatGui.Parent = PlayerGui
 
 local FloatBtn = Instance.new("TextButton")
 FloatBtn.Size = UDim2.fromOffset(60, 60); FloatBtn.Position = UDim2.new(0, 20, 0.5, -30)
@@ -766,7 +597,7 @@ local function AutoAvoidCheck(myRoot)
                         pcall(function()
                             myRoot.CFrame = CFrame.new(newPos + Vector3.new(0, 10, 0))
                             AutoAvoidSettings.LastAvoidTime = tick()
-                            showNotification("Auto Avoid", "⚠️ Escaped ("..(gloveName or "?")..")", true)
+                            showNotification("Auto Avoid", "⚠️ Escaped", true)
                         end)
                         return
                     end
@@ -950,8 +781,8 @@ function ToggleAntiKnockback(state)
                 if Vector3.new(vel.X, 0, vel.Z).Magnitude > 100 then hrp.AssemblyLinearVelocity = Vector3.new(0, vel.Y, 0) end
             end
         end)
-        showNotification("Anti Knockback", "On", true)
-    else showNotification("Anti Knockback", "Off", false) end
+        showNotification("Anti KB", "On", true)
+    else showNotification("Anti KB", "Off", false) end
 end
 
 function ToggleAntiHoney(state)
@@ -1076,27 +907,13 @@ function ToggleAntiAFK(state)
     else showNotification("Anti AFK", "Off", false) end
 end
 
-function ToggleAutoRejoin(state)
-    Settings.AutoRejoin = state
-    if state then
-        pcall(function()
-            LocalPlayer.OnTeleport:Connect(function(s)
-                if s == Enum.TeleportState.Started and Settings.AutoRejoin then
-                    task.wait(3); TeleportService:Teleport(game.PlaceId, LocalPlayer)
-                end
-            end)
-        end)
-        showNotification("Auto Rejoin", "On", true)
-    else showNotification("Auto Rejoin", "Off", false) end
-end
-
 -- ============================================================
 -- 🎨 GUI
 -- ============================================================
 function LoadMainGUI()
     local success, err = pcall(function()
         local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-        local Window = WindUI:CreateWindow({ Title = "Slap Aura | V59 Ultimate", Icon = "shield", Author = "Majed", Folder = "SlapAuraV59", Size = UDim2.fromOffset(600, 540), Transparent = true, Theme = "Dark" })
+        local Window = WindUI:CreateWindow({ Title = "Slap Aura | V59", Icon = "shield", Author = "Majed", Folder = "SlapAuraV59", Size = UDim2.fromOffset(600, 520), Transparent = true, Theme = "Dark" })
 
         -- Combat
         local CombatTab = Window:Tab({ Title = "Combat", Icon = "crosshair" })
@@ -1107,7 +924,7 @@ function LoadMainGUI()
         end })
         CombatTab:Slider({ Title = "Aura Range", Value = { Min = 5, Max = 50, Default = 15 }, Callback = function(v) Settings.Range = v end })
         CombatTab:Slider({ Title = "Aura Max Hits/sec", Value = { Min = 1, Max = 20, Default = 5 }, Callback = function(v) Settings.AuraMaxHits = v end })
-        CombatTab:Dropdown({ Title = "🎯 Hit Target Part", Values = {"Any", "Head", "HumanoidRootPart"}, Default = "Any", Callback = function(o) Settings.HitPart = o; showNotification("Aura", "Target: "..o, true) end })
+        CombatTab:Dropdown({ Title = "🎯 Hit Target Part", Values = {"Any", "Head", "HumanoidRootPart"}, Default = "Any", Callback = function(o) Settings.HitPart = o end })
         CombatTab:Toggle({ Title = "Auto Aim", Value = false, Callback = function(s) ToggleAutoAim(s) end })
         CombatTab:Toggle({ Title = "Hitbox", Value = false, Callback = function(s) ToggleHitbox(s) end })
         CombatTab:Toggle({ Title = "Godmode", Value = false, Callback = function(s) ToggleGodmode(s) end })
@@ -1128,13 +945,7 @@ function LoadMainGUI()
             if CandyFarm.Running ~= s then ToggleCandyFarm(s) end
         end })
         CandyFarm.UI_Toggle = farmToggle
-        FarmTab:Toggle({ Title = "Auto Server Hop (When Empty)", Value = false, Callback = function(s) Settings.ServerHopper = s end })
         FarmTab:Paragraph({ Title = "Candy Stats", Desc = "Collected: 0 | Folder: None" })
-
-        FarmTab:Section({ Title = "🚀 Server Hopper" })
-        FarmTab:Button({ Title = "🔍 Find & Join New Server", Callback = function() HopToNewServer() end })
-        FarmTab:Button({ Title = "⚡ Quick Teleport (Random)", Callback = function() QuickTeleport() end })
-        FarmTab:Button({ Title = "🔄 Rejoin Same Server", Callback = function() RejoinSame() end })
 
         -- Visuals
         local VisTab = Window:Tab({ Title = "Visuals", Icon = "eye" })
@@ -1145,7 +956,7 @@ function LoadMainGUI()
             showNotification("Auto Avoid", s and "ON" or "OFF", s)
         end })
         VisTab:Toggle({ Title = "Only EXTREME Gloves", Value = true, Callback = function(s) AutoAvoidSettings.OnlyExtreme = s end })
-        VisTab:Slider({ Title = "Avoid Distance (studs)", Value = { Min = 10, Max = 100, Default = 30 }, Callback = function(v) AutoAvoidSettings.Distance = v end })
+        VisTab:Slider({ Title = "Avoid Distance", Value = { Min = 10, Max = 100, Default = 30 }, Callback = function(v) AutoAvoidSettings.Distance = v end })
         VisTab:Slider({ Title = "Teleport Away Distance", Value = { Min = 30, Max = 200, Default = 60 }, Callback = function(v) AutoAvoidSettings.SafeDistance = v end })
 
         -- Anti
@@ -1164,7 +975,6 @@ function LoadMainGUI()
         AntiTab:Toggle({ Title = "🦑 Anti Squid", Value = false, Callback = function(s) ToggleAntiSquid(s) end })
         AntiTab:Section({ Title = "System" })
         AntiTab:Toggle({ Title = "Anti AFK", Value = false, Callback = function(s) ToggleAntiAFK(s) end })
-        AntiTab:Toggle({ Title = "Auto Rejoin", Value = false, Callback = function(s) ToggleAutoRejoin(s) end })
 
         -- Settings
         local SetTab = Window:Tab({ Title = "Settings", Icon = "settings" })
@@ -1176,36 +986,13 @@ function LoadMainGUI()
                 showNotification("Safe Pos", "Updated!", true)
             end
         end })
-        SetTab:Button({ Title = "⏱️ Teleport Status", Callback = function()
-            print("========== SERVER INFO ==========")
-            print("PlaceId:", game.PlaceId)
-            print("JobId:", game.JobId)
-            print("Players:", #Players:GetPlayers())
-            print("syn.request:", type(syn and syn.request))
-            print("request:", type(request))
-            print("http_request:", type(http_request))
-            print("=================================")
-            showNotification("Info", "Check F9 Console", true)
-        end })
         SetTab:Button({ Title = "🔍 Scan for Candy", Callback = function()
             local candies = GetCandyList()
             if #candies == 0 then showNotification("Scan", "No Candy", false)
-            else
-                local names = {}
-                for i = 1, math.min(#candies, 5) do table.insert(names, candies[i].Name) end
-                showNotification("Scan", "Found "..#candies..": "..table.concat(names, ", "), true)
-            end
-        end })
-        SetTab:Button({ Title = "📁 List Workspace Folders", Callback = function()
-            local folders = {}
-            for _, obj in pairs(workspace:GetChildren()) do
-                if obj:IsA("Folder") then table.insert(folders, obj.Name) end
-            end
-            if #folders == 0 then showNotification("Folders", "None", false)
-            else showNotification("Folders", table.concat(folders, ", "), true); print("Folders:", folders) end
+            else showNotification("Scan", "Found "..#candies, true) end
         end })
         SetTab:Button({ Title = "📊 Candy Farm Status", Callback = function()
-            local msg = "Running: "..tostring(CandyFarm.Running).." | Collected: "..CandyFarm.Collected.." | Folder: "..(CandyFarm.FolderFound and CandyFarm.FolderName or "None").." | Found: "..CandyFarm.LastCount
+            local msg = "Running: "..tostring(CandyFarm.Running).." | Collected: "..CandyFarm.Collected.." | Found: "..CandyFarm.LastCount
             showNotification("Status", msg, CandyFarm.Collected > 0)
         end })
         SetTab:Button({ Title = "❌ Unload", Callback = function()
@@ -1223,18 +1010,13 @@ function LoadMainGUI()
             while task.wait(1) do
                 if CandyFarm.Running then
                     pcall(function()
-                        FarmTab:SetDesc("Candy Stats", string.format("Collected: %d | Folder: %s | Found: %d", CandyFarm.Collected, CandyFarm.FolderFound and CandyFarm.FolderName or "None", CandyFarm.LastCount))
+                        FarmTab:SetDesc("Candy Stats", string.format("Collected: %d | Found: %d", CandyFarm.Collected, CandyFarm.LastCount))
                     end)
                 end
             end
         end)
     end)
-    if not success then
-        warn("[Slap Aura] GUI Error: " .. tostring(err))
-        showNotification("GUI Error", "WindUI Failed", false)
-    else
-        showNotification("Slap Aura", "V59 Ready!", true)
-    end
+    if not success then warn("[Slap Aura] GUI Error: " .. tostring(err)) end
 end
 
 LoadMainGUI()
@@ -1244,4 +1026,4 @@ task.delay(3, function()
     print("✅ [Slap Aura] Candy Farm ready")
 end)
 
-print("✅ [Slap Aura] V59 Ultimate Final Ready!")
+print("✅ [Slap Aura] V59 Working Edition Ready!")
