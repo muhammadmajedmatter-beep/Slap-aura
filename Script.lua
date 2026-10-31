@@ -1,7 +1,7 @@
 -- ============================================================
--- 👑 SLAP AURA HUB | V59 | DELTA-SAFE GHOST PROTOCOL
--- Full Anti + ESP Auto-Detect + Candy Farm Full Search
--- + Server Hopper + Floating Button
+-- 👑 SLAP AURA HUB | V59 | ULTIMATE FINAL
+-- (Ghost Protocol + All Antis + ESP Auto-Detect
+--  + Candy Farm SB Exclusive + Server Hopper + Floating Button)
 -- ============================================================
 
 local Players = game:GetService("Players")
@@ -54,7 +54,7 @@ local Version = Instance.new("TextLabel")
 Version.Size = UDim2.new(1, 0, 0, 20)
 Version.Position = UDim2.fromOffset(0, 70)
 Version.BackgroundTransparency = 1
-Version.Text = "V59 • Ultimate Final"
+Version.Text = "V59 • Ultimate Final (SB Exclusive)"
 Version.TextColor3 = Color3.fromRGB(160, 160, 175)
 Version.Font = Enum.Font.Gotham
 Version.TextSize = 12
@@ -190,8 +190,7 @@ local Settings = {
     AntiVoid = false, AntiFling = false, AntiRagdoll = false,
     AntiKnockback = false, AntiHoney = false, AntiIce = false,
     AntiMail = false, AntiMR = false, AntiMitten = false, AntiSquid = false,
-    AntiAFK = false, AutoRejoin = false, SafePos = Vector3.new(0, 100, 0),
-    FullSearch = true
+    AntiAFK = false, AutoRejoin = false, SafePos = Vector3.new(0, 100, 0)
 }
 local Connections = {}
 local HitCount = 0
@@ -380,144 +379,60 @@ local function HopToNewServer()
             end
         end
         
-        -- Fallback: teleport to random server
         TeleportService:Teleport(game.PlaceId, LocalPlayer)
     end)
 end
 
 -- ============================================================
--- 🍬 7. CANDY FARM (FULL SEARCH + TweenService)
+-- 🍬 7. CANDY FARM (Slap Battles Exclusive - Gather Method)
 -- ============================================================
-local CANDY_KEYWORDS = {
-    "corn", "candy", "sweet", "treat", "token", "coin",
-    "collect", "pickup", "orb", "gem", "crystal", "honey",
-    "sugar", "caramel", "chocolate", "lollipop", "gum"
-}
-
-local function isCandyPart(obj)
-    if not (obj:IsA("BasePart") or obj:IsA("MeshPart") or obj:IsA("UnionOperation")) then
-        return false
-    end
-    local name = string.lower(obj.Name)
-    for _, kw in ipairs(CANDY_KEYWORDS) do
-        if string.find(name, kw) then return true end
-    end
-    return false
-end
-
-local function findCandyEverywhere()
-    local found = {}
-    local searched = {}
-    
-    -- 1. workspace (كل المناطق)
-    pcall(function()
-        for _, obj in pairs(workspace:GetDescendants()) do
-            if isCandyPart(obj) and not searched[obj] then
-                table.insert(found, obj)
-                searched[obj] = true
-            end
-        end
-    end)
-    
-    -- 2. ReplicatedStorage
-    pcall(function()
-        local rs = game:GetService("ReplicatedStorage")
-        for _, obj in pairs(rs:GetDescendants()) do
-            if isCandyPart(obj) and not searched[obj] then
-                table.insert(found, obj)
-                searched[obj] = true
-            end
-        end
-    end)
-    
-    -- 3. Lighting
-    pcall(function()
-        local lt = game:GetService("Lighting")
-        for _, obj in pairs(lt:GetDescendants()) do
-            if isCandyPart(obj) and not searched[obj] then
-                table.insert(found, obj)
-                searched[obj] = true
-            end
-        end
-    end)
-    
-    -- 4. كل players' characters (لو اللعبة بتحط الحلوى عليهم)
-    pcall(function()
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr.Character then
-                for _, obj in pairs(plr.Character:GetDescendants()) do
-                    if isCandyPart(obj) and not searched[obj] then
-                        table.insert(found, obj)
-                        searched[obj] = true
-                    end
-                end
-            end
-        end
-    end)
-    
-    return found
-end
-
-local function collectOne(obj)
-    local char = LocalPlayer.Character
-    if not char then return false end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return false end
-    
-    local success = pcall(function()
-        local targetPos = obj.Position + Vector3.new(0, 3, 0)
-        local tween = TweenService:Create(
-            hrp,
-            TweenInfo.new(0.12, Enum.EasingStyle.Linear),
-            {CFrame = CFrame.new(targetPos)}
-        )
-        tween:Play()
-        tween.Completed:Wait()
-        
-        -- محاولة لمس متعددة للتأكد
-        firetouchinterest(hrp, obj, 0); task.wait(0.03)
-        firetouchinterest(hrp, obj, 1); task.wait(0.03)
-        firetouchinterest(hrp, obj, 0); task.wait(0.03)
-        firetouchinterest(hrp, obj, 1)
-    end)
-    return success
-end
-
-function ToggleCandyFarm(state)
+local function ToggleCandyFarm(state)
     Settings.CandyFarm = state
     if Connections.Candy then Connections.Candy:Disconnect() end
     if not state then showNotification("Farm", "Stopped", false); return end
-    
-    showNotification("Farm", "🍬 Full Search Started", true)
+
+    showNotification("Farm", "🍬 SB Candy Farm Started", true)
+
     Connections.Candy = task.spawn(function()
         while Settings.CandyFarm do
             local char = LocalPlayer.Character
             local hrp = char and char:FindFirstChild("HumanoidRootPart")
-            if not hrp then task.wait(1); continue end
-            
-            -- البحث الشامل في كل المناطق
-            local candies = findCandyEverywhere()
-            
-            if #candies > 0 then
-                for _, candy in ipairs(candies) do
-                    if not Settings.CandyFarm then break end
-                    if candy and candy.Parent then
-                        pcall(function() collectOne(candy) end)
-                        task.wait(0.08)
+
+            -- البحث عن مجلد الحلوى الرسمي في اللعبة
+            local candyFolder = workspace:FindFirstChild("CandyCorns")
+
+            if hrp and candyFolder then
+                local candies = candyFolder:GetChildren()
+
+                if #candies > 0 then
+                    -- تجميع كل الحلوى عندك (أسرع طريقة)
+                    for _, candy in ipairs(candies) do
+                        if not Settings.CandyFarm then break end
+                        if candy:IsA("BasePart") then
+                            pcall(function()
+                                candy.CFrame = hrp.CFrame
+                                firetouchinterest(hrp, candy, 0)
+                                task.wait(0.01)
+                                firetouchinterest(hrp, candy, 1)
+                            end)
+                        end
+                    end
+                    task.wait(0.1)
+                else
+                    if Settings.ServerHopper then
+                        showNotification("Hopper", "No Candy! Hopping...", true)
+                        task.wait(2)
+                        if Settings.CandyFarm then
+                            HopToNewServer()
+                            break
+                        end
+                    else
+                        task.wait(1)
                     end
                 end
             else
-                -- لا توجد حلوى - انتظر أو اهرب
-                if Settings.ServerHopper then
-                    showNotification("Hopper", "Server Cleared! Hopping...", true)
-                    task.wait(2)
-                    if Settings.CandyFarm then
-                        HopToNewServer()
-                        break
-                    end
-                else
-                    task.wait(2)
-                end
+                showNotification("Farm", "CandyCorns folder not found!", false)
+                task.wait(3)
             end
         end
     end)
@@ -563,7 +478,6 @@ FloatLabel.Font = Enum.Font.GothamBold
 FloatLabel.TextSize = 10
 FloatLabel.Parent = FloatBtn
 
--- Dragging logic
 local isDragging = false
 local dragStartPos
 local btnStartPos
@@ -595,7 +509,6 @@ UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         task.delay(0.05, function()
             if not isDragging then
-                -- Toggle candy farm
                 local newState = not Settings.CandyFarm
                 ToggleCandyFarm(newState)
                 if newState then
@@ -972,7 +885,7 @@ end
 function LoadMainGUI()
     local success, err = pcall(function()
         local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-        local Window = WindUI:CreateWindow({ Title = "Slap Aura | V59", Icon = "shield", Author = "Majed", Folder = "SlapAuraV59", Size = UDim2.fromOffset(600, 500), Transparent = true, Theme = "Dark" })
+        local Window = WindUI:CreateWindow({ Title = "Slap Aura | V59 SB", Icon = "shield", Author = "Majed", Folder = "SlapAuraV59", Size = UDim2.fromOffset(600, 500), Transparent = true, Theme = "Dark" })
 
         -- ⚔️ Combat
         local CombatTab = Window:Tab({ Title = "Combat", Icon = "crosshair" })
@@ -995,7 +908,7 @@ function LoadMainGUI()
 
         -- 🍬 Farm
         local FarmTab = Window:Tab({ Title = "Farm", Icon = "leaf" })
-        FarmTab:Toggle({ Title = "Candy Corn Farm (Full Search)", Value = false, Callback = function(s) ToggleCandyFarm(s) end })
+        FarmTab:Toggle({ Title = "🍬 Candy Corn Farm (SB Exclusive)", Value = false, Callback = function(s) ToggleCandyFarm(s) end })
         FarmTab:Toggle({ Title = "Server Hopper", Value = false, Callback = function(s) Settings.ServerHopper = s end })
         FarmTab:Button({ Title = "🚀 Hop Now", Callback = function() HopToNewServer() end })
         FarmTab:Paragraph({ Title = "Info", Desc = "🍬 الزرار العائم على الشاشة بيشتغل كـ Toggle سريع. اسحبه لأي مكان." })
@@ -1038,6 +951,14 @@ function LoadMainGUI()
             local h = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
             if h then showNotification("Debug", "WalkSpeed: "..h.WalkSpeed.." | Target: "..Settings.PremiumSpeed, true) end
         end })
+        SetTab:Button({ Title = "🍬 Check CandyCorns Folder", Callback = function()
+            local folder = workspace:FindFirstChild("CandyCorns")
+            if folder then
+                showNotification("CandyCorns", "Found! Count: "..#folder:GetChildren(), true)
+            else
+                showNotification("CandyCorns", "Folder not found in workspace", false)
+            end
+        end })
         SetTab:Button({ Title = "❌ Unload", Callback = function()
             for _, c in pairs(Connections) do pcall(function() c:Disconnect() end) end
             for _, c in pairs(espConnections) do pcall(function() c:Disconnect() end) end
@@ -1048,9 +969,9 @@ function LoadMainGUI()
         warn("[Slap Aura] GUI Error: " .. tostring(err))
         showNotification("GUI Error", "Failed", false)
     else
-        showNotification("Slap Aura", "Loaded Successfully! 🎃", true)
+        showNotification("Slap Aura", "V59 SB Loaded! 🎃", true)
     end
 end
 
 LoadMainGUI()
-print("✅ [Slap Aura] V59 Ultimate Final Ready!")
+print("✅ [Slap Aura] V59 Ultimate Final (SB Exclusive) Ready!")
