@@ -1,7 +1,8 @@
 -- ============================================================
--- 👑 SLAP AURA HUB | V59 | ESP PRO + AUTO AVOID + ANY-PART AURA
--- (Glove Detection + Danger Levels + Auto Avoid
---  + Candy Farm V5 + All Antis + Aura hits ANY body part)
+-- 👑 SLAP AURA HUB | V59 | ULTIMATE FINAL
+-- (ESP PRO + Auto Avoid + Any-Part Aura + Candy Farm V5
+--  + NEW Server Hopper (Best Effort, Crash-Proof)
+--  + All Antis + Ghost Protocol V9)
 -- ============================================================
 
 if _G.SlapAuraAlreadyRunning then
@@ -17,6 +18,7 @@ local TweenService = game:GetService("TweenService")
 local VirtualUser = game:GetService("VirtualUser")
 local UserInputService = game:GetService("UserInputService")
 local TeleportService = game:GetService("TeleportService")
+local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local Camera = workspace.CurrentCamera
@@ -92,7 +94,7 @@ local Version = Instance.new("TextLabel")
 Version.Size = UDim2.new(1, 0, 0, 20)
 Version.Position = UDim2.fromOffset(0, 75)
 Version.BackgroundTransparency = 1
-Version.Text = "V59  •  Any-Part Aura Edition"
+Version.Text = "V59  •  Ultimate Final Edition"
 Version.TextColor3 = Color3.fromRGB(160, 160, 175)
 Version.Font = Enum.Font.Gotham
 Version.TextSize = 13
@@ -165,7 +167,7 @@ local loadSteps = {
     {p = 45, text = "Injecting Remote Hooks..."},
     {p = 60, text = "Building HUD..."},
     {p = 75, text = "Loading WindUI Framework..."},
-    {p = 90, text = "Preparing Any-Part Aura..."},
+    {p = 90, text = "Preparing Ultimate Final..."},
     {p = 100, text = "Ready! Punch once with glove"}
 }
 
@@ -193,7 +195,7 @@ end
 runLoadingScreen()
 
 -- ============================================================
--- 🛑 GHOST PROTOCOL V9
+-- 🛑 GHOST PROTOCOL V9 (Delta-Safe)
 -- ============================================================
 local CapturedRemote = nil
 local RemoteFormat = "None"
@@ -265,11 +267,11 @@ if hasHooks then
 end
 
 -- ============================================================
--- ⚙️ الإعدادات
+-- ⚙️ SETTINGS
 -- ============================================================
 local Settings = {
     AuraEnabled = true, Range = 15, AuraMaxHits = 5,
-    HitPart = "Any", -- "Any" / "Head" / "HumanoidRootPart"
+    HitPart = "Any",
     FlySpeed = 50, Noclip = false, Godmode = false,
     PremiumSpeed = 35, ESP = false, AutoAim = false,
     HitboxExpander = false, GravityControl = false,
@@ -283,17 +285,15 @@ local Connections = {}
 local HitCount = 0
 
 -- ============================================================
--- 🎯 دالة اختيار جزء الهدف
+-- 🎯 Target Part Selector
 -- ============================================================
 local function GetTargetPart(char)
     if not char then return nil end
-    
     if Settings.HitPart == "Head" then
         return char:FindFirstChild("Head")
     elseif Settings.HitPart == "HumanoidRootPart" then
         return char:FindFirstChild("HumanoidRootPart")
     else
-        -- "Any" = جرب Head، بعدين HRP، بعدين أي BasePart
         return char:FindFirstChild("Head")
             or char:FindFirstChild("HumanoidRootPart")
             or char:FindFirstChild("Torso")
@@ -376,7 +376,7 @@ local function showNotification(title, text, isSuccess)
 end
 
 -- ============================================================
--- 💎 المحركات
+-- 💎 ENGINES
 -- ============================================================
 function ToggleSpeed(state)
     if Connections.Speed then Connections.Speed:Disconnect() end
@@ -517,19 +517,69 @@ function ToggleGodmode(state)
 end
 
 -- ============================================================
--- 🚀 SERVER HOPPER
+-- 🚀 SERVER HOPPER (Best Effort - Crash-Proof)
 -- ============================================================
 local function HopToNewServer()
-    pcall(function() showNotification("Hopper", "Teleporting...", true) end)
-    task.wait(0.5)
-    pcall(function()
-        local player = Players.LocalPlayer
-        if player then TeleportService:Teleport(game.PlaceId, player) end
+    showNotification("Hopper", "Searching for a new server...", true)
+    task.wait(0.3)
+
+    local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100"
+
+    -- محاولة جلب قائمة السيرفرات
+    local fetchSuccess, response = pcall(function()
+        return game:HttpGet(url)
     end)
+
+    if not fetchSuccess or not response or response == "" then
+        warn("[Hopper] HttpGet failed. Falling back to basic Teleport.")
+        showNotification("Hopper", "⚠️ Fetch failed, trying basic teleport...", false)
+        task.wait(0.5)
+        pcall(function()
+            TeleportService:Teleport(game.PlaceId, LocalPlayer)
+        end)
+        return
+    end
+
+    -- تحليل البيانات
+    local decodeSuccess, data = pcall(function()
+        return HttpService:JSONDecode(response)
+    end)
+
+    if not decodeSuccess or not data or not data.data then
+        warn("[Hopper] JSONDecode failed.")
+        showNotification("Hopper", "❌ No server data", false)
+        return
+    end
+
+    -- البحث عن سيرفر مناسب
+    local found = false
+    for _, server in ipairs(data.data) do
+        if server.playing < (server.maxPlayers * 0.9) and server.id ~= game.JobId then
+            found = true
+            print("[Hopper] Attempting teleport to:", server.id, "| Players:", server.playing .. "/" .. server.maxPlayers)
+            showNotification("Hopper", "✅ Joining new server...", true)
+            task.wait(0.5)
+            
+            local tpSuccess, tpError = pcall(function()
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, LocalPlayer)
+            end)
+
+            if not tpSuccess then
+                warn("[Hopper] TeleportToPlaceInstance failed:", tpError)
+                showNotification("Hopper", "❌ Teleport blocked by executor", false)
+            end
+            break
+        end
+    end
+
+    if not found then
+        warn("[Hopper] No suitable server found.")
+        showNotification("Hopper", "❌ All servers full, try again later", false)
+    end
 end
 
 -- ============================================================
--- 🍬 CANDY FARM V5
+-- 🍬 CANDY FARM V5 (Manual Control)
 -- ============================================================
 local CandyFarm = {
     Running = false, Collected = 0, Thread = nil, Monitor = nil,
@@ -767,7 +817,7 @@ UserInputService.InputEnded:Connect(function(input)
 end)
 
 -- ============================================================
--- 👁️ ESP PRO
+-- 👁️ ESP PRO (Glove Detection + Danger + Auto Avoid)
 -- ============================================================
 local GloveDanger = {
     ["killstreak"] = "EXTREME", ["god's hand"] = "EXTREME", ["gods hand"] = "EXTREME",
@@ -953,7 +1003,6 @@ Connections.Aura = RunService.Stepped:Connect(function()
     end
     
     if closest and closest.Character then
-        -- 🎯 استخدام دالة اختيار الجزء (Any / Head / HRP)
         local targetPart = GetTargetPart(closest.Character)
         if targetPart then
             pcall(function()
@@ -1177,26 +1226,22 @@ function ToggleAutoRejoin(state)
 end
 
 -- ============================================================
--- 🎨 الواجهة (WindUI)
+-- 🎨 GUI
 -- ============================================================
 function LoadMainGUI()
     local success, err = pcall(function()
         local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-        local Window = WindUI:CreateWindow({ Title = "Slap Aura | V59", Icon = "shield", Author = "Majed", Folder = "SlapAuraV59", Size = UDim2.fromOffset(600, 540), Transparent = true, Theme = "Dark" })
+        local Window = WindUI:CreateWindow({ Title = "Slap Aura | V59 Ultimate", Icon = "shield", Author = "Majed", Folder = "SlapAuraV59", Size = UDim2.fromOffset(600, 540), Transparent = true, Theme = "Dark" })
 
-        -- ⚔️ Combat
+        -- Combat
         local CombatTab = Window:Tab({ Title = "Combat", Icon = "crosshair" })
         CombatTab:Button({ Title = "🔄 Refresh Glove", Callback = function() CapturedRemote = nil; RemoteFormat = "None"; showNotification("System", "Glove Reset", true) end })
         CombatTab:Toggle({ Title = "Auto Slap", Value = true, Callback = function(s)
             Settings.AuraEnabled = s
-            if s and not CapturedRemote then
-                showNotification("Aura", "⚠️ Punch once with glove to capture remote", false)
-            end
+            if s and not CapturedRemote then showNotification("Aura", "⚠️ Punch once with glove to capture remote", false) end
         end })
         CombatTab:Slider({ Title = "Aura Range", Value = { Min = 5, Max = 50, Default = 15 }, Callback = function(v) Settings.Range = v end })
         CombatTab:Slider({ Title = "Aura Max Hits/sec", Value = { Min = 1, Max = 20, Default = 5 }, Callback = function(v) Settings.AuraMaxHits = v end })
-        
-        -- 🎯 اختيار جزء الهدف
         CombatTab:Dropdown({
             Title = "🎯 Hit Target Part",
             Values = {"Any", "Head", "HumanoidRootPart"},
@@ -1206,12 +1251,11 @@ function LoadMainGUI()
                 showNotification("Aura", "Now hitting: "..option, true)
             end
         })
-        
         CombatTab:Toggle({ Title = "Auto Aim", Value = false, Callback = function(s) ToggleAutoAim(s) end })
         CombatTab:Toggle({ Title = "Hitbox", Value = false, Callback = function(s) ToggleHitbox(s) end })
         CombatTab:Toggle({ Title = "Godmode", Value = false, Callback = function(s) ToggleGodmode(s) end })
 
-        -- 💨 Movement
+        -- Movement
         local MoveTab = Window:Tab({ Title = "Movement", Icon = "wind" })
         MoveTab:Toggle({ Title = "Premium Speed", Value = false, Callback = function(s) ToggleSpeed(s) end })
         MoveTab:Slider({ Title = "Speed Value", Value = { Min = 16, Max = 100, Default = 35 }, Callback = function(v) Settings.PremiumSpeed = v end })
@@ -1220,18 +1264,18 @@ function LoadMainGUI()
         MoveTab:Toggle({ Title = "Zero Gravity", Value = false, Callback = function(s) ToggleGravity(s) end })
         MoveTab:Toggle({ Title = "Noclip", Value = false, Callback = function(s) ToggleNoclip(s) end })
 
-        -- 🍬 Farm
+        -- Farm
         local FarmTab = Window:Tab({ Title = "Farm", Icon = "leaf" })
         local farmToggle = FarmTab:Toggle({ Title = "🍬 Candy Farm V5", Value = false, Callback = function(s)
             if not _G.CandyFarmReady then return end
             if CandyFarm.Running ~= s then ToggleCandyFarm(s) end
         end })
         CandyFarm.UI_Toggle = farmToggle
-        FarmTab:Toggle({ Title = "⚠️ Auto Server Hop (Off default)", Value = false, Callback = function(s) Settings.ServerHopper = s end })
+        FarmTab:Toggle({ Title = "⚠️ Auto Server Hop", Value = false, Callback = function(s) Settings.ServerHopper = s end })
         FarmTab:Button({ Title = "🚀 Hop Now", Callback = function() HopToNewServer() end })
         FarmTab:Paragraph({ Title = "Candy Stats", Desc = "Collected: 0 | Folder: None" })
 
-        -- 👁️ Visuals
+        -- Visuals
         local VisTab = Window:Tab({ Title = "Visuals", Icon = "eye" })
         VisTab:Toggle({ Title = "👁️ Player ESP (Glove Detection)", Value = false, Callback = function(s) ToggleESP(s) end })
         VisTab:Section({ Title = "🛡️ Auto Avoid" })
@@ -1243,7 +1287,7 @@ function LoadMainGUI()
         VisTab:Slider({ Title = "Avoid Distance (studs)", Value = { Min = 10, Max = 100, Default = 30 }, Callback = function(v) AutoAvoidSettings.Distance = v end })
         VisTab:Slider({ Title = "Teleport Away Distance", Value = { Min = 30, Max = 200, Default = 60 }, Callback = function(v) AutoAvoidSettings.SafeDistance = v end })
 
-        -- 🛡️ Anti
+        -- Anti
         local AntiTab = Window:Tab({ Title = "Anti", Icon = "shield" })
         AntiTab:Section({ Title = "Game Mechanics" })
         AntiTab:Toggle({ Title = "Anti Void", Value = false, Callback = function(s) ToggleAntiVoid(s) end })
@@ -1261,7 +1305,7 @@ function LoadMainGUI()
         AntiTab:Toggle({ Title = "Anti AFK", Value = false, Callback = function(s) ToggleAntiAFK(s) end })
         AntiTab:Toggle({ Title = "Auto Rejoin", Value = false, Callback = function(s) ToggleAutoRejoin(s) end })
 
-        -- ⚙️ Settings
+        -- Settings
         local SetTab = Window:Tab({ Title = "Settings", Icon = "settings" })
         SetTab:Button({ Title = "🔔 Test Notification", Callback = function() showNotification("Test", "Working!", true) end })
         SetTab:Button({ Title = "📍 Set Safe Pos", Callback = function()
@@ -1270,6 +1314,22 @@ function LoadMainGUI()
                 Settings.SafePos = char.HumanoidRootPart.Position
                 showNotification("Safe Pos", "Updated!", true)
             end
+        end })
+        SetTab:Button({ Title = "🔄 Rejoin Same Server", Callback = function()
+            showNotification("Hopper", "Rejoining...", true)
+            task.wait(0.3)
+            pcall(function() TeleportService:Teleport(game.PlaceId, LocalPlayer) end)
+        end })
+        SetTab:Button({ Title = "⏱️ Check Teleport Status", Callback = function()
+            print("========== SERVER INFO ==========")
+            print("PlaceId:", game.PlaceId)
+            print("JobId:", game.JobId)
+            print("Players:", #Players:GetPlayers())
+            print("TeleportService.Teleport:", type(TeleportService.Teleport))
+            print("TeleportService.TeleportAsync:", type(TeleportService.TeleportAsync))
+            print("TeleportToPlaceInstance:", type(TeleportService.TeleportToPlaceInstance))
+            print("=================================")
+            showNotification("Info", "Check F9 Console", true)
         end })
         SetTab:Button({ Title = "🔍 Scan for Candy", Callback = function()
             local candies = GetCandyList()
@@ -1292,7 +1352,7 @@ function LoadMainGUI()
             end
         end })
         SetTab:Button({ Title = "📊 Candy Farm Status", Callback = function()
-            local msg = "Running: "..tostring(CandyFarm.Running).." | Collected: "..CandyFarm.Collected.." | Folder: "..(CandyFarm.FolderFound and CandyFarm.FolderName or "None").." | Found: "..CandyFarm.LastCount.." | Ready: "..tostring(_G.CandyFarmReady)
+            local msg = "Running: "..tostring(CandyFarm.Running).." | Collected: "..CandyFarm.Collected.." | Folder: "..(CandyFarm.FolderFound and CandyFarm.FolderName or "None").." | Found: "..CandyFarm.LastCount
             showNotification("Farm Status", msg, CandyFarm.Collected > 0)
         end })
         SetTab:Button({ Title = "❌ Unload", Callback = function()
@@ -1320,7 +1380,7 @@ function LoadMainGUI()
         warn("[Slap Aura] GUI Error: " .. tostring(err))
         showNotification("GUI Error", "WindUI Failed to Load", false)
     else
-        showNotification("Slap Aura", "V59 Ready! Auto Slap ON", true)
+        showNotification("Slap Aura", "V59 Ultimate Ready!", true)
     end
 end
 
@@ -1328,7 +1388,7 @@ LoadMainGUI()
 
 task.delay(3, function()
     _G.CandyFarmReady = true
-    print("✅ [Slap Aura] Candy Farm ready")
+    print("✅ [Slap Aura] Candy Farm ready (manual toggle)")
 end)
 
-print("✅ [Slap Aura] V59 Any-Part Aura Ready!")
+print("✅ [Slap Aura] V59 Ultimate Final Ready!")
