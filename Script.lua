@@ -1,9 +1,9 @@
 -- ============================================================
--- 👑 SLAP AURA HUB | V59 | CANDY FARM V5
--- (No Auto-Start + Full Manual Control + Fixed Float Button)
+-- 👑 SLAP AURA HUB | V59 | ESP PRO + AUTO AVOID EDITION
+-- (Glove Detection + Danger Levels + Auto Avoid
+--  + Candy Farm V5 + All Antis + Manual Control)
 -- ============================================================
 
--- ⚠️ منع تشغيل السكربت مرتين
 if _G.SlapAuraAlreadyRunning then
     warn("[Slap Aura] Script already running! Skipping duplicate.")
     return
@@ -92,7 +92,7 @@ local Version = Instance.new("TextLabel")
 Version.Size = UDim2.new(1, 0, 0, 20)
 Version.Position = UDim2.fromOffset(0, 75)
 Version.BackgroundTransparency = 1
-Version.Text = "V59  •  Candy Farm V5 (Manual Control)"
+Version.Text = "V59  •  ESP PRO + Auto Avoid"
 Version.TextColor3 = Color3.fromRGB(160, 160, 175)
 Version.Font = Enum.Font.Gotham
 Version.TextSize = 13
@@ -165,7 +165,7 @@ local loadSteps = {
     {p = 45, text = "Injecting Remote Hooks..."},
     {p = 60, text = "Building HUD..."},
     {p = 75, text = "Loading WindUI Framework..."},
-    {p = 90, text = "Preparing Candy Farm V5..."},
+    {p = 90, text = "Preparing ESP PRO + Candy Farm V5..."},
     {p = 100, text = "Ready! All features OFF by default"}
 }
 
@@ -571,22 +571,13 @@ local function GetCandyList()
     return candies
 end
 
-local ToggleCandyFarm -- forward declaration
+local ToggleCandyFarm
 
 function ToggleCandyFarm(state)
-    -- ⚠️ Grace Period: منع التشغيل في أول 3 ثواني
-    if not _G.CandyFarmReady then
-        return
-    end
-    
+    if not _G.CandyFarmReady then return end
     state = state and true or false
-    
-    -- Debounce
-    if tick() - CandyFarm.LastToggleTime < 1 then
-        return
-    end
+    if tick() - CandyFarm.LastToggleTime < 1 then return end
     CandyFarm.LastToggleTime = tick()
-    
     if CandyFarm.Running == state then return end
 
     CandyFarm.Running = state
@@ -676,7 +667,7 @@ function ToggleCandyFarm(state)
 end
 
 -- ============================================================
--- 🍬 8. FLOATING BUTTON (Fixed - No Double Trigger)
+-- 🍬 8. FLOATING BUTTON
 -- ============================================================
 local FloatGui = Instance.new("ScreenGui")
 FloatGui.Name = "CandyFarmFloat"
@@ -694,7 +685,7 @@ FloatBtn.Font = Enum.Font.GothamBold
 FloatBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 FloatBtn.BorderSizePixel = 0
 FloatBtn.AutoButtonColor = false
-FloatBtn.Active = false -- منع التفعيل التلقائي
+FloatBtn.Active = false
 FloatBtn.Parent = FloatGui
 
 local FloatCorner = Instance.new("UICorner")
@@ -759,11 +750,10 @@ UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         if dragStartPos and not isDragging and not touchConsumed then
             touchConsumed = true
-            -- ⚠️ مايشتغلش لو _G.CandyFarmReady = false
             if _G.CandyFarmReady then
                 ToggleCandyFarm(not CandyFarm.Running)
             else
-                showNotification("Farm", "Please wait 3 seconds after script load", false)
+                showNotification("Farm", "Wait 3 seconds after script load", false)
             end
         end
         dragStartPos = nil
@@ -772,8 +762,82 @@ UserInputService.InputEnded:Connect(function(input)
 end)
 
 -- ============================================================
--- 👁️ 9. ESP (Auto-Detect)
+-- 👁️ 9. ESP PRO (Glove Detection + Danger + Auto Avoid)
 -- ============================================================
+local GloveDanger = {
+    -- EXTREME
+    ["killstreak"] = "EXTREME", ["god's hand"] = "EXTREME", ["gods hand"] = "EXTREME",
+    ["error"] = "EXTREME", ["reaper"] = "EXTREME", ["thanos"] = "EXTREME",
+    ["overkill"] = "EXTREME", ["megarock"] = "EXTREME", ["berserk"] = "EXTREME",
+    ["hallow jack"] = "EXTREME", ["detonator"] = "EXTREME", ["bob"] = "EXTREME",
+    -- HIGH
+    ["mitten"] = "HIGH", ["leash"] = "HIGH", ["fish"] = "HIGH", ["grab"] = "HIGH",
+    ["pull"] = "HIGH", ["lure"] = "HIGH", ["phase"] = "HIGH", ["wormhole"] = "HIGH",
+    ["blackhole"] = "HIGH", ["rattlebones"] = "HIGH", ["home run"] = "HIGH",
+    ["jet"] = "HIGH", ["baller"] = "HIGH", ["za hando"] = "HIGH", ["recycler"] = "HIGH",
+    ["bomb"] = "HIGH", ["sparky"] = "HIGH", ["conductor"] = "HIGH", ["tinkerer"] = "HIGH",
+    ["rhythm"] = "HIGH", ["track"] = "HIGH",
+    -- MEDIUM
+    ["ice"] = "MEDIUM", ["snowball"] = "MEDIUM", ["mr"] = "MEDIUM", ["mail"] = "MEDIUM",
+    ["squid"] = "MEDIUM", ["honey"] = "MEDIUM", ["cloud"] = "MEDIUM", ["kinetic"] = "MEDIUM",
+    ["slapple"] = "MEDIUM", ["moon"] = "MEDIUM",
+}
+
+local DangerColors = {
+    EXTREME = {Fill = Color3.fromRGB(255, 30, 30), Text = "🔴 EXTREME"},
+    HIGH = {Fill = Color3.fromRGB(255, 140, 0), Text = "🟠 HIGH"},
+    MEDIUM = {Fill = Color3.fromRGB(255, 220, 50), Text = "🟡 MEDIUM"},
+    SAFE = {Fill = Color3.fromRGB(80, 220, 130), Text = "🟢 SAFE"},
+    NONE = {Fill = Color3.fromRGB(150, 150, 150), Text = "⚪ NONE"},
+}
+
+local function GetPlayerGlove(plr)
+    if not plr.Character then return nil, "NONE" end
+    local tool = plr.Character:FindFirstChildOfClass("Tool")
+    if not tool then return nil, "NONE" end
+    local name = string.lower(tool.Name)
+    local danger = GloveDanger[name] or "SAFE"
+    return tool.Name, danger
+end
+
+local AutoAvoidSettings = {
+    Enabled = false,
+    Distance = 30,
+    SafeDistance = 60,
+    OnlyExtreme = true,
+    LastAvoidTime = 0,
+}
+
+local function AutoAvoidCheck(myRoot)
+    if not AutoAvoidSettings.Enabled then return end
+    if not myRoot then return end
+    if tick() - AutoAvoidSettings.LastAvoidTime < 2 then return end
+
+    for _, plr in ipairs(Players:GetPlayers()) do
+        if plr ~= LocalPlayer and plr.Character then
+            local tRoot = plr.Character:FindFirstChild("HumanoidRootPart")
+            if tRoot then
+                local gloveName, danger = GetPlayerGlove(plr)
+                local shouldAvoid = (danger == "EXTREME") or (danger == "HIGH" and not AutoAvoidSettings.OnlyExtreme)
+                
+                if shouldAvoid then
+                    local dist = (myRoot.Position - tRoot.Position).Magnitude
+                    if dist < AutoAvoidSettings.Distance then
+                        local direction = (myRoot.Position - tRoot.Position).Unit
+                        local newPos = myRoot.Position + direction * AutoAvoidSettings.SafeDistance
+                        pcall(function()
+                            myRoot.CFrame = CFrame.new(newPos + Vector3.new(0, 10, 0))
+                            AutoAvoidSettings.LastAvoidTime = tick()
+                            showNotification("Auto Avoid", "⚠️ Escaped from "..plr.DisplayName.." ("..(gloveName or "?")..")", true)
+                        end)
+                        return
+                    end
+                end
+            end
+        end
+    end
+end
+
 local activeESP = {}
 local espConnections = {}
 
@@ -798,9 +862,10 @@ local function applyESPToPlayer(plr)
     local hl = Instance.new("Highlight", plr.Character)
     hl.FillColor = Color3.fromRGB(255, 140, 0)
     hl.FillTransparency = 0.5
+    hl.OutlineColor = Color3.fromRGB(255, 140, 0)
 
     local bb = Instance.new("BillboardGui", head)
-    bb.Size = UDim2.new(0, 200, 0, 50)
+    bb.Size = UDim2.new(0, 220, 0, 70)
     bb.StudsOffset = Vector3.new(0, 2.5, 0)
     bb.AlwaysOnTop = true
 
@@ -808,8 +873,10 @@ local function applyESPToPlayer(plr)
     txt.Size = UDim2.new(1, 0, 1, 0)
     txt.BackgroundTransparency = 1
     txt.TextColor3 = Color3.fromRGB(255, 255, 255)
+    txt.TextStrokeTransparency = 0
     txt.Font = Enum.Font.GothamBold
-    txt.TextSize = 14
+    txt.TextSize = 13
+    txt.RichText = true
 
     activeESP[plr.Name] = {Highlight = hl, Billboard = bb, Text = txt}
 end
@@ -852,18 +919,37 @@ function ToggleESP(state)
                 if plr ~= LocalPlayer and plr.Character then
                     local data = activeESP[plr.Name]
                     local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    
                     if data and myRoot and data.Text then
                         local tRoot = plr.Character:FindFirstChild("HumanoidRootPart")
                         if tRoot then
                             local dist = math.floor((myRoot.Position - tRoot.Position).Magnitude)
-                            data.Text.Text = string.format('%s\n%d studs', plr.DisplayName, dist)
+                            local gloveName, danger = GetPlayerGlove(plr)
+                            local colorInfo = DangerColors[danger] or DangerColors.SAFE
+                            
+                            local gloveDisplay = gloveName and ("["..gloveName.."]") or "[None]"
+                            data.Text.Text = string.format('%s\n%s\n%d studs', plr.DisplayName, colorInfo.Text.." "..gloveDisplay, dist)
+                            
+                            data.Highlight.FillColor = colorInfo.Fill
+                            data.Highlight.OutlineColor = colorInfo.Fill
+                            
+                            if danger == "EXTREME" then
+                                data.Highlight.FillTransparency = 0.3
+                            else
+                                data.Highlight.FillTransparency = 0.5
+                            end
                         end
                     end
                 end
             end
+            
+            local myRoot = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if myRoot then
+                AutoAvoidCheck(myRoot)
+            end
         end)
 
-        showNotification("Visuals", "ESP On", true)
+        showNotification("ESP", "Glove Detection + Danger Levels ON", true)
     else
         for _, data in pairs(activeESP) do
             pcall(function()
@@ -872,7 +958,7 @@ function ToggleESP(state)
             end)
         end
         activeESP = {}
-        showNotification("Visuals", "ESP Off", false)
+        showNotification("ESP", "OFF", false)
     end
 end
 
@@ -1129,7 +1215,7 @@ end
 function LoadMainGUI()
     local success, err = pcall(function()
         local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-        local Window = WindUI:CreateWindow({ Title = "Slap Aura | V59", Icon = "shield", Author = "Majed", Folder = "SlapAuraV59", Size = UDim2.fromOffset(600, 520), Transparent = true, Theme = "Dark" })
+        local Window = WindUI:CreateWindow({ Title = "Slap Aura | V59", Icon = "shield", Author = "Majed", Folder = "SlapAuraV59", Size = UDim2.fromOffset(600, 540), Transparent = true, Theme = "Dark" })
 
         -- ⚔️ Combat
         local CombatTab = Window:Tab({ Title = "Combat", Icon = "crosshair" })
@@ -1154,19 +1240,32 @@ function LoadMainGUI()
         local FarmTab = Window:Tab({ Title = "Farm", Icon = "leaf" })
         local farmToggle = FarmTab:Toggle({ Title = "🍬 Candy Farm V5", Value = false, Callback = function(s)
             if not _G.CandyFarmReady then return end
-            if CandyFarm.Running ~= s then
-                ToggleCandyFarm(s)
-            end
+            if CandyFarm.Running ~= s then ToggleCandyFarm(s) end
         end })
         CandyFarm.UI_Toggle = farmToggle
-
-        FarmTab:Toggle({ Title = "⚠️ Auto Server Hop (Off by default)", Value = false, Callback = function(s) Settings.ServerHopper = s end })
+        FarmTab:Toggle({ Title = "⚠️ Auto Server Hop (Off default)", Value = false, Callback = function(s) Settings.ServerHopper = s end })
         FarmTab:Button({ Title = "🚀 Hop Now", Callback = function() HopToNewServer() end })
         FarmTab:Paragraph({ Title = "Candy Stats", Desc = "Collected: 0 | Folder: None" })
 
         -- 👁️ Visuals
         local VisTab = Window:Tab({ Title = "Visuals", Icon = "eye" })
-        VisTab:Toggle({ Title = "Player ESP (Auto-Detect)", Value = false, Callback = function(s) ToggleESP(s) end })
+        VisTab:Toggle({ Title = "👁️ Player ESP (Glove Detection)", Value = false, Callback = function(s) ToggleESP(s) end })
+
+        VisTab:Section({ Title = "🛡️ Auto Avoid" })
+        VisTab:Toggle({ Title = "Enable Auto Avoid", Value = false, Callback = function(s)
+            AutoAvoidSettings.Enabled = s
+            showNotification("Auto Avoid", s and "ON" or "OFF", s)
+        end })
+        VisTab:Toggle({ Title = "Only EXTREME Gloves", Value = true, Callback = function(s)
+            AutoAvoidSettings.OnlyExtreme = s
+        end })
+        VisTab:Slider({ Title = "Avoid Distance (studs)", Value = { Min = 10, Max = 100, Default = 30 }, Callback = function(v)
+            AutoAvoidSettings.Distance = v
+        end })
+        VisTab:Slider({ Title = "Teleport Away Distance", Value = { Min = 30, Max = 200, Default = 60 }, Callback = function(v)
+            AutoAvoidSettings.SafeDistance = v
+        end })
+        VisTab:Paragraph({ Title = "ℹ️ Danger Levels", Desc = "🔴 EXTREME = Killstreak, God's Hand, Error, Reaper, Thanos\n🟠 HIGH = Mitten, Leash, Fish, Grab, Pull, Lure\n🟡 MEDIUM = Ice, Honey, Squid, Mail, MR\n🟢 SAFE = Normal gloves" })
 
         -- 🛡️ Anti
         local AntiTab = Window:Tab({ Title = "Anti", Icon = "shield" })
@@ -1235,7 +1334,6 @@ function LoadMainGUI()
             HUD:Destroy(); FloatGui:Destroy(); Window:Destroy()
         end })
 
-        -- تحديث الإحصائيات كل ثانية
         task.spawn(function()
             while task.wait(1) do
                 if CandyFarm.Running then
@@ -1250,17 +1348,17 @@ function LoadMainGUI()
         warn("[Slap Aura] GUI Error: " .. tostring(err))
         showNotification("GUI Error", "WindUI Failed to Load", false)
     else
-        showNotification("Slap Aura", "V59 Loaded - All OFF by default", true)
+        showNotification("Slap Aura", "V59 ESP PRO Loaded - All OFF", true)
     end
 end
 
 LoadMainGUI()
 
--- ⚠️ Grace Period: السماح بتشغيل الكاندي فارم بعد 3 ثواني
+-- Grace Period
 task.delay(3, function()
     _G.CandyFarmReady = true
-    print("✅ [Slap Aura] Candy Farm is now ready (manual toggle only)")
-    showNotification("Slap Aura", "Candy Farm ready! Press to start", true)
+    print("✅ [Slap Aura] Candy Farm ready (manual toggle only)")
+    showNotification("Slap Aura", "Ready! Press to start anything", true)
 end)
 
-print("✅ [Slap Aura] V59 Candy Farm V5 (Manual Control) Ready!")
+print("✅ [Slap Aura] V59 ESP PRO + Auto Avoid Ready!")
