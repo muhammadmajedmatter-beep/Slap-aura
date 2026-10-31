@@ -12,85 +12,36 @@ local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local Camera = workspace.CurrentCamera
 
--- ============================================================
--- 👑 SLAP AURA | PREMIUM EDITION (Protection + Hooks)
--- ============================================================
-print("🚀 [Slap Aura] Starting Premium Engine...")
-
-local Players = game:GetService("Players")
-local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
-local UserInputService = game:GetService("UserInputService")
-local Lighting = game:GetService("Lighting")
-local LocalPlayer = Players.LocalPlayer
-local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
-local Camera = workspace.CurrentCamera
-
--- ============================================================
--- 🛡️ 1. درع الحماية (Ghost Protocol) + التقاط الريموت
--- ============================================================
+-- 🛑 1. درع الحماية + الالتقاط الفوري
 local CapturedRemote = nil
 local RemoteFormat = "None"
-
--- تمويه الذاكرة والفيزياء
-pcall(function()
-    local mt = getrawmetatable(game)
-    local oldIndex = mt.__index
-    local oldNewIndex = mt.__newindex
-    setreadonly(mt, false)
-
-    mt.__index = newcclosure(function(t, k)
-        if (k == "WalkSpeed" or k == "JumpPower") and t:IsA("Humanoid") and t.Parent == LocalPlayer.Character then
-            return k == "WalkSpeed" and 16 or 50
-        end
-        if k == "AssemblyLinearVelocity" and t.Parent == LocalPlayer.Character then
-            local realVel = oldIndex(t, k)
-            if realVel.Magnitude > 40 then
-                return Vector3.new(realVel.X / 2, realVel.Y / 2, realVel.Z / 2)
-            end
-        end
-        return oldIndex(t, k)
-    end)
-
-    mt.__newindex = newcclosure(function(t, k, v)
-        if (k == "WalkSpeed" or k == "JumpPower") and t:IsA("Humanoid") and t.Parent == LocalPlayer.Character then
+local oldNamecall
+oldNamecall = hookmetamethod(game, "__namecall", function(self, ...)
+    local method = getnamecallmethod()
+    if method == "FireServer" then
+        if self.Name == "Ban" or self.Name == "AdminGUI" or self.Name == "Kick" or self.Name == "WalkSpeedChanged" then
             return 
         end
-        return oldNewIndex(t, k, v)
-    end)
-    setreadonly(mt, true)
+        local args = {...}
+        if #args > 0 then
+            if type(args[1]) == "table" and args[1]["victim"] then
+                if CapturedRemote ~= self then
+                    CapturedRemote = self
+                    RemoteFormat = "Table"
+                end
+            elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart") then
+                if CapturedRemote ~= self then
+                    CapturedRemote = self
+                    RemoteFormat = "Instance"
+                end
+            end
+        end
+    elseif method == "Kick" and self == LocalPlayer then
+        return
+    end
+    return oldNamecall(self, ...)
 end)
 
--- اعتراض الريموتات (منع الطرد + منع البلاغات + التقاط الضرب)
-local oldNamecall
-oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-    local method = getnamecallmethod()
-    local args = {...}
-    
-    -- منع الطرد
-    if method == "Kick" and self == LocalPlayer then return end
-    
-    -- منع البلاغات
-    if method == "FireServer" then
-        local remoteName = string.lower(self.Name)
-        local badRemotes = {"ban", "kick", "anticheat", "detect", "report", "speedcheck", "walkspeedchanged", "flag", "monitor"}
-        for _, bad in ipairs(badRemotes) do
-            if string.find(remoteName, bad) then return end
-        end
-    end
-    
-    -- التقاط ريموت الضرب
-    if method == "FireServer" and #args > 0 then
-        if type(args[1]) == "table" and args[1]["victim"] then
-            CapturedRemote = self; RemoteFormat = "Table"
-        elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart") then
-            CapturedRemote = self; RemoteFormat = "Instance"
-        end
-    end
-    
-    return oldNamecall(self, ...)
-end))
--- ============================================================
 -- المتغيرات
 local CurrentGloveIcon = "rbxassetid://15315284749"
 local StatusLabel = nil
@@ -107,9 +58,7 @@ local Settings = {
     FlySpeed = 50, Noclip = false, AntiVoid = false, 
     Godmode = true, AntiRagdoll = true, AntiKnockback = true, 
     WalkSpeed = 16, JumpPower = 50, 
-    Fullbright = false, ESP = false, 
-    CandyFarm = false,
-    PremiumSpeed = 35
+    Fullbright = false, ESP = false, CandyFarm = false
 }
 
 -- ================= نظام الإشعارات المخصص =================
@@ -533,95 +482,8 @@ RunService.Stepped:Connect(function()
         lastHitTime = tick()
     end
 end)
--- 🍬 محرك الكاندي (الآمن - بدون تيليبورت)
-local isCandyFarming = false
-function TogglePremiumCandyFarm(state)
-    isCandyFarming = state
-    if state then
-        task.spawn(function()
-            while isCandyFarming do
-                local myChar = LocalPlayer.Character
-                local hrp = myChar and myChar:FindFirstChild("HumanoidRootPart")
-                if hrp then
-                    for _, obj in pairs(workspace:GetDescendants()) do
-                        if not isCandyFarming then break end
-                        local name = string.lower(obj.Name)
-                        if obj:IsA("BasePart") and (string.find(name, "corn") or string.find(name, "candy")) then
-                            if (hrp.Position - obj.Position).Magnitude < 30 then
-                                pcall(function()
-                                    firetouchinterest(hrp, obj, 0)
-                                    task.wait(0.01)
-                                    firetouchinterest(hrp, obj, 1)
-                                end)
-                                task.wait(0.1) 
-                            end
-                        end
-                    end
-                end
-                task.wait(0.2) 
-            end
-        end)
-    end
-end
 
--- 🚀 محرك السيرفر هوبر (أسرع طريقة لجمع الحلوى)
-local isHopping = false
-function ToggleServerHopper(state)
-    isHopping = state
-    if state then
-        task.spawn(function()
-            while isHopping do
-                local char = LocalPlayer.Character
-                local hrp = char and char:FindFirstChild("HumanoidRootPart")
-                if hrp then
-                    for _, obj in pairs(workspace:GetDescendants()) do
-                        if not isHopping then break end
-                        local name = string.lower(obj.Name)
-                        if obj:IsA("BasePart") and (string.find(name, "corn") or string.find(name, "candy")) then
-                            if (hrp.Position - obj.Position).Magnitude < 30 then
-                                pcall(function()
-                                    firetouchinterest(hrp, obj, 0)
-                                    task.wait(0.01)
-                                    firetouchinterest(hrp, obj, 1)
-                                end)
-                                task.wait(0.1)
-                            end
-                        end
-                    end
-                end
-                task.wait(5) -- بيستنى 5 ثواني يجمع اللي حواليه
-                if isHopping then
-                    pcall(function()
-                        game:GetService("TeleportService"):Teleport(game.PlaceId, game.Players.LocalPlayer)
-                    end)
-                    break
-                end
-            end
-        end)
-    end
-end
--- 💎 محرك السرعة (Premium Speed Engine)
-local isSpeedEnabled = false
-local SpeedConnection = nil
-
-function TogglePremiumSpeed(state)
-    isSpeedEnabled = state
-    if state then
-        if SpeedConnection then SpeedConnection:Disconnect() end
-        SpeedConnection = RunService.Heartbeat:Connect(function()
-            if not isSpeedEnabled then return end
-            local myChar = LocalPlayer.Character
-            local myHum = myChar and myChar:FindFirstChildOfClass("Humanoid")
-            if myHum then
-                myHum.WalkSpeed = Settings.PremiumSpeed 
-            end
-        end)
-    else
-        if SpeedConnection then SpeedConnection:Disconnect(); SpeedConnection = nil end
-        local myHum = LocalPlayer.Character and LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-        if myHum then myHum.WalkSpeed = 16 end
-    end
-end ============================================================
+-- ============================================================
 -- 🎨 8. واجهة WindUI
 -- ============================================================
 function LoadMainGUI()
@@ -653,7 +515,6 @@ function LoadMainGUI()
             Theme = "Halloween"
         })
 
-        -- تبويب القتال
         local CombatTab = MainWindow:Tab({ Title = "Combat", Icon = "crosshair" })
         StatusLabel = CombatTab:Paragraph({Title = "Status", Desc = "⏳ Waiting for Calibration... Slap a player ONCE.", Image = "info"})
         
@@ -662,7 +523,6 @@ function LoadMainGUI()
         CombatTab:Slider({Title = "Range", Step = 1, Value = { Min = 1, Max = 50, Default = 10 }, Callback = function(value) Settings.Range = value end})
         CombatTab:Slider({Title = "Speed", Step = 1, Value = { Min = 1, Max = 4, Default = 3 }, Callback = function(value) Settings.MaxHitsPerSecond = value end})
 
-        -- تبويب الحركة
         local UtilityTab = MainWindow:Tab({ Title = "Utility", Icon = "settings" })
         UtilityTab:Toggle({ Title = "Fly", Value = false, Callback = function(state) if state then startFly() else stopFly() end end })
         UtilityTab:Slider({ Title = "Fly Speed", Step = 10, Value = { Min = 20, Max = 200, Default = 50 }, Callback = function(value) Settings.FlySpeed = value end })
@@ -670,41 +530,61 @@ function LoadMainGUI()
         UtilityTab:Slider({ Title = "WalkSpeed", Step = 1, Value = { Min = 16, Max = 100, Default = 16 }, Callback = function(value) Settings.WalkSpeed = value end })
         UtilityTab:Slider({ Title = "JumpPower", Step = 1, Value = { Min = 50, Max = 200, Default = 50 }, Callback = function(value) Settings.JumpPower = value end })
 
-        -- تبويب الرؤية
         local VisualsTab = MainWindow:Tab({ Title = "Visuals", Icon = "eye" })
         VisualsTab:Toggle({ Title = "Fullbright", Value = false, Callback = function(state) Settings.Fullbright = state; if state then Lighting.Ambient = Color3.fromRGB(255,255,255); Lighting.OutdoorAmbient = Color3.fromRGB(255,255,255) else Lighting.Ambient = Color3.fromRGB(70,70,70); Lighting.OutdoorAmbient = Color3.fromRGB(128,128,128) end end })
         VisualsTab:Toggle({ Title = "Player ESP", Value = false, Callback = function(state) if state then enableESP() else disableESP() end end })
 
-        -- تبويب الحمايات
         local AntisTab = MainWindow:Tab({ Title = "Antis", Icon = "shield" })
         AntisTab:Toggle({ Title = "Anti-Void", Value = false, Callback = function(state) Settings.AntiVoid = state end })
         AntisTab:Toggle({ Title = "Godmode (Anti-Overkill)", Value = true, Callback = function(state) Settings.Godmode = state end })
         AntisTab:Toggle({ Title = "Anti-Ragdoll", Value = true, Callback = function(state) Settings.AntiRagdoll = state end })
         AntisTab:Toggle({ Title = "Anti-Knockback", Desc = "منع الطيران عند الضربة", Value = true, Callback = function(state) Settings.AntiKnockback = state end })
 
-        -- تبويب الفارم
         local FarmsTab = MainWindow:Tab({ Title = "Farms", Icon = "tractor" })
         FarmsTab:Toggle({ Title = "Slap AutoFarm", Desc = "يضرب ويلم فلوس تلقائياً", Value = false, Callback = function(state) toggleAutoFarm(state) end })
         
-        -- 👇 هنا الزراير الجديدة (بتنادي على المحرك اللي أنت حطيته فوق) 👇
         FarmsTab:Toggle({ 
-            Title = "Auto Candy Farm (Safe)", 
-            Desc = "جمع الحلوى بأمان (واقف مكانك)", 
+            Title = "Auto Candy Farm (Ultra Speed)", 
+            Desc = "أسرع طريقة لجمع الكاندي", 
             Value = false, 
             Callback = function(state) 
-                TogglePremiumCandyFarm(state)
+                Settings.CandyFarm = state 
+                if state then
+                    task.spawn(function()
+                        local tweenInfo = TweenInfo.new(0.03, Enum.EasingStyle.Linear, Enum.EasingDirection.Out)
+                        while Settings.CandyFarm do
+                            local myChar = LocalPlayer.Character
+                            if myChar and myChar:FindFirstChild("HumanoidRootPart") then
+                                local hrp = myChar.HumanoidRootPart
+                                local folder = workspace:FindFirstChild("CandyCorns") or workspace:FindFirstChild("Candy") or workspace:FindFirstChild("HalloweenCandy")
+                                if folder then
+                                    for i = 1, #folder:GetChildren() do
+                                        if not Settings.CandyFarm then break end
+                                        local candy = folder:GetChildren()[i]
+                                        if candy:IsA("BasePart") then
+                                            local tween = TweenService:Create(hrp, tweenInfo, {CFrame = candy.CFrame})
+                                            tween:Play()
+                                            tween.Completed:Wait() 
+                                        end
+                                    end
+                                else
+                                    for _, obj in pairs(workspace:GetDescendants()) do
+                                        if not Settings.CandyFarm then break end
+                                        local nameCheck = string.lower(obj.Name)
+                                        if obj:IsA("BasePart") and (string.find(nameCheck, "candy") or string.find(nameCheck, "corn")) then
+                                            local tween = TweenService:Create(hrp, tweenInfo, {CFrame = obj.CFrame})
+                                            tween:Play()
+                                            tween.Completed:Wait()
+                                        end
+                                    end
+                                end
+                            end
+                            task.wait(0.1) 
+                        end
+                    end)
+                end
             end 
         })
-
-        FarmsTab:Toggle({ 
-            Title = "Auto Server Hopper", 
-            Desc = "يجمع الحلوى وينقلك لسيرفر جديد", 
-            Value = false, 
-            Callback = function(state) 
-                ToggleServerHopper(state)
-            end 
-        })
-        -- 👆 ------------------------------------------------ 👆
     end)
     if not success then warn("❌ خطأ في الواجهة: " .. tostring(err)) end
 end
