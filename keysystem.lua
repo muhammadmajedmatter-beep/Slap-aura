@@ -1,5 +1,5 @@
 -- ============================================================
--- 🔐 SLAP AURA | Supreme UI - Upgraded Edition (V5)
+-- 🔐 SLAP AURA | Ultimate Premium Key System (Old UI + New Server)
 -- ============================================================
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
@@ -11,16 +11,16 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- ================= [1] الإعدادات =================
 local KeySystem = {
-    LinkvertiseURL = "https://link-target.net/10307604/ikbTu3tbVOrU",   
+    LinkvertiseURL = "https://link-target.net/10307604/ikbTu3tbVOrU", -- ✅ الرابط الجديد بتاعك
     VerifyAPI      = "https://muhammadmajed54.val.run/", 
-    ScriptURL      = "https://raw.githubusercontent.com/muhammadmajedmatter-beep/Slap-aura/refs/heads/main/Script.lua", 
+    ScriptURL      = "https://raw.githubusercontent.com/muhammadmajedmatter-beep/Slap-aura/main/Script.lua", 
     Duration       = 14 * 24 * 60 * 60,
     SaveFile       = "SlapAura_CloudKey.json",
     DeveloperName  = "Muhammad Majed",
-    OwnerKey       = "MAJED-OWNER-2025",
-    DiscordInvite  = "https://discord.gg/GXp87ZUg2" 
+    OwnerKey       = "MAJED-OWNER-2025"
 }
 
+-- ================= [2] توليد HWID و Session =================
 local function getRealHWID()
     local success, hwid = pcall(function() return game:GetService("RbxAnalyticsService"):GetClientId() end)
     if success and hwid and hwid ~= "" then return hwid end
@@ -30,15 +30,20 @@ local HWID = getRealHWID()
 local sessionId = HttpService:GenerateGUID(false) 
 
 local COLORS = {
-    Bg1     = Color3.fromRGB(15, 15, 20), Bg2     = Color3.fromRGB(25, 25, 32),
-    Card    = Color3.fromRGB(35, 35, 45), Surface = Color3.fromRGB(45, 45, 55),
-    Stroke  = Color3.fromRGB(60, 60, 70), Accent1 = Color3.fromRGB(255, 140, 0),
-    Accent2 = Color3.fromRGB(160, 70, 220), Success = Color3.fromRGB(50, 220, 130),
-    Error   = Color3.fromRGB(255, 80, 80), Text    = Color3.fromRGB(255, 255, 255),
-    TextDim = Color3.fromRGB(160, 160, 170), Discord = Color3.fromRGB(88, 101, 242)
+    Bg1     = Color3.fromRGB(15, 15, 20),
+    Bg2     = Color3.fromRGB(25, 25, 32),
+    Card    = Color3.fromRGB(35, 35, 45),
+    Surface = Color3.fromRGB(45, 45, 55),
+    Stroke  = Color3.fromRGB(60, 60, 70),
+    Accent1 = Color3.fromRGB(255, 140, 0),
+    Accent2 = Color3.fromRGB(160, 70, 220),
+    Success = Color3.fromRGB(50, 220, 130),
+    Error   = Color3.fromRGB(255, 80, 80),
+    Text    = Color3.fromRGB(255, 255, 255),
+    TextDim = Color3.fromRGB(160, 160, 170),
 }
 
--- ================= [2] التشفير والحفظ =================
+-- ================= [3] التشفير والحفظ =================
 local function encrypt(s) local r = "" for i = 1, #s do r = r .. string.char((string.byte(s, i) + 13) % 256) end return r end
 local function decrypt(s) local r = "" for i = 1, #s do r = r .. string.char((string.byte(s, i) - 13) % 256) end return r end
 local function saveData(t) if writefile then pcall(writefile, KeySystem.SaveFile, encrypt(HttpService:JSONEncode(t))) end end
@@ -49,24 +54,41 @@ local function loadData()
     end
 end
 
--- ================= [3] التحقق =================
+-- ================= [4] التحقق (مع مفتاح الأونر) =================
 local function verifyKeyOnline(inputKey)
     if inputKey == KeySystem.OwnerKey then return true, KeySystem.Duration end
+    
     local success, response = pcall(function()
         local url = KeySystem.VerifyAPI .. "?key=" .. HttpService:UrlEncode(inputKey) .. "&hwid=" .. HWID .. "&userid=" .. tostring(LocalPlayer.UserId) .. "&session=" .. sessionId
-        return game:HttpGet(url)
+        if syn and syn.request then return syn.request({Url = url, Method = "GET"}).Body
+        elseif request then return request({Url = url, Method = "GET"}).Body
+        else return game:HttpGet(url) end
     end)
+    
     if success and response then
         local decodeSuccess, data = pcall(function() return HttpService:JSONDecode(response) end)
         if decodeSuccess and data and data.success == true then 
-            local expiryTime = data.expires_at and math.floor(data.expires_at / 1000) or (os.time() + KeySystem.Duration)
-            return true, expiryTime 
+            return true, data.expires_at and math.floor(data.expires_at / 1000) or (os.time() + KeySystem.Duration)
         else
             if data and data.message then 
                 if string.find(data.message, "BAN") or string.find(data.message, "محظور") then return false, "BAN_TRIGGERED" end
                 return false, data.message 
             end
         end
+    end
+    return false, "فشل الاتصال بالسيرفر."
+end
+
+local function resetHWIDOnline(inputKey)
+    local success, response = pcall(function()
+        local url = KeySystem.VerifyAPI .. "?action=reset_hwid&key=" .. HttpService:UrlEncode(inputKey)
+        if syn and syn.request then return syn.request({Url = url, Method = "GET"}).Body
+        elseif request then return request({Url = url, Method = "GET"}).Body
+        else return game:HttpGet(url) end
+    end)
+    if success and response then
+        local decodeSuccess, data = pcall(function() return HttpService:JSONDecode(response) end)
+        if decodeSuccess and data and data.success == true then return true, data.message end
     end
     return false, "فشل الاتصال بالسيرفر."
 end
@@ -80,26 +102,32 @@ local function checkLocalSession()
     return false
 end
 
--- ================= [4] الإشعارات =================
+-- ================= [5] نظام الإشعارات =================
 local function showNotification(title, text, isSuccess)
     local notifGui = Instance.new("ScreenGui")
     notifGui.Name = "SlapAuraNotifs"; notifGui.ResetOnSpawn = false; notifGui.DisplayOrder = 99999
     pcall(function() notifGui.Parent = game:GetService("CoreGui") end)
     if not notifGui.Parent then notifGui.Parent = PlayerGui end
+
     local frame = Instance.new("Frame"); frame.Size = UDim2.fromOffset(280, 60); frame.Position = UDim2.new(1, 20, 0, 20); frame.BackgroundColor3 = COLORS.Card; frame.BorderSizePixel = 0; frame.Parent = notifGui
     local corner = Instance.new("UICorner"); corner.CornerRadius = UDim.new(0, 8); corner.Parent = frame
     local stroke = Instance.new("UIStroke"); stroke.Color = isSuccess and COLORS.Success or COLORS.Accent1; stroke.Thickness = 1.5; stroke.Transparency = 0.3; stroke.Parent = frame
+    
     local icon = Instance.new("TextLabel"); icon.Size = UDim2.fromOffset(30, 30); icon.Position = UDim2.fromOffset(10, 15); icon.BackgroundTransparency = 1; icon.Text = isSuccess and "✅" or "🎃"; icon.TextSize = 20; icon.Parent = frame
     local titleLbl = Instance.new("TextLabel"); titleLbl.Size = UDim2.new(1, -50, 0, 20); titleLbl.Position = UDim2.fromOffset(45, 10); titleLbl.BackgroundTransparency = 1; titleLbl.Text = title; titleLbl.TextColor3 = COLORS.Text; titleLbl.Font = Enum.Font.GothamBold; titleLbl.TextSize = 14; titleLbl.TextXAlignment = Enum.TextXAlignment.Left; titleLbl.Parent = frame
     local descLbl = Instance.new("TextLabel"); descLbl.Size = UDim2.new(1, -50, 0, 25); descLbl.Position = UDim2.fromOffset(45, 30); descLbl.BackgroundTransparency = 1; descLbl.Text = text; descLbl.TextColor3 = COLORS.TextDim; descLbl.Font = Enum.Font.Gotham; descLbl.TextSize = 12; descLbl.TextWrapped = true; descLbl.TextXAlignment = Enum.TextXAlignment.Left; descLbl.Parent = frame
+
     TweenService:Create(frame, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(1, -300, 0, 20)}):Play()
-    task.delay(3, function() TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Position = UDim2.new(1, 20, 0, 20)}):Play(); task.wait(0.3); notifGui:Destroy() end)
+    task.delay(3, function()
+        TweenService:Create(frame, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.In), {Position = UDim2.new(1, 20, 0, 20)}):Play()
+        task.wait(0.3); notifGui:Destroy()
+    end)
 end
 
--- ================= [5] الواجهة الأصلية المطورة (Supreme UI Upgraded) =================
+-- ================= [6] واجهة المفتاح (القديمة) =================
 local isVerified = false
 
-local function createSupremeUI()
+local function createSupremeUI(callback)
     local gui = Instance.new("ScreenGui")
     gui.Name = "SlapAuraSupremeKey"; gui.ResetOnSpawn = false; gui.IgnoreGuiInset = true; gui.DisplayOrder = 99999; gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     pcall(function() gui.Parent = game:GetService("CoreGui") end)
@@ -111,20 +139,22 @@ local function createSupremeUI()
     local backdrop = Instance.new("Frame"); backdrop.Size = UDim2.fromScale(1, 1); backdrop.BackgroundColor3 = Color3.new(0, 0, 0); backdrop.BackgroundTransparency = 1; backdrop.BorderSizePixel = 0; backdrop.Parent = gui
     TweenService:Create(backdrop, TweenInfo.new(0.4), {BackgroundTransparency = 0.6}):Play()
 
-    -- النافذة الرئيسية (مع أنيميشن ظهور ناعم)
-    local window = Instance.new("Frame"); window.AnchorPoint = Vector2.new(0.5, 0.5); window.Position = UDim2.fromScale(0.5, 0.5); window.Size = UDim2.fromOffset(540, 370); window.BackgroundColor3 = COLORS.Bg1; window.BorderSizePixel = 0; window.Parent = gui
+    local window = Instance.new("Frame"); window.AnchorPoint = Vector2.new(0.5, 0.5); window.Position = UDim2.fromScale(0.5, 0.5); window.Size = UDim2.fromOffset(540, 320); window.BackgroundColor3 = COLORS.Bg1; window.BorderSizePixel = 0; window.Parent = gui
     local uiScale = Instance.new("UIScale"); uiScale.Scale = 0.8; uiScale.Parent = window
-    TweenService:Create(uiScale, TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Scale = 1}):Play() -- تحسين الأنيميشن
+    TweenService:Create(uiScale, TweenInfo.new(0.5, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1}):Play()
 
     local winCorner = Instance.new("UICorner"); winCorner.CornerRadius = UDim.new(0, 14); winCorner.Parent = window
     local bgGradient = Instance.new("UIGradient"); bgGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, COLORS.Bg1), ColorSequenceKeypoint.new(1, COLORS.Bg2)}); bgGradient.Rotation = 45; bgGradient.Parent = window
     local winStroke = Instance.new("UIStroke"); winStroke.Color = COLORS.Stroke; winStroke.Thickness = 2; winStroke.Transparency = 0.1; winStroke.Parent = window
     local winGrad = Instance.new("UIGradient"); winGrad.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, COLORS.Accent1), ColorSequenceKeypoint.new(0.5, COLORS.Accent2), ColorSequenceKeypoint.new(1, COLORS.Accent1)}); winGrad.Parent = winStroke
 
-    task.spawn(function() local r = 0 while window.Parent do r = (r + 1) % 360 winGrad.Rotation = r task.wait(0.03) end end)
+    task.spawn(function()
+        local r = 0
+        while window.Parent do r = (r + 1) % 360 winGrad.Rotation = r task.wait(0.03) end
+    end)
 
     -- الجزء الشمال
-    local sidebar = Instance.new("Frame"); sidebar.Size = UDim2.fromOffset(210, 370); sidebar.BackgroundColor3 = COLORS.Surface; sidebar.BackgroundTransparency = 0.5; sidebar.BorderSizePixel = 0; sidebar.Parent = window
+    local sidebar = Instance.new("Frame"); sidebar.Size = UDim2.fromOffset(210, 320); sidebar.BackgroundColor3 = COLORS.Surface; sidebar.BackgroundTransparency = 0.5; sidebar.BorderSizePixel = 0; sidebar.Parent = window
     local sideCorner = Instance.new("UICorner"); sideCorner.CornerRadius = UDim.new(0, 14); sideCorner.Parent = sidebar
 
     local ringFrame = Instance.new("Frame"); ringFrame.Size = UDim2.fromOffset(90, 90); ringFrame.Position = UDim2.fromOffset(60, 30); ringFrame.BackgroundColor3 = COLORS.Surface; ringFrame.Parent = sidebar
@@ -132,7 +162,10 @@ local function createSupremeUI()
     local ringStroke = Instance.new("UIStroke"); ringStroke.Color = COLORS.Accent1; ringStroke.Thickness = 3; ringStroke.Parent = ringFrame
     local ringGrad = Instance.new("UIGradient"); ringGrad.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, COLORS.Accent1), ColorSequenceKeypoint.new(1, COLORS.Accent2)}); ringGrad.Parent = ringStroke
 
-    task.spawn(function() local r = 0 while ringFrame.Parent do r = (r - 2) % 360 ringGrad.Rotation = r task.wait(0.03) end end)
+    task.spawn(function()
+        local r = 0
+        while ringFrame.Parent do r = (r - 2) % 360 ringGrad.Rotation = r task.wait(0.03) end
+    end)
 
     local avatarImg = Instance.new("ImageLabel"); avatarImg.Size = UDim2.new(1, -6, 1, -6); avatarImg.Position = UDim2.fromOffset(3, 3); avatarImg.BackgroundTransparency = 1; avatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"; avatarImg.Parent = ringFrame
     local imgCorner = Instance.new("UICorner"); imgCorner.CornerRadius = UDim.new(1, 0); imgCorner.Parent = avatarImg
@@ -141,13 +174,13 @@ local function createSupremeUI()
     local nameText = Instance.new("TextLabel"); nameText.Size = UDim2.new(1, -20, 0, 25); nameText.Position = UDim2.fromOffset(10, 155); nameText.BackgroundTransparency = 1; nameText.Text = LocalPlayer.DisplayName; nameText.TextColor3 = COLORS.Text; nameText.Font = Enum.Font.GothamBlack; nameText.TextSize = 20; nameText.TextTruncate = Enum.TextTruncate.AtEnd; nameText.Parent = sidebar
     local userText = Instance.new("TextLabel"); userText.Size = UDim2.new(1, -20, 0, 20); userText.Position = UDim2.fromOffset(10, 180); userText.BackgroundTransparency = 1; userText.Text = "@" .. LocalPlayer.Name; userText.TextColor3 = COLORS.Accent1; userText.Font = Enum.Font.GothamMedium; userText.TextSize = 12; userText.TextTruncate = Enum.TextTruncate.AtEnd; userText.Parent = sidebar
 
-    local devBadge = Instance.new("Frame"); devBadge.Size = UDim2.fromOffset(170, 26); devBadge.Position = UDim2.fromOffset(20, 320); devBadge.BackgroundColor3 = COLORS.Bg1; devBadge.Parent = sidebar
+    local devBadge = Instance.new("Frame"); devBadge.Size = UDim2.fromOffset(170, 26); devBadge.Position = UDim2.fromOffset(20, 270); devBadge.BackgroundColor3 = COLORS.Bg1; devBadge.Parent = sidebar
     local devCorner = Instance.new("UICorner"); devCorner.CornerRadius = UDim.new(0, 6); devCorner.Parent = devBadge
     local devStroke = Instance.new("UIStroke"); devStroke.Color = COLORS.Accent2; devStroke.Thickness = 1; devStroke.Parent = devBadge
     local devText = Instance.new("TextLabel"); devText.Size = UDim2.new(1, 0, 1, 0); devText.BackgroundTransparency = 1; devText.Text = "⚡ Dev: " .. KeySystem.DeveloperName; devText.TextColor3 = COLORS.TextDim; devText.Font = Enum.Font.GothamBold; devText.TextSize = 11; devText.Parent = devBadge
 
     -- الجزء اليمين
-    local rightPanel = Instance.new("Frame"); rightPanel.Size = UDim2.fromOffset(330, 370); rightPanel.Position = UDim2.fromOffset(210, 0); rightPanel.BackgroundTransparency = 1; rightPanel.Parent = window
+    local rightPanel = Instance.new("Frame"); rightPanel.Size = UDim2.fromOffset(330, 320); rightPanel.Position = UDim2.fromOffset(210, 0); rightPanel.BackgroundTransparency = 1; rightPanel.Parent = window
 
     local header = Instance.new("Frame"); header.Size = UDim2.new(1, 0, 0, 50); header.BackgroundTransparency = 1; header.Parent = rightPanel
     local title = Instance.new("TextLabel"); title.Size = UDim2.new(1, -50, 1, 0); title.Position = UDim2.fromOffset(20, 0); title.BackgroundTransparency = 1; title.Text = "Cloud Auth"; title.TextColor3 = COLORS.Text; title.Font = Enum.Font.GothamBlack; title.TextSize = 18; title.TextXAlignment = Enum.TextXAlignment.Left; title.Parent = header
@@ -156,124 +189,128 @@ local function createSupremeUI()
     local cc = Instance.new("UICorner"); cc.CornerRadius = UDim.new(1, 0); cc.Parent = closeBtn
     closeBtn.MouseButton1Click:Connect(function() TweenService:Create(blur, TweenInfo.new(0.3), {Size = 0}):Play() gui:Destroy() end)
 
-    local instructions = Instance.new("TextLabel"); instructions.Size = UDim2.new(1, -40, 0, 50); instructions.Position = UDim2.fromOffset(20, 50); instructions.BackgroundTransparency = 1; instructions.Text = "Please authenticate to access Slap Aura.\n1. Click 'Get Key' to open the link.\n2. Paste your key in the field below."; instructions.TextColor3 = COLORS.TextDim; instructions.Font = Enum.Font.Gotham; instructions.TextSize = 12; instructions.TextWrapped = true; instructions.TextXAlignment = Enum.TextXAlignment.Left; instructions.Parent = rightPanel
+    local instructions = Instance.new("TextLabel"); instructions.Size = UDim2.new(1, -40, 0, 60); instructions.Position = UDim2.fromOffset(20, 60); instructions.BackgroundTransparency = 1; instructions.Text = "Please authenticate to access Slap Aura.\n1. Click 'Get Key' to open the link.\n2. Paste your key in the field below."; instructions.TextColor3 = COLORS.TextDim; instructions.Font = Enum.Font.Gotham; instructions.TextSize = 12; instructions.TextWrapped = true; instructions.TextXAlignment = Enum.TextXAlignment.Left; instructions.Parent = rightPanel
 
-    local keyBox = Instance.new("TextBox"); keyBox.Size = UDim2.new(1, -40, 0, 45); keyBox.Position = UDim2.fromOffset(20, 110); keyBox.BackgroundColor3 = COLORS.Bg1; keyBox.PlaceholderText = "Paste your key here..."; keyBox.Text = ""; keyBox.TextColor3 = COLORS.Text; keyBox.PlaceholderColor3 = COLORS.TextDim; keyBox.Font = Enum.Font.GothamMedium; keyBox.TextSize = 14; keyBox.ClearTextOnFocus = false; keyBox.Parent = rightPanel
+    local keyBox = Instance.new("TextBox"); keyBox.Size = UDim2.new(1, -40, 0, 45); keyBox.Position = UDim2.fromOffset(20, 140); keyBox.BackgroundColor3 = COLORS.Bg1; keyBox.PlaceholderText = "Paste your key here..."; keyBox.Text = ""; keyBox.TextColor3 = COLORS.Text; keyBox.PlaceholderColor3 = COLORS.TextDim; keyBox.Font = Enum.Font.GothamMedium; keyBox.TextSize = 14; keyBox.ClearTextOnFocus = false; keyBox.Parent = rightPanel
     local kbc = Instance.new("UICorner"); kbc.CornerRadius = UDim.new(0, 8); kbc.Parent = keyBox
     local kbs = Instance.new("UIStroke"); kbs.Color = COLORS.Stroke; kbs.Thickness = 1.5; kbs.Parent = keyBox
     
     keyBox.Focused:Connect(function() TweenService:Create(kbs, TweenInfo.new(0.2), {Color = COLORS.Accent1, Thickness = 2}):Play() end)
     keyBox.FocusLost:Connect(function() TweenService:Create(kbs, TweenInfo.new(0.2), {Color = COLORS.Stroke, Thickness = 1.5}):Play() end)
 
-    local getBtn = Instance.new("TextButton"); getBtn.Size = UDim2.new(0.4, -20, 0, 45); getBtn.Position = UDim2.fromOffset(20, 170); getBtn.BackgroundColor3 = COLORS.Surface; getBtn.Text = "🔗 Get Key"; getBtn.TextColor3 = COLORS.Text; getBtn.Font = Enum.Font.GothamBold; getBtn.TextSize = 13; getBtn.AutoButtonColor = false; getBtn.Parent = rightPanel
+    local getBtn = Instance.new("TextButton"); getBtn.Size = UDim2.new(0.4, -20, 0, 45); getBtn.Position = UDim2.fromOffset(20, 205); getBtn.BackgroundColor3 = COLORS.Surface; getBtn.Text = "🔗 Get Key"; getBtn.TextColor3 = COLORS.Text; getBtn.Font = Enum.Font.GothamBold; getBtn.TextSize = 13; getBtn.AutoButtonColor = false; getBtn.Parent = rightPanel
     local gbc = Instance.new("UICorner"); gbc.CornerRadius = UDim.new(0, 8); gbc.Parent = getBtn
     local gbs = Instance.new("UIStroke"); gbs.Color = COLORS.Stroke; gbs.Parent = getBtn
+
     getBtn.MouseEnter:Connect(function() TweenService:Create(gbs, TweenInfo.new(0.2), {Color = COLORS.Accent1}):Play() end)
     getBtn.MouseLeave:Connect(function() TweenService:Create(gbs, TweenInfo.new(0.2), {Color = COLORS.Stroke}):Play() end)
     
-    local verifyBtn = Instance.new("TextButton"); verifyBtn.Size = UDim2.new(0.6, -20, 0, 45); verifyBtn.Position = UDim2.new(0.4, 10, 0, 170); verifyBtn.BackgroundColor3 = COLORS.Accent1; verifyBtn.Text = "Verify & Continue"; verifyBtn.TextColor3 = COLORS.Text; verifyBtn.Font = Enum.Font.GothamBold; verifyBtn.TextSize = 14; verifyBtn.AutoButtonColor = false; verifyBtn.Parent = rightPanel
+    local verifyBtn = Instance.new("TextButton"); verifyBtn.Size = UDim2.new(0.6, -20, 0, 45); verifyBtn.Position = UDim2.new(0.4, 10, 0, 205); verifyBtn.BackgroundColor3 = COLORS.Accent1; verifyBtn.Text = "Verify & Continue"; verifyBtn.TextColor3 = COLORS.Text; verifyBtn.Font = Enum.Font.GothamBold; verifyBtn.TextSize = 14; verifyBtn.AutoButtonColor = false; verifyBtn.Parent = rightPanel
     local vbc = Instance.new("UICorner"); vbc.CornerRadius = UDim.new(0, 8); vbc.Parent = verifyBtn
     local vbg = Instance.new("UIGradient"); vbg.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, COLORS.Accent1), ColorSequenceKeypoint.new(1, COLORS.Accent2)}); vbg.Parent = verifyBtn
 
-    local discordBtn = Instance.new("TextButton")
-    discordBtn.Size = UDim2.new(1, -40, 0, 40)
-    discordBtn.Position = UDim2.fromOffset(20, 230)
-    discordBtn.BackgroundColor3 = COLORS.Discord
-    discordBtn.Text = "💬 Join Our Discord Server"
-    discordBtn.TextColor3 = COLORS.Text
-    discordBtn.Font = Enum.Font.GothamBold
-    discordBtn.TextSize = 14
-    discordBtn.AutoButtonColor = false
-    discordBtn.Parent = rightPanel
-    local dbc = Instance.new("UICorner"); dbc.CornerRadius = UDim.new(0, 8); dbc.Parent = discordBtn
-    local dbs = Instance.new("UIStroke"); dbs.Color = Color3.fromRGB(114, 137, 218); dbs.Parent = discordBtn
-
-    discordBtn.MouseEnter:Connect(function() TweenService:Create(dbs, TweenInfo.new(0.2), {Color = COLORS.Text}):Play() end)
-    discordBtn.MouseLeave:Connect(function() TweenService:Create(dbs, TweenInfo.new(0.2), {Color = Color3.fromRGB(114, 137, 218)}):Play() end)
-
-    discordBtn.MouseButton1Click:Connect(function()
-        if setclipboard then
-            pcall(setclipboard, KeySystem.DiscordInvite)
-            showNotification("Discord", "تم نسخ رابط السيرفر! افتح المتصفح.", true)
-        else
-            showNotification("Discord", "انسخ الرابط: " .. KeySystem.DiscordInvite, true)
-        end
-    end)
-
-    local noteLabel = Instance.new("TextLabel")
-    noteLabel.Size = UDim2.new(1, -40, 0, 40)
-    noteLabel.Position = UDim2.fromOffset(20, 280)
-    noteLabel.BackgroundTransparency = 1
-    noteLabel.Text = "⚠️ ملاحظة هامة: يجب عليك الانضمام لسيرفر الديسكورد أولاً والحصول على مفتاح، وإلا لن يعمل السكربت!"
-    noteLabel.TextColor3 = COLORS.Error
-    noteLabel.Font = Enum.Font.GothamMedium
-    noteLabel.TextSize = 13
-    noteLabel.TextWrapped = true
-    noteLabel.TextXAlignment = Enum.TextXAlignment.Center
-    noteLabel.Parent = rightPanel
-
+    -- Draggable
     local dragging, dragInput, dragStart, startPos
     header.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = true; dragStart = input.Position; startPos = window.Position; input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end) end end)
     header.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
     UserInputService.InputChanged:Connect(function(input) if input == dragInput and dragging then local delta = input.Position - dragStart window.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
 
+    -- المنطق
     local isCooldown = false
     getBtn.MouseButton1Click:Connect(function()
-        if isCooldown then return end; isCooldown = true
-        local uniqueLink = KeySystem.LinkvertiseURL .. "?userId=" .. LocalPlayer.UserId .. "&session=" .. sessionId
-        if setclipboard then pcall(setclipboard, uniqueLink) end
-        for i = 15, 1, -1 do getBtn.Text = "Wait " .. i .. "s"; getBtn.TextColor3 = COLORS.TextDim; task.wait(1) end
-        getBtn.Text = "✅ Copied!"; getBtn.TextColor3 = COLORS.Success; task.wait(2)
-        getBtn.Text = "🔗 Get Key"; getBtn.TextColor3 = COLORS.Text; isCooldown = false
+        if isCooldown then return end
+        isCooldown = true
+        
+        if setclipboard then 
+            local uniqueLink = KeySystem.LinkvertiseURL .. "?userId=" .. LocalPlayer.UserId .. "&session=" .. sessionId
+            pcall(setclipboard, uniqueLink) 
+        end
+        
+        for i = 15, 1, -1 do
+            getBtn.Text = "Wait " .. i .. "s"
+            getBtn.TextColor3 = COLORS.TextDim
+            task.wait(1)
+        end
+        
+        getBtn.Text = "✅ Copied!"
+        getBtn.TextColor3 = COLORS.Success
+        task.wait(2)
+        
+        getBtn.Text = "🔗 Get Key"
+        getBtn.TextColor3 = COLORS.Text
+        isCooldown = false
     end)
 
     verifyBtn.MouseButton1Click:Connect(function()
         local k = keyBox.Text:gsub("%s+", "")
         if k == "" then kbs.Color = COLORS.Error; task.wait(0.5); kbs.Color = COLORS.Stroke; return end
+        
         verifyBtn.Text = "⏳ Checking..."; verifyBtn.Active = false; vbg.Enabled = false
         
         local isValid, errorMsgOrTime = verifyKeyOnline(k)
         
         if isValid then
-            local expiryTime = type(errorMsgOrTime) == "number" and errorMsgOrTime or (os.time() + KeySystem.Duration)
+            local expiryTime = errorMsgOrTime
+            if expiryTime == true then expiryTime = os.time() + KeySystem.Duration end
             saveData({key = k, expires = expiryTime, hwid = HWID})
             isVerified = true
+            
             verifyBtn.Text = "✅ Success"; verifyBtn.BackgroundColor3 = COLORS.Success
             task.wait(0.8)
             TweenService:Create(blur, TweenInfo.new(0.4), {Size = 0}):Play()
             TweenService:Create(uiScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0}):Play()
             task.wait(0.4); gui:Destroy()
+            callback() -- ✅ هنا بنشغل السكربت الأساسي
         else
-            if errorMsgOrTime == "BAN_TRIGGERED" then
-                gui:Destroy()
-                LocalPlayer:Kick("⛔ Bypass Detected!\nYour HWID has been blacklisted.")
+            local errorMsg = errorMsgOrTime
+            if errorMsg == "BAN_TRIGGERED" then
+                LocalPlayer:Kick("⛔ SLAP AURA ANTI-CHEAT ⛔\n🚨 YOU HAVE BEEN TRIPLE BANNED 🚨\n\n❌ Reason: Bypass/Trap Key.\n🛡️ Action: HWID, IP & Account blacklisted.")
                 return
             end
             
-            if string.find(errorMsgOrTime, "ديسكورد") or string.find(errorMsgOrTime, "Discord") then
-                showNotification("مطلوب الانضمام", "يجب الانضمام لسيرفر الديسكورد وربط حسابك أولاً!", false)
-                verifyBtn.Text = "❌ يجب الانضمام للديسكورد"
-            else
-                verifyBtn.Text = "❌ " .. (errorMsgOrTime or "Invalid Key")
+            if errorMsg == "HWID_MISMATCH" then
+                verifyBtn.Text = "🔄 Reset HWID"; verifyBtn.BackgroundColor3 = COLORS.Accent2; verifyBtn.Active = true; vbg.Enabled = true
+                verifyBtn.MouseButton1Click:Once(function()
+                    verifyBtn.Text = "⏳ Resetting..."; verifyBtn.Active = false
+                    local resetSuccess, resetMsg = resetHWIDOnline(k)
+                    if resetSuccess then
+                        local reVerifySuccess, reVerifyTime = verifyKeyOnline(k)
+                        if reVerifySuccess then
+                            saveData({key = k, expires = reVerifyTime, hwid = HWID})
+                            verifyBtn.Text = "✅ Success"; verifyBtn.BackgroundColor3 = COLORS.Success
+                            task.wait(0.8); TweenService:Create(blur, TweenInfo.new(0.4), {Size = 0}):Play(); TweenService:Create(uiScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0}):Play(); task.wait(0.4); gui:Destroy()
+                            callback() -- ✅ هنا بنشغل السكربت الأساسي بعد الريست
+                        else
+                            verifyBtn.Text = "Verify & Continue"; verifyBtn.BackgroundColor3 = COLORS.Accent1
+                        end
+                    else
+                        verifyBtn.Text = "🔄 Reset HWID"; verifyBtn.Active = true
+                    end
+                end)
+                return
             end
             
-            verifyBtn.BackgroundColor3 = COLORS.Error
-            task.wait(2.5); verifyBtn.Text = "Verify & Continue"; verifyBtn.BackgroundColor3 = COLORS.Accent1; vbg.Enabled = true; verifyBtn.Active = true
+            verifyBtn.Text = "❌ " .. tostring(errorMsg); verifyBtn.BackgroundColor3 = COLORS.Error
+            task.wait(2)
+            verifyBtn.Text = "Verify & Continue"; verifyBtn.BackgroundColor3 = COLORS.Accent1; vbg.Enabled = true; verifyBtn.Active = true
         end
     end)
 end
 
--- ================= [6] التشغيل =================
-if checkLocalSession() then
-    isVerified = true
-else
-    createSupremeUI()
-    while not isVerified do task.wait(0.1) end
+-- ================= [7] التشغيل =================
+local function LoadMainScript()
+    local success, err = pcall(function()
+        local code = game:HttpGet(KeySystem.ScriptURL)
+        local func = loadstring(code)
+        if func then func() else error("Failed to load script string") end
+    end)
+    if not success then
+        warn("❌ Error Loading Script: " .. tostring(err))
+    end
 end
 
-task.wait(1) 
-local success, err = pcall(function()
-    if not isVerified then return end
-    local code = game:HttpGet(KeySystem.ScriptURL)
-    loadstring(code)() 
-end)
+if checkLocalSession() then
+    LoadMainScript()
+else
+    createSupremeUI(LoadMainScript)
+end
