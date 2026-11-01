@@ -1,1 +1,216 @@
-return(function(...) local _7k,_9s=string.gsub,bit32.byteswap local _7p,_5w,_5u=string.byte,string.char,bit32.extract local _8s,_2m,_6u,_4r=string.find,bit32.rshift,string.sub,table.insert local _8f,_1d,_2s=string.rep,bit32.bxor,type local _1k,_1x=bit32.band,assert local _2q,_7d,_2t=table.concat,pcall,rawget local _2r=[=[PJ#phadro]7jT_/&0@cYX7<rFob$0p$a85,B.U8[u"W,R5An%G,UNaht!'JdkAEnD@2Rf23sK<GI>Y'X&0YS1,P5^dOUBc[=OZW]&g=#VS.ZC+MYOhB.;(Y:OsPA>fY,f!'(5_ChWsmg`u>pJfajGsJqfL8P#QHDi.mIkbTl`!1#p/p%2H^:[oHn=nY.*8pQ?tJ[V'!!EXL@scNm:ams]D-3YY?^/]&V?u"_a@PoG0k\P!)D9pa:.JE1OE^[+X*4\]Y[(ki>(s*F*4TcObB+\qS`"?lF61J=$j'p]'oUc974)DKkK!)[8S7eg52rM5.m?R\[cN$'[3i(:R%&'<8hjX+^,W%no\t%$l6-q5W2Qn]9ST/2CqT"@hP\Aoa0F5R6N#9gbgI%j93F>"6(tpPcfN2eY3C<,7`<otUNd4WbueUC1$rGL_j-6!BPc$L;[UFVPo$F`)`Qd&-ap3Z!Zhka^MFOT9XMj-m#)N(+M]!2`32r1cGZ%[b-+;s5'rj'0E'6Xg5F6a#Ym7AF3?HOK.E(dZ[SK5O0NN8?46R>eU;Ih*0<s]D[.=9K%HSA?'UT_Rji4"#CZdd.Sq>#e[A$_c#0)"'YO(l]L3([l20I4_B5e2i#@f9D8^=2EY!+lU2"Y`#nX"LJ7iTm!HXmf#BX2;QFpCbEWY%I29ZhK^uE,$tY:TqPk875+@?_E5gCVhp^HdDU19M.u:`E#>'?jI`6p^(Icl6,=g>in(Zq#<oCfVXYpr^mbfCGW-U0[=)R)u$lnMKg/A]JN@!fB=(hO@:;lB\W9qfl!.RoZt8:-5@f$=iJR9YVorl6,%0YY[4!&jH[Bk]eqf"UWt<#)(U<ZKR<W$Njj%nd2"C__rPKJN%Ren['r1BRSSKFGlA:dFI[66)+4WQk[hds.p[X_6O49g0Hf*XPigPTRamjQu5o'P=^?-VC*E^tHnpE0C+L(M69,7%U\!Dee(q:JEDc;=3)r'3oFBcN0nkMGSYf=5:*"SYnjrGE=O\p5fM6[3ici1sdqABe&PQO#j_&A3Nq*h>rM%7!YI$E]^;c!EHo<Mo%sU%^'sb:Z3;i`+MnnZAbV!ma@-([efh5RhTJNs@Ct)O/+X>hXTsi7:>+fuQ%XVYHB)X51HYG^dS:6HKt+g>=i2'>CgRTNn*1=D$H(OpEnW@u!]1KQ5gI)SqM$c^<$,;52m^GNSgdX"832oYd_dG19=*s%F7F%D[+:f36o/F_4)a#!EX\u=2Ih7^[C9qea,GLs@GL6Zsr:Ee#6f_;Ve&2=OlTS?YXmugIn7uSBP(t1e9;A!=oaAJ?OYZ'%J#?&.Sjuc!.:XU\/S(+7&8HHdt0u@Xj3:?cKfV&Q5GF(-,(f3Y_u1i.XotNTYuGVGA%NF$GaN.3m4#3GP7E+Q89Y5[.C?B0ir)#4`cCbF8-tbHdX"Yh.l;La_g@6L8"(Y\bX%Me,]Dn'iAT<mJBmhio,__YpQMr?8hoGA3:Mk)q[,Y,<rl6V`2Sr"i\D:/bPB&K%'cDT0AIJ"tnRFO-ikuQ#<UoFXM&rl`5o.,3,EVZ*`_DmdmOSf".Ioo3^EnKN;dJLj>!cBT2G%j/d.BZ#3s>kTCi3rKPn<f8X9_P]fP+.6-$du1tt%aUI!S)M5r.LdLa_1.%R'%n.do>:Z6G+cYTOUr27Xh(W@4J>ZIH"i_cu0:U6":T#eq[(*#Q[$GQs$n,,^/eYSO"Sm.#p8TSarlM3"kLIOX7?G"=Q@EEaT@37$Ws`&5j&j\d0oq;p/GMG;k<JH,CNR'ct/DgY"da?>(dYQY(Z-`7@Gc\IoX3?/;n7:9mdB<G`Ji`on!7oS4."g??1KE,>7b8F@tO=jeOe]K3SSJR$LoY!!ZhpM(\`'/X!N\9o-1nV).TMJe]$pZ8R3b@"c.--SK4p7tjjm:fj:sjKK\orH*"FcDeR7VNEQ1@G5/o(jLRU-4e"2;g$MQ<YNL[s/BE/Zr`mR4=i#]dkX6h]KR@[6rZ#sVWRG2TZ/_7@Km&.FUgRe]0]-2d\(=\gQWTg2ARq;3QCbmTj[c;[L&^\%I=#i$Sk93?O\qRSu3Vq\uJ5JmPBpas8u0n[7j+]F<06@*d)=6VJ@5`$YkE1mXo+a`a3^*h@`o2`<5k1np5#:4YPdbXd=AboajuCWR]u_9Cg'/A>WBZH#I#eL]*\%N_.nP5_EIr;DLngsHL&bgh"?P$[*sAp=/Z))=:46bGQcuF@;e8:^!A3_*%?"L!?AOop6\6!#?l-%Jcd)*")L,t4.+i'nsF3\]!_^ct8K2V1pN@e?r)n$gHsZ?7^XV\ph%hg`rHEO]Gu_k7bN_3D!^'j'l`s^TU>JU+T4>h,JH_?m%*J3]=>rX%;Uf+2qTaBbJC2TZ$D"1[m3Sk#)ss#_NCf2JFGSr'0hQ%C!fR+95eU17$I)2hU5hg(;*J;W`uI!?^.(dQb2`i&n;G&h-#6$&U\7&SAc"Y7@TgC#AI0*Lo=iLB9gUNJaVQlFBq\=O?G)Q$Q9)8?>=.iZlMIK^+U:$!!TgSq<m")l+P5WS5H$N@1^\n<\4ah7/Z`\S5Y>;u8TfPr)T@T9-/k@PY`g8LeZf!$Qth=D:*g9)ZXWhnj#T7$?Vc)"p/17`eq,[3Ej7"n99I'7]rVO[6k%H63DFp)SO&#'N?6&cp+B[4T&^qCo6f>HEh]X@i%o<s1?mg,[+bJgpU*iBU=0#fW940uM^[%sPSfC"u;iJ5Q,9Yf_S'[u:./u=Zmp=0Gk5V?IZ;aE`gF?Cc.kE%X'5Rt8R707PQOBW?I1)74d`_/h<ih&i1e-e+mJ%6Ym,oL9nJu,=gI%I[E.L^/GRfdRipolQ.<hsI._`D7mXjT].l4C:.E?id1DRnmEqk;c4Mm:k%-g'to0/0ah1IV$0;6b;W@BsnT'@Kfc,2ud/;0L3RGGF/k'rF)@DUj,T?]D'e%b!WFKEuYGmphs=u`b8&)Ks?EXTH]jeW68hNJ5ZquZeWH=*#&o%(/emlE(t0DfdGPFON'tD$OZt#a%0J)gSU-W./M\9$DH5RP4nfut"5Vm*tSZiNV$Y:duXo/kAe`+11=Gt5<3J$<OoWQ^/U,,0&8K@,Rep/<FJCPcKG4Y!=L<RrQO:483qaoFLCZbBA^[Fk&\Mo/3Fe/]pE`?=4d6W[%pF3M1Bh/,<8+EU;^%])Ce,'Jc%R.6qs[AUF^ldWt(9:lFdtcV8)f9-tS;k#&aQ0t'&hjMI2/B.De`Jl@>EIu_b=;gu+sCK.B[;]5:QV'o94o-VlsD6umK]W(`l+.t9kbTtp((cXsBMgk:^#Ui.*CX6Yk0YDtpN4$O^>$1]g':B;2V`1X.!VW1D,j^67iH>tA%qXBm3JM5PCkj>I"\8c-`rPA*P>"kgSWRu?QLt:e^T:Ff;Jm/,1/R'JPbF&2:/[.Pq4S"+3Z3_!-Rsd:R>Jm5#C3.R#89He=gU.l*;RShY[=PfoKn^9WID56/Y2al*5pAhQ\`M_N^V$u+#T'FS6rlRf.0&Au7LE#Zu^/!t_Q\)Cc?Z:L?<ba-G%?8+2dGc##WOk-,8'0MeLAf$R*iFD$=k_I%"W&?-Jl\oWm#iq%g"CCVg#f<?!0A""UB_3&eqKH:1Y[.l6Q47P)N2s%TW"b+2IVgf<[5^(^_Ng]mYq*LD7abI%!h6cAP0p%E]!:QGEp$rVcQd[DRjb+hjW7lEM@2D/ALdui%@VNKBY'>lts@-L`BM(aHHk^.5IiQiR`%.qs](2(h_`F[KfYV3^I^]g2eeQOu&5cCcJJ+sksR"f16$n9+7;WE>\5"ir1a6bm/WVn/+h&`t8_.srpco':=Aad?gjG:rOoB7PaR5%jWb)B3UU]oj3p7/CqadX,7=8?lP,Gm3A;L1[m2]++=s?lnj*0ble@::\']\LQgD\rW.?PS&4X!2?m+pNF^]Si43KE2:B&a9[g3`rS$]Rg"EA2f;]/4Yp)ka]4db<RbNS&)*Nd1a3ZRMYTIb0L8r@BqhLs!HS5H"]NK4&2i1dLY+(7[C4N0]FQ:b38UA=OFG+`,5n:NgeN%di%MUgel:!HG64)4H#YE34oLt=<+.H1]d0kZ#9=m=2]WpD]7j`6Kjj*)FIk?5j")VL'tf4C%gjSVTbbBpHBY/7&N*@nP0Tm`[jkTC4hc]6egTe=NM?<j:T8ohY=,nsR#YBUeW0d+uG$"X_Y)@H]WX+P\qdr^u@ABPImJLIL49K?Os,/kEBj;<>iMbp1cdCU1&.sfbUpUgineh]sir3I9tb5:>J&$3tJMs$>^(E&@Y+L>H6$V*.*ZeI62Qf`p6mX(4a6&\NhI`=HP3gomls+/KtT6R<=ns]lCd;k2+7%4A%s3EIYiTlM7S:t/grd"HeQ8"E5FJ9WUQ,`nu3.Df^["/LE8o>@A8pb22$aki<t1CNL/-)h@X:;(,&-i\.cb/k:T074@XJFU]]4rMLZeU$Tkn0tr]'KW8\Coup=C)XIQL`M=kjpVt)^jMV#[MUW!T6[5^h0mVL7V%P/U?37ptGY5s6Xk4EYon8?X2J90bX7Y]jfUD.%KB:)9/=*I,D!e6Y$(Q)$Z6@Jm`N';"/V!A+<7IquAhT*U9"kei``B@k.h0uA2r7.nil#p4ip3YY:iI,l'1GX##CCbXWlt/O];l-`t\C%N7CE37%3qNj7Y`ZXg2Qen#oG;-8)UcB=``</h,%M`"<]9%6D#T'Tu,e@7dM,Oq!3+T!m)uBi'`_H1C$;PSplbDMf%t,[NcBC)QG?+I?+d)'Ol0t1R-^;4oGG^b8S<8Y#<P,FtF%2X;u/Erftq,b5M4-aecJQ"fUiWs5I?;=A'Y>*nVRpXY;&#crbomXNZPls(p"*RIMa`Ml&C_bo5:#`O57L;f%#,I?(n=FjL5nh[A?_tB\U'l;K'IXg5-J,\?,E:_:uQ4VN'9WPBZoDUc8!)6YcE@Ria2+XIIBJj"j>%>nu&.Q*Rg$j,SL?S6eMF9l?l1?SJ5_"-1^CrLaq/45_K<u%R#<3foJJ'$re@EdO_Ci7i:A@I<_S_)S+4>2Rp'NH;^Js8u1djL;uo&Iq3>uqQ=WEp>n]4.[21CmS//.6L(7W9R2t>Z.l[T39D=H5f$F\8,o0#M,@s`-^dh#t;sukEXkJdRE78\9`kW)9T<c/@XSh0_\[VCHIa]lF5Ndo)h.!T%%B9p;a5G_Od+t!jR=I38@YErOZ^;FcE?a-/nF"$i`3EtcLB_i04*gsno\m#][ZGO(#ggBGjLHPMC:>)7QXU7!]T13=n6`uqJ0@5@KFU<i#K1hmWVC!LF54F3*8AIK\f#VRA7XKhOrfTFUZ4GWW(d^QHO9qn7U56#G7[IV+lY_hHY*Urq#^:XMS$FKY!KC@rISE.L:a5ME5S%^Z]U=3:&Cs79pPTi^UM:<$uI3;t@O#hq$>*3eC;`4S:nHGQ/H6CE]mksbI;f\m)sg]tZ^SmB@n^DbOmEcKc$4GeFK8-f?[-<p+,tX3L;ntUp!'I5f'3$U!gH0'2_g)bB$PYr*\Heh*BeYb3qj1a8nl*frL'*1qObFOpr9&1?Zp2E-S:4qRuNIK^Y$)<[Mo+qJF5e)VWkrh]OdZ[l3_-N3Z^lHCSLpL!TimhWl^jMNVmg=K`E0=_Cq50SiKYe]Pg-FC.jrN)DJcP>t49ZSn\HAFn1kPcn*\XU)WTF%c?eXZ"gY^GZfpaDa\V8]?$^*c^j&%m^8/[q.qG)2bU1_oMah'\;en>o$dZqG7IMq9WrgP\C3pth#3%To&[u;d0Jqa9Yu0q8K?Yge,N9Rd5qO,OS0lu.o8RX`ml""q(Ijot18o]l`*46=pB^pg6-+lV7A3.K(7pXZC98#>=B79fqp;\T"SM;T*VQfCeS*57t?*K[g)/:@q4l++ec$;cte/'hp_NX9$-HBHL3n""ruN-BRFV='g#qkhmBS[Xq'8&<@&hkT-ni!<4?WG8jJ_iCLj4(/qe=A"]\?6i5`M%TnWkpho#Df?+KP(=eqMW5]CZRn/KdW[H^k1j^cgM>P6^Hd1T^n@g#0<`4G((SQF:idYU#(>)m5r@Y8E";J3jOD!8NC,'"/ZjT)?3J;^2<d&#B/n_&R4F?#2?Jh2JF2;4q0^n0-A`c<sGKk1U/aBk65hZ/l51]leQa:\<@BD`jKd1;9n(b[QJ!?Q(A7nZ493a0^ZQ^AC<>A?%m#i$/0`<IEnYp&0ACHhC/rsqcZU=R/uo*2#i8Fsd:98:&<_>b.bA%(WO$O"uuR3V?7[hOk_GZ%"SJ<e,09Rp6si-cg2KtTu`oh4F7TB;#FL'#7&LWE76.A8o[O'Z"5S:ud8sk,,T`*L*:#YG=9M#C1!2g\a5c2a,Ea=\h4*tAZ?-\+?k;uOi#m[O6@^1q]%s.UYm6M`NT:CSSIX+0:B!$C<=5W_)ojtb8XbGu_Pp8TIiS9<=bBq26i*edo+rt&2"_18e-3tm%G%D@<@_rdP=a4WgKG#P1o!Ukp$euQ["3seckPuQ-?EP`s3$V!38(toEtF7U$s(&ESOCJ'#TNFY;OL3'BPC?4!b.'=f*^Ii<b!-?8*(K%"[T"5o!ic4ht]$`UHg=e6?S/^hjkl8ap!Kf@nRZ[DJ8,KV;7ZGEG>7/:&n:JP:X"I]Z0iX4U?"/LaeBASm1K*,t+m>8=Wk'SWjoas\<Y_)83UT(:\\*2s`Tfd0b@4Gn8O,tq":=lP,h"/'15U<-C=^+I9h:d]4fMr[7IN!??V-m>#rFqNR%1Q\$eXGFF*\4/K?beZ+AXN3i)DaIT'%6^ugFO>CchA`(%J`+E_'V5<s-gd?HjUI!>G^q*nA>#Xd5Jtu^+.T*Vlf\``oa`g+)n_-ft1iVJ.?rSb1B;r'fr'P7"dp=X3#:#)*DR80ZDcU#ZJSl/4kR^/P+XSgcc/VbBQH0<@IRu"Bl\dLG50L@3<L5PB;,%YJF)Zjo@:Y3RD[a+e?Q_JFejO]:Rnk)CZU_(G)2%F"NrCM4uqG0-7N'$->5VXHA-$K0@'_lZtE%Vt%3QHa*fq#j05gp^"#6F$sfWpdBT>cGKObVuD-U?]O?ERRYcM?t4A[IRQO'Jt/M=^Z9k%b?<\qJ9(`JZ2smkP;[tVpDL6'5JcI8dZhM(ujs:_8f%8tfk!([c%[u&SQU]M*6miW?NSe65gHF9Ntqe&ceJ3W]N,nM+7,R2^gp)4IFHKrul_57.tde9t+\YYP;"IRsQ&(l(Q<-*a/f55Gj-bk(CsU+akHr69HSiV!_J`(cd%?[dk%Q;Y!=fL>MK,:n+SOI.N*Oa!EdZ&X&:lET?bnc5G72';3H/`e[3n?pO#W)/uGoE&NK1G;DP=&0(E!a\a$Z.VIEmJ:8"6GAGd`[&kue[,EcCk%<&0In1H;".aQ]7_&R">d"F#&I]1UANdF,mKqt@,D0:lbVaVq9UcTGWTh&_kq>!KoP->=O^dMPr/V.]mWZ7H=k?L&$G1#AZQkLMBfA5S@%<"R0&%6l#+N4hYRPZ$^BjN*.DmCKA0(T$I<,68/MfOMO$IeF[nN>[,h$1*3/NR3]8Fk#Jm40do`U']VaEJ`pgf'k^t:ujp54dO19c"*L-NKJ<J>cY$Dl4<`rI<\Q!VTU)D32O=!Hu"EN9KFmipDud+!Id!";?R;qZKqlbnWosW(/RM<;Xc)3MgG]l\$EnU^^1D.]m[3GOko7q!LjR\;AMXFMs(YV?a?k;huU<:/oj1coB`F::gO$CF=83`@^\r9T"p5dW[+^g]U[<p^85Z(_[L%!*kjdg\R[9Q\5#QCr)pWH&$##Hq0"<P(-%h0)e^$VIDUPCck02[!6+,%kA06r!Gs_`)lubYrT_j:uSZs)IE\$#:Bin*C9uYi7k$2F;8]=6<eHk7Egsb=C=A%'1%7KffZ^KIOM2"Vnmi]/VlGH@JSG$NSbs>R2dU'`S/-j3bc4fD*R(&(f1;pIiaF05,Rb&mA:;D.T`9FpQc`7kpfMS):]fM%'YW91>NdLle=j"G@R7a7c,tqBH*kSJr@+Y<p>rA\i%r>!ho.qWRG5LHqh9odG$o>hVMZ$Q=(O4SEnB-1f(:MP5hphCi3Kd-)$!X\\`KG*g_MMt2)o"o+SgB(;pWG+&EcrdW.%XNmT0-oKQ'h+M-GfKI`PfDbMG-(=7-IE1VH'0G]Y2h@=H+74Lab%]A#.[cS=Mg;\!QRE&qP>sWe$FmpU])I1iG_[+(8j?X41$;eA.:\M@#b5#$(;*VESe=<U>)n27.;GLlhc$*%25%?1dLf6qbRa27u9V@M4=WGkS84d=2dsKoU?tcCnHXU>1Hi@E>fNFo(_clLl1]1jsoM3IWoR=,)8.^Xc\Dt8]-Z&a:s5sq%YWd0LS)e+R&OZmI`m(o7)<J8eFPhfaUjm[]i[UEB&ol8YaZKX;Y$&-`KG^9%K;37I5qWc]t]]9i%A5/fT1Z9?s?dlt&?:[bbp`m0M-:4*&/'GejgG?T$trP-qiCol*>>+51#I!Es+R572mh/+"p^a#VF?RPZ2p::i&!kuoSi>Ki/JYlV4t,j1g:5D"CE:j@XU_VU>a3LHPJ'RDMggksUpc9)"DjBn\O`#L<],<2Ii.1on88pjJ/Fff<G0B138R!6fCgYdm.hnDlRfa;>6!No*e3m(p)bKG0[k):qk#"?fY/_q7^fXXTql-<cr>,=<5P'rHnM/SEaj$*e=O3:=grsA]@/)3%8rqE_DS*3fs1Pb:[ljDXY*4BK2HAZTsB?%7eEBjRqA&fo/j*Hl=/"`TMuG'D050mU17Va0/:(8mHT?2>/Xa6G9>s@8+4nG$9l7R'73lh",RZ>2MZ?n6LbtkM,1ntu%YQacOp,$QFnYLJ['E:R3Ys,+q=.iIlQ*^^5kW$q7Fdp/52IkKl4OHP7GgElNR;^sX7?t51!%>201lh$;?.(=Pk5cb/jml0aH1Ym:i9aA/e#b.N>,;25`Iu#o&"Wt_]WUZYS'9N1cD,gLL$G16Y(?kc&`l]jUe7mTekc>7,*LHp5A^-23Bo83KBj`DB/%l&a>L<3C@o7[Z^=s>?K0]2=t;UXf3W^q%40k<1aqPQiJJ;ooVm/hqfloDJc']`KV4a=X[PocHmmrcqE-79,dj=1#DT5<WXCGQ5\VF(T9AK*c$cL.njN(%i8f(BCCB:DeJW`,;B27_A/ndNZQpn=>3H-G1n[6AU4Hr:Tb_9T9/i=o5mE_niGl%]>$-3U<;`aJ`Nj/a#Q:Vu5FLb"e,q&k1kDg6L4nS$h`!hY'VZ1Nl]mmjZG@mriWJ!4^;qZ+Y2dQFdTlcJ'KCu&dI>QRE_SY1:bU'9=H\mj.""A[d9Z.M\D+77.GUcikm?ZF<rcqi=ICg:P5R.$rW2SmUd><8r(0SG_0ld4NfBkhG>B<>SrNW5^!kc?]#u>Ai.\2S_Yl_Ld(-!\:sA;bo57n%CODdAX6,Ws3l:nahrH>LI5QRaIF\XWL?_W/T7$l2,[_t]P4jhoj]RKC&VAn:'et4@ir4C&G3#6>mh"0!s<t765#>\-!S@69`qAbP<%O:t@hQ7(>199)#+UHjOZ6>D*SeE-LucS@gGcG%H6-80bf^kTck%j(9Y"G8cE2AF"++D]Rp9Uo,7ne:kI+NaEENC.]lj[jt^5(t96K%f@^bdUJaNk-."&V]9U!;.%3Bh+\"g9`3Z(MWGHpG*TPiZ/*sZ5X,/+Rr3X8.f-iqR30!RT2R(=JKB[>(A_0u"4<@*Jot^F11\C,rgY!cFdp?eI2uGPd47LG+/.OR$/[bL/X+&nSjIm'XkB-enL,aRWhT>2'IdB.ZhY&>*+8-<G0\X_TdEJ:2fOqOF\pJaS:OnM0$!Dl644PTjU.&#eNR&rZ##EDJ.f%oUA`_V=2`d"rSB((qb'4UYs?3qTC0kf606sNOh&YG8b*<ISS?E#V=SjAu>="f%#bJ3&\7\?44+8\8moWX3Y9&kaP*oqjFSXKND0u@A2QL1D;?0qXlQs=pHbQe;&8iC!`RTZs<gXmOM]=SV-TV41iAIKd/"YAhF.Dk=6B?&#3Fr*lj>P#hnh"l77$tR%ekgd3g>YP(^8'U(d(+Q[[3_mB9EG`Jo\gYchN[a%^E@[A$6.j@<?Jlq8i^>D7K`U]3`>efnR!YmC4s\P7*NDa]NgZqO9Z1%CqtK6>d*si<\rOZ_;!q1(uUWBipC_=+qkUJKhOX_OXo^Qj^3S*N;ChmI*DB,'PTj`n#^[$C$k`=Hu*eM7A>l$U1H,KaUUp]Y><$!Pse9e='I;sG0S32A$.u^CbZc73%(*i<,P^cYk(lEuS>R^_[6:!XY5/C`+(ZBj&Fiof0RL)hk,RMGW,Y,kjRq"1e?@ifr_c)B<Lb)UWmPi5Y+2dXh#F+g5q9gddI!-]QSc-dZC!=Q#"8Fg%*&;)&DOjK*j[`3J:"*"_I<0GJ\CX_sl\'MlY_Y/M\>=NHmk$GQd_u#.?#6R?F]lRnIb:7ZQqRtFdkt;;oUQ.OG*3ei9RgQkTTYdELC;=uKc&TU66AK9?%"Drl$L6/sJp.Nqp4&"Tc,gEZmLc+!FhRq!t5(k]J<.H&g;,'4WpG&c8UiYXmM(=r).<FWau='6j8Cmq9Da^9WhT3/6Ofp0Cr%nC(&$agQ+jC=_^#1h=I5-'GND(f[6R:dLhl0S&)n(LOU)qQd2JjNBYu3oXF6CouuO`ZM'bo^L,_bJfu#?o.aO+T*(@YL!V6h?$V[k*<7Jbu4<2BC.6@&5sUg0>p!IoG$lMI%d0EOs,NJb9\"^'Rc?r.Ih:G&qd9aKNP6m4e$X\O)\UB-3\ud+cm#aK&bj-^UM\I^DrT>M9on+6CL8Sq<h]g(q3?fsi&-!mp6O1m]15:LQf8AKpI39*X`WVE_k8I(IaXlr[F3>&_erE"lp-dl]>0r?$[LEKt"$_2[<nFP!>f]3:U*]a4G>8:oV@haikhHN-jZX9aj=##DX/hm7m$c`8!k=WK\?i&1lTc97uA#PJ`oqTs0$clts^"M'JL]5"/$h6$=TY$S'j-CLjd<7-s&W6'9M+i7Y/f-a+8_"])EA*f8f%sBJ?ILU.hIoSe,4*1F)Ddu27*$mTP*n^V)k=IhE?4PI_(["TSf(*$<EADqqI-[E0O<_WT6JfUibM&te<[<uPln^g7+_Nt2(l*!pR]rFkVoakn'][Wg(/n5#p>ucCkI?Z%Gce;!In21:Q8^fbreE42FsC\cFp>pA]HnJP:Bb+/#)p8-e8U"Qtu+&$sc6?m0HFEs8TP*Dp4nlP*uU?b&&(Q=Id,oh#gY]r`8J'9@X=>$BtQuk(@gU[:US^=b@)!fTblBlo"ELiu/+X)XqQS121P0dS[h)ugb2S$SgAudMNT90&53c_MZ5<k%f[FJ#s^m9l&X=J)+9/^*mFPo4idrR]C0@$I%dXUd@,RtiYOIeCn-slT,ZR=c'm!s)OcMPNjOsgN-#8K:ND>$eosD!p+M4_FaRC'WGrm7"hYLQY#D>7[)3Ct9&;n`Y<FM'l*>milGUB1"_.04DC32%;UC2S%')#YJUNj&;Ma9Ki")[T;]e8,pQ(%tZ[8VGde=?:phrY;b&Cl1qC"70"]b%J^%H\DQA\NQF"4>b-P^!%chcc$3]feMqm_]d3A($MC$5?CHr^HHcjLiQfqagSn;l&t#3;P%KXD7bXbOcloK[7P"nO0`Fi;JIW]mt,jNAdfU,W4>o<_9Kq4J_[/Ud&uPQ+oFC,),KM;8]f)WYpp&3G\C]],snU\7o7-HpUNo&[qk:$hGFK.5l/l$;pRE>P/l=4>5nM<3]DMp-KCDhC=7S1I#S?U%*KO7'GCni#8[;"W;ease?+rOW+']u^Jk8^ld/#mIm%69mtJoKpWn6C%,pm^N%4Y:$ch]!oc58H,*G3R!t.^G&JW&q#d-?BJ@>M-;r5lAoMC9Ej]bDJ5Q.UbO8u9"doF&)i$DSm\Ii\4m=1l$rmmRr/m]BOqlu"s)bQ^T[BtAXaSJZ<?fud'ui25@?g)h\r'D!n%D[ap/nP.(oSAl0'fM'mfs)^[A.m[f);nX'KfX5$N"Arg,g-FGCLqj_`ZO81uGA(b>R"R<9^"u3n2pIke=/&T<[l>8Lmc(H;h483IXjIcq:YlE#FP+d.D!/(A/ST1kA/I@,]^lq_&*=GaOtTU*4A?Y&F/M:[H/PnN@#IHO#8-O:P0N!1bE=M>l"iKooT*3#lJ*P+Qm#Y,-\M]sW.`pN&KdMigmc.D7N\nKcF)1N[&b/X"IPq6Z\UWg:R(IQ&aA,P"$%fadiT\oVum%1"3(9@F!$cXD*eWESujTPq07]B)4p38hI0OA\+;1m9A[`!J1VY1F-?N$9I\JDmAk8Qh(KZL\",C>CRQ&M#oA5I-=>NbXH-8";4H2<pj]!t39.-(.JFSU2ONbDl8^Y(S\9[ku25:<S+bArOU*YNa,e_BchlRZa(KC;lN\7@s=*]mK't,L\b/^S!9qoW9oV(S3G-G&upW$7&K98.+'7;9t;RTEqT^EY%`>XIMo@]lI"g:05?>Oap3HflULB_2P\o0;'i:`qiA@rS9T)1ZS*G'=t7"!\]-%C=T<IXH:CZ&hlgL/o[rCGQtMmOA1ihg<-1__n[/Jccg=1o<oE&3UirFk^'$1rigOPg).@.NjuFb[tgq1!]^V&%=@5F\sN/rZcVQ%;I?PG`D*tVRJl9"-+JZI)e68E7Y)<c\>PrCu$l<!-,)R_!IoL'(C=@?;]8??mY1$j_+^]%2%^ea=GmV`jKb1cm-q%>BQ<nWhM49=^S!p^]gMY9<Pg%5MUbX2*IT2TP@h"eR4,5`(l<%Rj>8'M^qe*m'l1^OcGepHs;<^5k5WHlOueci"';<Jds`'QB5aMm]tB)]QZmID>^A=mnBf1o_4slC)Qe=F6M1]5%OcP+T;0G.lYSh`EF+[8lbFJ/F.5*\oCPcUjY.N&qPoM4;Nt0:J-9QY<DXB(h)U?FM@cDGFP1%&->CM7k#^L5miQoiq"M7<ZKYJBu=A:6M5?M!tXodUbjJjZ73&0LkLmTiGb:j+54<)3").t;CqD>>5_A$^p^OdMM=<mTnL:<Jh]PYr=bcG&?`l@:o(OiHs;ILR]`p4=ac`>JLmcaX>f(.%uK=pDAGW=,"MaR5jTMflqQX,QM4HhHZ.U\aT5_*Z=`W^*jnZ.JgC/9=e.uPb_2pVDj>!pT!T&QHK9hk^`@:,uu#_?]"QZf:A8A9J8\"_T&cB8M>B'+4ZP:;jP'p$,YmNH6U9hjU`G-G#j?m-4utc'CPoBM^83Ge]j5g=!uWbhPr^Y].nKlLF.5WK63<+W-4eM0n%4[5TRo<Yo@X/N6uLedkdLggSL=iCU#o!i;E^Wn/(i[-74&72S0C+PSo?g\EF<SIacnlUSa=O_k<TSOIiVAkAME]U(/#Ir*k/GMdJO)99duWNE-h/fo.Z*KCa1[WC?&"lXIK+Re2jZOa9[?3CB`%Xm[q8(`1gG?5+,HQ^"^(9'0:EV&H6[;;6$GtL#G8-T'V2i7M@D%/3\COLY>u!:>>"ku<r8j/AE2TqlTX$c9oI]6\>MQed,,hfb'GI0@aOI6S+9HP"W./6p"9:$&=QRbj\8e.Eid<*>UEH<rS;h-AdVpgUnWT1hgI(*%A,n`1dl%9l1r0NdKi[7^UV)j6L!1\*6b`b42gZ3/Qq,A_83'=s)?S0Ro'I=X$bu/$TmdH;Xl@dHEB`\L21#(BSCr,QR2VlL1k%XMnD34k&ip8qsnM'dAS\FXUhU?i7#1kb^Kci5_-AGA]V.G(QSNhpaR+EmQn&VO_FgMaS1O_iKnR?@haDLk-Ha5soS8m_/r")^'3E<oEt$Z$FH++3N?s:7uF&2&#@I)Rqm<3UHGT)W?LL;J+!gh\;5Q@I$uJ:LfTq@"??i<XrHrt[&PT!052M8Zt%_s_7u)G4+j<@,>ddkN0i2cS=5B%@+#1[b2V#h"ITd&[<i[;4F<9D+N2/H"gr*G<j1?VchAI+$P+oNC/L!^ZAIJGJ9TUJNUE)ELA-4]K[I;H%$I:9T[H]28!Y]DeW(IO@73Ges;//1(4*N$JMc;b[WCjYnO1=DY_`h>f]49>c@rn1=['-6F^"H.*S]Hn=%+@p_Zej`P'i"!THX*!79CTYiYVt">$-"DtRt0;=RLA3onDW(:@?"!%H"*WNZMd"8O)=K@$W;9qCIZ`fX,A<#N4L#guDJ%3O-C:MD6=4nUn!9/iT,11LIA>4p3]^dB"c%0o"J1+SET+<J.Los0ad`80'Gc9A(^[*BK'%Gf\Bt9)5.\1?J6Pt:E81_Hrn8t0YYBF]GsFLFJ#V\1/->WSJ@f<PLA'1\rd/&j-/&fFka.6Y5,H"dP"G@o!&-(JV9-Gm=pJoa9QF6+lmpfJ.N!@!@UK.(u$D;e7Nd`>k%gp*UffZn'UMFY7D.?QDH"#EhG3Z`p_7Ik8^GLr!ZT0kgpT$0a?8$f\uqOQl1J+:b^A,TaPGgAY%C0u<cC?P?ikfIN-3-dbulSkcf>bO/9Z0U--u&MKeMeY1fBJJIrb9m0X6d/7g+Yc!(D7XYGjFi1a_%=NtpeZ/VmFFNjWr7';0G+)^S(>"9>4%<<e:sqNZSR]3tkl-=^1s\)8*[Z$bU)Qi]W)opo<;>Q3A+$ui#2c0U"b.+`Z$8V-s1-"o!W:S]db:pH`rDf?[Uu0XdM-=BjshAQ)/iugp4<LN]QbHXQ$0ol=OMn#M+k[.K7@K[S@Fo"LT#LCY0o'%uXpf*ra/N.IV^T!>K@4T'uCTSdnTO2E=kANWfP!](;+.QS-_N+sQO)d"*`/:r]%k`p+a:pT52C8\<OcPG+?<TCBKc[+*!^\UOkK<@,c"p1gc5.mjiA]jtQrG(n78I\I(<Vl<RbLK=j\T]F2<+RQ?,?ca(;.!:l3/m"Hu(qCfKLa]<.^(9#/+AZ'o8-]J)PRt!4q\7qX]1)DffgaiCj7jfhZQk"Vs'N,A[(D>e",@4.)FSSl7C"Ok]T7\$e4m!b0''Lt?NX<p)qGj[BADTZ.EC'V08$8)9iQGN6UCf"iHO.UYi#2@NP.#^D$j9NnTWo"3NQsS*A>h+II&Jq=?f'W"E(Ym6S"\lg[.uu*Z"@dLh2f1ZGY#U`7A4'SXE)&oWINVBR$#i@d">gO<,A@+EHrh-[T0&(P$RJq,k4`Hkia2t4"oUh;*J5P!X*36K#*^@9;Boq&;D^('g.-[EMVngdH-Q0%UJtE$T^(K@6Zq5j"tFs'htg?jes^C5_iDX"'8T1]HbRtu#S>Ca!(X_To:=)]O.nbp<"@7&"$(l-Tt=suh$qI["=6*/[3ICQg@)GehWYrHhY!khq?\SqfR?1JF+Sd0A%[N#YTMbQ+:MQeD!W%qQHK@\mV6_:4;lXZ_E)'A8iB!&%H0&EF&sSM+L@@bS)Jt60-h1lNI;I,sifjWAgS$Q>f$&nG$=BE-';QQ0+2eAO--#?O+EmCjr.\3QqB6+@SUE*-W)B.%A+YZD&Z8/9V1CTMI:++rT#!Z,_c%]DaF=C[rJ/K@h,[]mJS0S\7*:d;QMQXb:G#7Ee1KCZ+31g!1<^KN)Pik,8OtYmCEc*bQfsf+>XlM=KMM'pV6I7S)>9)5*0?\1;NUXYAp=INM3K\j9iaeW'6H7;7(-E*l57%lWk59ta[b&40cQ&:._&Be6j@iau_g(^3suk:t/JRCi=\fI`,Q<9_rd*B#1mPrlXaHD"sg5l;.AL(6OqCMEWA);8Il9`>t*"AG)t+`-3WB;6,UCOc^WMkFIp56JoLF(8b<?L9Tc#1Mul:B+th@DW$plq]M)e\hs/I%IIl328LV9fmRU`7Vg^r#PXnepUeeLSa-*6c57RNn@mG/qY*h*7XK"TTGRnoR(g6e[8ZW"*ZZ)bJTN^6f\YlrH0C3$sAVWJn_%66>m[r_A`:G`fne;M1q6G8q)InaLM]I&f&>WS`S;9[b]QIGrcq=fR?j'^Nc.#>YBc7Wi+[P/(7l3ggJYpKmVMY3*]E_,rD=C.`XhJ,dU[[qB@1pd?`h@9>epb('bt=?Q8nf\R(XP;eamLGURq6tY(GkLUR$4q.+1]&&<q4,c)7-2rpHoto3:tW^<D"WSe_eUnU"lKq!):lHMmj#$?#aF%4.s74^rVS)+i#=*kAG%4`'679skO:B9@-5hD7GFL7Hjo3e-u@u=*0^OA6i[$-.iC&.+dm*I\nt&^,LngOI4JV=$l=cJ7!-WV1lXH8hH#WKW;LGj&f:'s08%?eOY6]n.>.BE%pqT)&gA)Ahk"2M-IY.ahqpSc<2^GfhB=0'5F[>VT%l]j16?YS'[r^;l_*NYFKeP.qgm;Snr@RQT-G/qo&ncKP]X2-:qM=jO6SULqWd/r8ho.N\n'd/W6aaLV[^g!b6Q7);&$k74X>.2(K.SF3gqT9k=lh%,`_RgniA"'nh@*:?InJ`WAsr^Y'#:VrKqqtlqe2@uQ6.D&2d8(,&2j%s.oR3J;cN;>RGm0N5.8pO"NT6%ne"kS-H>+o*)!8LRl+_L65JDu,-Y>d=NP*H#$<d.g-QbdYj*(HUjW]F:cliaN,Y;k<?slne%c?LPs0R'r[7p1*Jfi!t/[OkOOZ^j'5lm`/->a>;9LRRKN8KTK6%f_pS/?P\sAa8E%0mTQ!00Ct"Q9#d'*^(^`j-$Tn!LMRsn-,p>q5r6>@S'Fp5BJ!"kl1Pmf<GARVF\X`\63a5>!ulf.[lf-<4t]&`rt0SplXKbZAdcjV&PJTS_?!gLJhD[(XiO*"f4\[CmCMUbHX$\[t,D@K8\p`Cck6`rHq[mt(4BqSj5lI>-Z:jW;qfHl[r[X>6GuF]H\W<Rjra1hTmB&WXh:ghIkVZqDf"&C9&BWN<!?d\"9(/#I&'5>_0!t[o^&\kP%:%qTH!t8Wm$aOY9Q"3MK?8V$hLCE7i0Re:Zg*JDYUX97I5sQC-!+*=k;!*5YoumT:;&/F+qM>$\a]Ok<bt4W(kRM62m?d&>A6d]4JXW@e!ZlTm$kk\4`Ku;0tio+",Z1k'"FYBLkG%V46phJ4/Mlk=QjC9fc\;o)94KMi-F9]'G^tU>JO/dgk2KI-dMsZViO*LF8fN1NDY0,OX(\lT\F4H<WpU'M1SRr$1g=qQ9j`Zc3C/Io7UYV0USCg`Vj6*^Q;3qj?cS<H(j5'[YsK:j\'?*EE4)%)nQIJbG5!8(q'(0#Iqjq`f>@dH(i.SFWZTIM014&q$QbbXN?t=VhHK.<c0hA:LGgU5\9na&9lJ3Z5&7jW*>I1)i'tc`Of^qUt[Ag=G<K85FeTQ[uRJ(X];&5=2cI4gJdkN'3-+PI4b.>@OPJO+ItQup+&4G\[O0"_^BO7_D@53dZ>Kba>YECl<];7MBHmC-QhbP$*`&fmbdGoJR'[;,<qN#3q>!Nc^"r)#QSTGeRMBgKZ39uq[BOPbX1d^hF_@hBAK4s'W/]o52bp%P<pof=Kd5ZUV`?:9jn6F5',XQe3H`#`I&@RiUhM<W(d-C:h6tPQIIeQQ8LRo[<F5%cL$a?A_qoB#ZQ^0ML+?pVn+KRi76ZI(+11ZnR$-Rq&93\_((Fq<NTUbuZAo-[#)Ol]RM%p]Ff_.iJdHb(!TnACdeZL3+s])\m<C?P>$C8J'-=&rj0$L-9ArDuSjPDn*92CCDT%lZI&d5Yg6bapZ5k-2*aue_,ISZ.WFI+93!fc^=&>b5SBG6$ab#4V8&ZT+hBc:f7#YO`L8@i=lL2c-'<^:3H1+Y-,4I6ces_nP8+Rbc!J,SfQ\5(.,B(8C-;AA2BT0YI`pXgGegF<GSQT>0<G`7HQtBS2.>s,#QRh;i$fLfH%hX-4Nfq96n-&bFYu2oU!0>`Jab;aZZR;Z)Y@33s\(3f,Rf./7,m1nGC^PZ6pgdk`-4<N$s=Cc=:%4m:lbjOegk9iDA@7R8s)bQM6ck1`PaMqT$+qTA%.kL]57/1sm8CjG:t,Z']a>sgPf#%h@/M!P!W\i=2*Hh(KJGF\Iuudb@82L%EXtP:`BhBRF0eXI4R3Cde)<CDY"4h>@/@*jH0]mqfaPL@Y0Wj5E@!=Z+3D#!5GulEbs]*o+ga3N'a(fl#!3W;VXZMM.Kdj9Q?]m]N>"Y_nN*BYgPE.m2XhpcWfdB,]NR[9O5pq$WBWJX0!tP.s5\$cFWJ&":n1/^F9]>63OI\Qr4J7H/IRqp51K2"2!da&6XJ"[--(K<h/Etf'GPXS/Y<-BJn2q\JMHj?#)TKb*0g]8cN*37#,u+9pp*a"8;ufCIRLp?.3@omm0Wu3a7KRt,Z&RF@5jTD3GNA\\tJ0-U&(II\rurYhH$hm[tA)O%9+/,^;Utd6_4go(5bVhBT:e?i3f<q4<ajtZ+gh`mmoHumjhk#[16[RRd*.lr=TBrPm*#DP6CYuAJS8<MKH+LnsqI"15fs48i;;uV63Gb\0&BE!gBP*ndC.*%`?FH"WY2bG75?lO,j1\=d0$EsQi,O`.A-b66Xh*PJeZADa&=e"32N-D+g3s"(A`#=G..TnqcAt-B?SC3<!aps$#:nPQZ(n:9&*K\(@bCrgr/$)`#olohmaXDZi]&/cckfBgePg&6m_*Boh0>7LX_Z9.sk-Y_b-@k*oW(W:ud5`G,J>u.S@e+a;dlCJV;dlXOK.GGT2=X;7GDsBm5kL2%h+n3&aeZ+j_e20GP2-YM%eKn;iMEq^B(aU[5LIeUL`8;R<qQ7^f;Vgb.0UAL)=<)5lrIC>>dBHNCd>YF+S8"JH'nc'9!AR'/ip7O<Q77f])RF2HHd<C76r)T"kEP*YUofCMVQQg\C_uPh.L"9q2)Z5.[4G[=?0gjYC+Jn&*m9\3rpul]YNBi]XFFna<g'G39j3Va'UjqUC:h5BJa_e<ku?/NU3'YEiZi:.f"<)qXY0EnPTn1^J_lsGrC:@u^MFSDbK9Z\sAU3UZ+(D5=%q3p*rT1A%PZ0q62HLW)Y_IU$LhVEB?#C_sFgo4%e0X8HBb.!p&q!6(8igI)$&*%)ItALZsU>"i'!"UH*8-Z#69a)1@QaehLFoIoJ]=b3B9V7,`48^'&18_`+agIPb[5Ub.(JSr&sql<W"4KtP!E5PeG$[Lm0OVgEgN,,7*`7IPXNPa2BN^Z!r`oTk8=h<l!=f1QKm7`+>*Rt>.JH!Z;-UAT(%&ECjiS@l0P\>\P'.qDnRtKrXtX/^.Q]N9$i7nTI^N+3A1C<_4uIt1QdKD+f88!J+l1>nkJ99/10.p^32(+ng,G1.^uCc0TjW=!"d<ul9,gf*<6#,T"k;D&qjU*AmC*G3#;FQW%D>f=.;$tZ7Q^L7-jP"U&.j^H-EQ!Jd2at>HQ<p5;odU`FX(Ns-$_hU3NXkJsgF<=WB>\*bEsXgTSs#D5&HF3WFOYKi6jm0*8;G*>55u2]C:h4dUDt7P!X%64,?OfM*fRQ79OdkBD@b@dVq`!lf05FpJs+!f5nHB$sj8m6P8u`8<9O'+b9ZtEM8S[M'/p_Y@-^=&2Inq4mb5C,!Ws%YXk0!=AaN.]tM$m^;5amIW^&"@sLbOpD-%A34?2hb0XPI4`',G%dr@C7b@h'\45ted\;?(/oM9QJKHudeZ/30l%HJ_5hdV%jK>q:FkM$YJ,=XRIXgZ01)YJ;+27sHq>u`8CcWg!m+XC[BnVD.g@18ROLAUt(Ik?4kbRdkL-E8dEWAk#?jpEMeDThi?eclmAWIOT=QjHtTR_XtRtPLQTk3l%aGn3eJJ@0`.=H7G+Hhd%/USkgf8UDb.<P//F*tk:-JdLf\Ej*h#QKVLrG1cn8l]"qn!G]Ggdm-Gb>Pflmp7ue!9fHaqAH)j`$u/^g84T'Gt\o/Js^tD%q+hc]Nt%=%e+q/d%3T/>)j&'+p-bO^C@^.I["48t&^F@@,#H7:=i6)I8H1,Na[0kb:62<Z>,iQ:IJ\Xpb-FBE[$5+h4c/pXO+K`(Y!at3Jq3N@n(_o!ge\7XT!Zn!hWMO;B-7qKe
+-- ============================================================
+-- 🔐 SLAP AURA | Premium Key System (Standalone)
+-- ============================================================
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local HttpService = game:GetService("HttpService")
+local Lighting = game:GetService("Lighting")
+local LocalPlayer = Players.LocalPlayer
+local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
+
+-- ================= [1] الإعدادات =================
+local KeySystem = {
+    -- رابط لينك فيرتيز بتاعك
+    LinkvertiseURL = "https://link-target.net/10307604/ikbTu3tbVOrU",   
+    -- رابط السيرفر بتاعك في val.town
+    VerifyAPI      = "https://muhammadmajed54.val.run", 
+    -- رابط السكربت الأساسي اللي هيتشغل بعد المفتاح
+    ScriptURL      = "https://raw.githubusercontent.com/muhammadmajedmatter-beep/Slap-aura/main/Script.lua", 
+    Duration       = 14 * 24 * 60 * 60,
+    SaveFile       = "SlapAura_CloudKey.json",
+    DeveloperName  = "Muhammad Majed",
+    OwnerKey       = "MAJED-OWNER-2025",
+    DiscordInvite  = "https://discord.gg/gzuxzqj3t" 
+}
+
+-- ================= [2] توليد HWID و Session =================
+local function getRealHWID()
+    local success, hwid = pcall(function() return game:GetService("RbxAnalyticsService"):GetClientId() end)
+    if success and hwid and hwid ~= "" then return hwid end
+    return gethwid and gethwid() or tostring(LocalPlayer.UserId)
+end
+local HWID = getRealHWID()
+local sessionId = HttpService:GenerateGUID(false) 
+
+-- ================= [3] الألوان =================
+local COLORS = {
+    Bg1     = Color3.fromRGB(15, 15, 20), Bg2     = Color3.fromRGB(25, 25, 32),
+    Card    = Color3.fromRGB(35, 35, 45), Surface = Color3.fromRGB(45, 45, 55),
+    Stroke  = Color3.fromRGB(60, 60, 70), Accent1 = Color3.fromRGB(255, 140, 0),
+    Accent2 = Color3.fromRGB(160, 70, 220), Success = Color3.fromRGB(50, 220, 130),
+    Error   = Color3.fromRGB(255, 80, 80), Text    = Color3.fromRGB(255, 255, 255),
+    TextDim = Color3.fromRGB(160, 160, 170), Discord = Color3.fromRGB(88, 101, 242)
+}
+
+-- ================= [4] التشفير والحفظ =================
+local function encrypt(s) local r = "" for i = 1, #s do r = r .. string.char((string.byte(s, i) + 13) % 256) end return r end
+local function decrypt(s) local r = "" for i = 1, #s do r = r .. string.char((string.byte(s, i) - 13) % 256) end return r end
+local function saveData(t) if writefile then pcall(writefile, KeySystem.SaveFile, encrypt(HttpService:JSONEncode(t))) end end
+local function loadData()
+    if isfile and isfile(KeySystem.SaveFile) then
+        local ok, d = pcall(function() return HttpService:JSONDecode(decrypt(readfile(KeySystem.SaveFile))) end)
+        if ok and d then return d end
+    end
+end
+
+-- ================= [5] التحقق من السيرفر =================
+local function verifyKeyOnline(inputKey)
+    if inputKey == KeySystem.OwnerKey then return true, KeySystem.Duration end
+    local success, response = pcall(function()
+        local url = KeySystem.VerifyAPI .. "?key=" .. HttpService:UrlEncode(inputKey) .. "&hwid=" .. HWID .. "&userid=" .. tostring(LocalPlayer.UserId) .. "&session=" .. sessionId
+        if syn and syn.request then return syn.request({Url = url, Method = "GET"}).Body
+        elseif request then return request({Url = url, Method = "GET"}).Body
+        else return game:HttpGet(url) end
+    end)
+    if success and response then
+        local decodeSuccess, data = pcall(function() return HttpService:JSONDecode(response) end)
+        if decodeSuccess and data and data.success == true then 
+            return true, data.expires_at and math.floor(data.expires_at / 1000) or (os.time() + KeySystem.Duration)
+        else
+            if data and data.message then 
+                if string.find(data.message, "BAN") or string.find(data.message, "محظور") then return false, "BAN_TRIGGERED" end
+                return false, data.message 
+            end
+        end
+    end
+    return false, "فشل الاتصال بالسيرفر."
+end
+
+local function resetHWIDOnline(inputKey)
+    local success, response = pcall(function()
+        local url = KeySystem.VerifyAPI .. "?action=reset_hwid&key=" .. HttpService:UrlEncode(inputKey)
+        if syn and syn.request then return syn.request({Url = url, Method = "GET"}).Body
+        elseif request then return request({Url = url, Method = "GET"}).Body
+        else return game:HttpGet(url) end
+    end)
+    if success and response then
+        local decodeSuccess, data = pcall(function() return HttpService:JSONDecode(response) end)
+        if decodeSuccess and data and data.success == true then return true, data.message end
+    end
+    return false, "فشل الاتصال بالسيرفر."
+end
+
+local function checkLocalSession()
+    local saved = loadData()
+    if saved and saved.hwid == HWID and os.time() < saved.expires then 
+        if saved.key == KeySystem.OwnerKey then return true end
+        if verifyKeyOnline(saved.key) then return true end
+    end
+    return false
+end
+
+-- ================= [6] الواجهة الفخمة =================
+local function createSupremeUI(callback)
+    local gui = Instance.new("ScreenGui"); gui.Name = "SlapAuraSupremeKey"; gui.ResetOnSpawn = false; gui.IgnoreGuiInset = true; gui.DisplayOrder = 99999; gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    pcall(function() gui.Parent = game:GetService("CoreGui") end); if not gui.Parent then gui.Parent = PlayerGui end
+    local blur = Instance.new("BlurEffect"); blur.Size = 0; blur.Parent = Lighting; TweenService:Create(blur, TweenInfo.new(0.5), {Size = 24}):Play()
+    local backdrop = Instance.new("Frame"); backdrop.Size = UDim2.fromScale(1, 1); backdrop.BackgroundColor3 = Color3.new(0, 0, 0); backdrop.BackgroundTransparency = 1; backdrop.BorderSizePixel = 0; backdrop.Parent = gui; TweenService:Create(backdrop, TweenInfo.new(0.4), {BackgroundTransparency = 0.6}):Play()
+    
+    local window = Instance.new("Frame"); window.AnchorPoint = Vector2.new(0.5, 0.5); window.Position = UDim2.fromScale(0.5, 0.5); window.Size = UDim2.fromOffset(540, 370); window.BackgroundColor3 = COLORS.Bg1; window.BorderSizePixel = 0; window.Parent = gui
+    local uiScale = Instance.new("UIScale"); uiScale.Scale = 0.8; uiScale.Parent = window; TweenService:Create(uiScale, TweenInfo.new(0.6, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Scale = 1}):Play()
+    local winCorner = Instance.new("UICorner"); winCorner.CornerRadius = UDim.new(0, 14); winCorner.Parent = window
+    local bgGradient = Instance.new("UIGradient"); bgGradient.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, COLORS.Bg1), ColorSequenceKeypoint.new(1, COLORS.Bg2)}); bgGradient.Rotation = 45; bgGradient.Parent = window
+    local winStroke = Instance.new("UIStroke"); winStroke.Color = COLORS.Stroke; winStroke.Thickness = 2; winStroke.Transparency = 0.1; winStroke.Parent = window
+    local winGrad = Instance.new("UIGradient"); winGrad.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, COLORS.Accent1), ColorSequenceKeypoint.new(0.5, COLORS.Accent2), ColorSequenceKeypoint.new(1, COLORS.Accent1)}); winGrad.Parent = winStroke
+    task.spawn(function() local r = 0 while window.Parent do r = (r + 1) % 360 winGrad.Rotation = r task.wait(0.03) end end)
+
+    local sidebar = Instance.new("Frame"); sidebar.Size = UDim2.fromOffset(210, 370); sidebar.BackgroundColor3 = COLORS.Surface; sidebar.BackgroundTransparency = 0.5; sidebar.BorderSizePixel = 0; sidebar.Parent = window
+    local sideCorner = Instance.new("UICorner"); sideCorner.CornerRadius = UDim.new(0, 14); sideCorner.Parent = sidebar
+    local ringFrame = Instance.new("Frame"); ringFrame.Size = UDim2.fromOffset(90, 90); ringFrame.Position = UDim2.fromOffset(60, 30); ringFrame.BackgroundColor3 = COLORS.Surface; ringFrame.Parent = sidebar
+    local ringCorner = Instance.new("UICorner"); ringCorner.CornerRadius = UDim.new(1, 0); ringCorner.Parent = ringFrame
+    local ringStroke = Instance.new("UIStroke"); ringStroke.Color = COLORS.Accent1; ringStroke.Thickness = 3; ringStroke.Parent = ringFrame
+    local ringGrad = Instance.new("UIGradient"); ringGrad.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, COLORS.Accent1), ColorSequenceKeypoint.new(1, COLORS.Accent2)}); ringGrad.Parent = ringStroke
+    task.spawn(function() local r = 0 while ringFrame.Parent do r = (r - 2) % 360 ringGrad.Rotation = r task.wait(0.03) end end)
+    local avatarImg = Instance.new("ImageLabel"); avatarImg.Size = UDim2.new(1, -6, 1, -6); avatarImg.Position = UDim2.fromOffset(3, 3); avatarImg.BackgroundTransparency = 1; avatarImg.Image = "rbxthumb://type=AvatarHeadShot&id=" .. LocalPlayer.UserId .. "&w=150&h=150"; avatarImg.Parent = ringFrame
+    local imgCorner = Instance.new("UICorner"); imgCorner.CornerRadius = UDim.new(1, 0); imgCorner.Parent = avatarImg
+
+    local welcomeText = Instance.new("TextLabel"); welcomeText.Size = UDim2.new(1, -20, 0, 20); welcomeText.Position = UDim2.fromOffset(10, 135); welcomeText.BackgroundTransparency = 1; welcomeText.Text = "Welcome back,"; welcomeText.TextColor3 = COLORS.TextDim; welcomeText.Font = Enum.Font.Gotham; welcomeText.TextSize = 13; welcomeText.Parent = sidebar
+    local nameText = Instance.new("TextLabel"); nameText.Size = UDim2.new(1, -20, 0, 25); nameText.Position = UDim2.fromOffset(10, 155); nameText.BackgroundTransparency = 1; nameText.Text = LocalPlayer.DisplayName; nameText.TextColor3 = COLORS.Text; nameText.Font = Enum.Font.GothamBlack; nameText.TextSize = 20; nameText.TextTruncate = Enum.TextTruncate.AtEnd; nameText.Parent = sidebar
+    local userText = Instance.new("TextLabel"); userText.Size = UDim2.new(1, -20, 0, 20); userText.Position = UDim2.fromOffset(10, 180); userText.BackgroundTransparency = 1; userText.Text = "@" .. LocalPlayer.Name; userText.TextColor3 = COLORS.Accent1; userText.Font = Enum.Font.GothamMedium; userText.TextSize = 12; userText.TextTruncate = Enum.TextTruncate.AtEnd; userText.Parent = sidebar
+    local devBadge = Instance.new("Frame"); devBadge.Size = UDim2.fromOffset(170, 26); devBadge.Position = UDim2.fromOffset(20, 320); devBadge.BackgroundColor3 = COLORS.Bg1; devBadge.Parent = sidebar
+    local devCorner = Instance.new("UICorner"); devCorner.CornerRadius = UDim.new(0, 6); devCorner.Parent = devBadge
+    local devStroke = Instance.new("UIStroke"); devStroke.Color = COLORS.Accent2; devStroke.Thickness = 1; devStroke.Parent = devBadge
+    local devText = Instance.new("TextLabel"); devText.Size = UDim2.new(1, 0, 1, 0); devText.BackgroundTransparency = 1; devText.Text = "⚡ Dev: " .. KeySystem.DeveloperName; devText.TextColor3 = COLORS.TextDim; devText.Font = Enum.Font.GothamBold; devText.TextSize = 11; devText.Parent = devBadge
+
+    local rightPanel = Instance.new("Frame"); rightPanel.Size = UDim2.fromOffset(330, 370); rightPanel.Position = UDim2.fromOffset(210, 0); rightPanel.BackgroundTransparency = 1; rightPanel.Parent = window
+    local header = Instance.new("Frame"); header.Size = UDim2.new(1, 0, 0, 50); header.BackgroundTransparency = 1; header.Parent = rightPanel
+    local title = Instance.new("TextLabel"); title.Size = UDim2.new(1, -50, 1, 0); title.Position = UDim2.fromOffset(20, 0); title.BackgroundTransparency = 1; title.Text = "Cloud Auth"; title.TextColor3 = COLORS.Text; title.Font = Enum.Font.GothamBlack; title.TextSize = 18; title.TextXAlignment = Enum.TextXAlignment.Left; title.Parent = header
+    local closeBtn = Instance.new("TextButton"); closeBtn.Size = UDim2.fromOffset(28, 28); closeBtn.Position = UDim2.new(1, -45, 0, 11); closeBtn.BackgroundColor3 = COLORS.Surface; closeBtn.Text = "X"; closeBtn.TextColor3 = COLORS.TextDim; closeBtn.Font = Enum.Font.SourceSansBold; closeBtn.TextSize = 18; closeBtn.AutoButtonColor = false; closeBtn.Parent = header
+    local cc = Instance.new("UICorner"); cc.CornerRadius = UDim.new(1, 0); cc.Parent = closeBtn; closeBtn.MouseButton1Click:Connect(function() TweenService:Create(blur, TweenInfo.new(0.3), {Size = 0}):Play() gui:Destroy() end)
+
+    local instructions = Instance.new("TextLabel"); instructions.Size = UDim2.new(1, -40, 0, 50); instructions.Position = UDim2.fromOffset(20, 50); instructions.BackgroundTransparency = 1; instructions.Text = "Please authenticate to access Slap Aura.\n1. Click 'Get Key' to open the link.\n2. Paste your key in the field below."; instructions.TextColor3 = COLORS.TextDim; instructions.Font = Enum.Font.Gotham; instructions.TextSize = 12; instructions.TextWrapped = true; instructions.TextXAlignment = Enum.TextXAlignment.Left; instructions.Parent = rightPanel
+
+    local keyBox = Instance.new("TextBox"); keyBox.Size = UDim2.new(1, -40, 0, 45); keyBox.Position = UDim2.fromOffset(20, 110); keyBox.BackgroundColor3 = COLORS.Bg1; keyBox.PlaceholderText = "Paste your key here..."; keyBox.Text = ""; keyBox.TextColor3 = COLORS.Text; keyBox.PlaceholderColor3 = COLORS.TextDim; keyBox.Font = Enum.Font.GothamMedium; keyBox.TextSize = 14; keyBox.ClearTextOnFocus = false; keyBox.Parent = rightPanel
+    local kbc = Instance.new("UICorner"); kbc.CornerRadius = UDim.new(0, 8); kbc.Parent = keyBox
+    local kbs = Instance.new("UIStroke"); kbs.Color = COLORS.Stroke; kbs.Thickness = 1.5; kbs.Parent = keyBox
+    keyBox.Focused:Connect(function() TweenService:Create(kbs, TweenInfo.new(0.2), {Color = COLORS.Accent1, Thickness = 2}):Play() end)
+    keyBox.FocusLost:Connect(function() TweenService:Create(kbs, TweenInfo.new(0.2), {Color = COLORS.Stroke, Thickness = 1.5}):Play() end)
+
+    local getBtn = Instance.new("TextButton"); getBtn.Size = UDim2.new(0.4, -20, 0, 45); getBtn.Position = UDim2.fromOffset(20, 170); getBtn.BackgroundColor3 = COLORS.Surface; getBtn.Text = "🔗 Get Key"; getBtn.TextColor3 = COLORS.Text; getBtn.Font = Enum.Font.GothamBold; getBtn.TextSize = 13; getBtn.AutoButtonColor = false; getBtn.Parent = rightPanel
+    local gbc = Instance.new("UICorner"); gbc.CornerRadius = UDim.new(0, 8); gbc.Parent = getBtn
+    local gbs = Instance.new("UIStroke"); gbs.Color = COLORS.Stroke; gbs.Parent = getBtn
+    getBtn.MouseEnter:Connect(function() TweenService:Create(gbs, TweenInfo.new(0.2), {Color = COLORS.Accent1}):Play() end)
+    getBtn.MouseLeave:Connect(function() TweenService:Create(gbs, TweenInfo.new(0.2), {Color = COLORS.Stroke}):Play() end)
+
+    local verifyBtn = Instance.new("TextButton"); verifyBtn.Size = UDim2.new(0.6, -20, 0, 45); verifyBtn.Position = UDim2.new(0.4, 10, 0, 170); verifyBtn.BackgroundColor3 = COLORS.Accent1; verifyBtn.Text = "Verify & Continue"; verifyBtn.TextColor3 = COLORS.Text; verifyBtn.Font = Enum.Font.GothamBold; verifyBtn.TextSize = 14; verifyBtn.AutoButtonColor = false; verifyBtn.Parent = rightPanel
+    local vbc = Instance.new("UICorner"); vbc.CornerRadius = UDim.new(0, 8); vbc.Parent = verifyBtn
+    local vbg = Instance.new("UIGradient"); vbg.Color = ColorSequence.new({ColorSequenceKeypoint.new(0, COLORS.Accent1), ColorSequenceKeypoint.new(1, COLORS.Accent2)}); vbg.Parent = verifyBtn
+
+    local discordBtn = Instance.new("TextButton"); discordBtn.Size = UDim2.new(1, -40, 0, 40); discordBtn.Position = UDim2.fromOffset(20, 230); discordBtn.BackgroundColor3 = COLORS.Discord; discordBtn.Text = "💬 Join Our Discord Server"; discordBtn.TextColor3 = COLORS.Text; discordBtn.Font = Enum.Font.GothamBold; discordBtn.TextSize = 14; discordBtn.AutoButtonColor = false; discordBtn.Parent = rightPanel
+    local dbc = Instance.new("UICorner"); dbc.CornerRadius = UDim.new(0, 8); dbc.Parent = discordBtn
+    local dbs = Instance.new("UIStroke"); dbs.Color = Color3.fromRGB(114, 137, 218); dbs.Parent = discordBtn
+    discordBtn.MouseEnter:Connect(function() TweenService:Create(dbs, TweenInfo.new(0.2), {Color = COLORS.Text}):Play() end)
+    discordBtn.MouseLeave:Connect(function() TweenService:Create(dbs, TweenInfo.new(0.2), {Color = Color3.fromRGB(114, 137, 218)}):Play() end)
+    discordBtn.MouseButton1Click:Connect(function() if setclipboard then pcall(setclipboard, KeySystem.DiscordInvite); end end)
+
+    local noteLabel = Instance.new("TextLabel"); noteLabel.Size = UDim2.new(1, -40, 0, 40); noteLabel.Position = UDim2.fromOffset(20, 280); noteLabel.BackgroundTransparency = 1; noteLabel.Text = "⚠️ يجب الانضمام لسيرفر الديسكورد أولاً!"; noteLabel.TextColor3 = COLORS.Error; noteLabel.Font = Enum.Font.GothamMedium; noteLabel.TextSize = 13; noteLabel.TextWrapped = true; noteLabel.TextXAlignment = Enum.TextXAlignment.Center; noteLabel.Parent = rightPanel
+
+    local dragging, dragInput, dragStart, startPos
+    header.InputBegan:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then dragging = true; dragStart = input.Position; startPos = window.Position; input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then dragging = false end end) end end)
+    header.InputChanged:Connect(function(input) if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then dragInput = input end end)
+    UserInputService.InputChanged:Connect(function(input) if input == dragInput and dragging then local delta = input.Position - dragStart window.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y) end end)
+
+    local isCooldown = false
+    getBtn.MouseButton1Click:Connect(function()
+        if isCooldown then return end; isCooldown = true
+        local uniqueLink = KeySystem.LinkvertiseURL .. "?userId=" .. LocalPlayer.UserId .. "&session=" .. sessionId
+        if setclipboard then pcall(setclipboard, uniqueLink) end
+        for i = 5, 1, -1 do getBtn.Text = "Wait " .. i .. "s"; getBtn.TextColor3 = COLORS.TextDim; task.wait(1) end
+        getBtn.Text = "✅ Copied!"; getBtn.TextColor3 = COLORS.Success; task.wait(2)
+        getBtn.Text = "🔗 Get Key"; getBtn.TextColor3 = COLORS.Text; isCooldown = false
+    end)
+
+    verifyBtn.MouseButton1Click:Connect(function()
+        local k = keyBox.Text:gsub("%s+", "")
+        if k == "" then kbs.Color = COLORS.Error; task.wait(0.5); kbs.Color = COLORS.Stroke; return end
+        verifyBtn.Text = "⏳ Checking..."; verifyBtn.Active = false; vbg.Enabled = false
+        
+        local isValid, errorMsgOrTime = verifyKeyOnline(k)
+        
+        if isValid then
+            local expiryTime = errorMsgOrTime
+            if expiryTime == true then expiryTime = os.time() + KeySystem.Duration end
+            saveData({key = k, expires = expiryTime, hwid = HWID})
+            verifyBtn.Text = "✅ Success"; verifyBtn.BackgroundColor3 = COLORS.Success
+            task.wait(0.8)
+            TweenService:Create(blur, TweenInfo.new(0.4), {Size = 0}):Play(); TweenService:Create(uiScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0}):Play()
+            task.wait(0.4); gui:Destroy()
+            callback() -- ✅ هنا بنشغل السكربت الأساسي
+        else
+            local errorMsg = errorMsgOrTime
+            if errorMsg == "BAN_TRIGGERED" then
+                LocalPlayer:Kick("⛔ SLAP AURA ANTI-CHEAT ⛔\n🚨 YOU HAVE BEEN TRIPLE BANNED 🚨\n\n❌ Reason: Bypass/Trap Key.\n🛡️ Action: HWID, IP & Account blacklisted.")
+                return
+            end
+            
+            if errorMsg == "HWID_MISMATCH" then
+                verifyBtn.Text = "🔄 Reset HWID"; verifyBtn.BackgroundColor3 = COLORS.Accent2; verifyBtn.Active = true; vbg.Enabled = true
+                verifyBtn.MouseButton1Click:Once(function()
+                    verifyBtn.Text = "⏳ Resetting..."; verifyBtn.Active = false
+                    local resetSuccess, resetMsg = resetHWIDOnline(k)
+                    if resetSuccess then
+                        local reVerifySuccess, reVerifyTime = verifyKeyOnline(k)
+                        if reVerifySuccess then
+                            saveData({key = k, expires = reVerifyTime, hwid = HWID})
+                            verifyBtn.Text = "✅ Success"; verifyBtn.BackgroundColor3 = 
