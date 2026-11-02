@@ -1,5 +1,5 @@
 -- ============================================================
--- 🔐 SLAP AURA | Premium Key System (Standalone + Ban Screen)
+-- 🔐 SLAP AURA | Premium Key System (Standalone + Ban Screen Multi-Lang)
 -- ============================================================
 if _G.SlapAuraKeySystemRunning then return end
 _G.SlapAuraKeySystemRunning = true
@@ -9,6 +9,7 @@ local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
 local HttpService = game:GetService("HttpService")
 local Lighting = game:GetService("Lighting")
+local LocalizationService = game:GetService("LocalizationService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
@@ -23,6 +24,30 @@ local KeySystem = {
     OwnerKey       = "MAJED-OWNER-2025",
     DiscordInvite  = "https://discord.gg/gzuxzqj3t" 
 }
+
+-- ================= [1.5] الترجمات لشاشة الحظر =================
+local Translations = {
+    ar = { title = "⛔ تم رفض الوصول ⛔", banned_text = "لقد تم حظرك من Slap Aura.\n\nالسبب: ", time_remaining = "الوقت المتبقي: %d أيام", permanent = "المدة: دائم", leave = "مغادرة اللعبة", kick_msg = "أنت محظور: " },
+    en = { title = "⛔ ACCESS DENIED ⛔", banned_text = "You have been BANNED from Slap Aura.\n\nReason: ", time_remaining = "Time Remaining: %d Days", permanent = "Duration: Permanent", leave = "Leave Game", kick_msg = "You are banned: " },
+    es = { title = "⛔ ACCESO DENEGADO ⛔", banned_text = "Has sido BANEADO de Slap Aura.\n\nRazón: ", time_remaining = "Tiempo restante: %d Días", permanent = "Duración: Permanente", leave = "Salir del juego", kick_msg = "Estás baneado: " },
+    fr = { title = "⛔ ACCÈS REFUSÉ ⛔", banned_text = "Vous avez été BANNI de Slap Aura.\n\nRaison: ", time_remaining = "Temps restant: %d Jours", permanent = "Durée: Permanente", leave = "Quitter le jeu", kick_msg = "Vous êtes banni: " },
+    pt = { title = "⛔ ACESSO NEGADO ⛔", banned_text = "Você foi BANIDO do Slap Aura.\n\nMotivo: ", time_remaining = "Tempo restante: %d Dias", permanent = "Duração: Permanente", leave = "Sair do jogo", kick_msg = "Você está banido: " },
+    de = { title = "⛔ ZUGRIFF VERWEIGERT ⛔", banned_text = "Du wurdest von Slap Aura GESPERRT.\n\nGrund: ", time_remaining = "Verbleibende Zeit: %d Tage", permanent = "Dauer: Permanent", leave = "Spiel verlassen", kick_msg = "Du bist gesperrt: " },
+    ru = { title = "⛔ ДОСТУП ЗАПРЕЩЕН ⛔", banned_text = "Вы были ЗАБЛОКИРОВАНЫ в Slap Aura.\n\nПричина: ", time_remaining = "Оставшееся время: %d дней", permanent = "Продолжительность: Навсегда", leave = "Выйти из игры", kick_msg = "Вы заблокированы: " },
+    tr = { title = "⛔ ERİŞİM REDDEDİLDİ ⛔", banned_text = "Slap Aura'dan YASAKLANDINIZ.\n\nSebep: ", time_remaining = "Kalan Süre: %d Gün", permanent = "Süre: Kalıcı", leave = "Oyundan Çık", kick_msg = "Yasaklandınız: " },
+    id = { title = "⛔ AKSES DITOLAK ⛔", banned_text = "Anda telah DIBLOKIR dari Slap Aura.\n\nAlasan: ", time_remaining = "Sisa Waktu: %d Hari", permanent = "Durasi: Permanen", leave = "Keluar dari Game", kick_msg = "Anda diblokir: " }
+}
+
+local function getTranslation()
+    local locale = "en"
+    pcall(function()
+        local sysLocale = LocalizationService.SystemLocaleId
+        if sysLocale then
+            locale = string.sub(sysLocale, 1, 2):lower()
+        end
+    end)
+    return Translations[locale] or Translations["en"]
+end
 
 -- ================= [2] توليد HWID و Session =================
 local function getRealHWID()
@@ -72,7 +97,18 @@ local function verifyKeyOnline(inputKey)
             elseif data.message == "BANNED" then
                 return false, "BANNED", data.reason, data.expires
             else
-                return false, data.message
+                -- ✅ معالجة الأخطاء لتظهر بشكل واضح
+                if data.message == "NOT_IN_DISCORD" then
+                    return false, "⚠️ يجب الانضمام لسيرفر الديسكورد أولاً!"
+                elseif data.message == "BYPASS_DETECTED" then
+                    return false, "🚫 تم اكتشاف أداة غش (Bypass)!"
+                elseif data.message == "HWID_MISMATCH" then
+                    return false, "HWID_MISMATCH"
+                elseif data.message == "MAINTENANCE" then
+                    return false, "🛠️ السيرفر تحت الصيانة حالياً."
+                else
+                    return false, data.message or "حدث خطأ غير معروف."
+                end
             end
         end
     end
@@ -103,8 +139,10 @@ local function checkLocalSession()
     return false
 end
 
--- ================= [5] شاشة الحظر (Ban Screen) =================
+-- ================= [5] شاشة الحظر (Ban Screen Multi-Lang) =================
 local function ShowBanScreen(reason, expiresAt)
+    local t = getTranslation()
+
     local banGui = Instance.new("ScreenGui")
     banGui.Name = "SlapAuraBan"
     banGui.ResetOnSpawn = false
@@ -135,7 +173,7 @@ local function ShowBanScreen(reason, expiresAt)
     title.Size = UDim2.new(1, 0, 0, 50)
     title.Position = UDim2.fromOffset(0, 20)
     title.BackgroundTransparency = 1
-    title.Text = "⛔ ACCESS DENIED ⛔"
+    title.Text = t.title
     title.TextColor3 = Color3.fromRGB(255, 50, 50)
     title.Font = Enum.Font.GothamBlack
     title.TextSize = 28
@@ -144,7 +182,7 @@ local function ShowBanScreen(reason, expiresAt)
     reasonLbl.Size = UDim2.new(1, -40, 0, 60)
     reasonLbl.Position = UDim2.fromOffset(20, 80)
     reasonLbl.BackgroundTransparency = 1
-    reasonLbl.Text = "You have been BANNED from Slap Aura.\n\nReason: " .. tostring(reason)
+    reasonLbl.Text = t.banned_text .. tostring(reason)
     reasonLbl.TextColor3 = Color3.fromRGB(255, 255, 255)
     reasonLbl.Font = Enum.Font.GothamMedium
     reasonLbl.TextSize = 16
@@ -156,9 +194,9 @@ local function ShowBanScreen(reason, expiresAt)
     timeLbl.BackgroundTransparency = 1
     if expiresAt and expiresAt > 0 then
         local daysLeft = math.floor((expiresAt - (os.time() * 1000)) / (1000 * 60 * 60 * 24))
-        timeLbl.Text = "Time Remaining: " .. daysLeft .. " Days"
+        timeLbl.Text = string.format(t.time_remaining, daysLeft)
     else
-        timeLbl.Text = "Duration: Permanent"
+        timeLbl.Text = t.permanent
     end
     timeLbl.TextColor3 = Color3.fromRGB(255, 200, 50)
     timeLbl.Font = Enum.Font.GothamBold
@@ -168,18 +206,18 @@ local function ShowBanScreen(reason, expiresAt)
     btn.Size = UDim2.fromOffset(200, 45)
     btn.Position = UDim2.new(0.5, -100, 1, -70)
     btn.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
-    btn.Text = "Leave Game"
+    btn.Text = t.leave
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.Font = Enum.Font.GothamBold
     btn.TextSize = 16
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 8)
 
     btn.MouseButton1Click:Connect(function()
-        LocalPlayer:Kick("You are banned: " .. tostring(reason))
+        LocalPlayer:Kick(t.kick_msg .. tostring(reason))
     end)
 end
 
--- ================= [6] دالة النبضات (Heartbeat) مع فحص الباند =================
+-- ================= [6] دالة النبضات (Heartbeat) =================
 local function StartHeartbeat(keyToUse)
     task.spawn(function()
         while _G.SlapAuraKeySystemRunning do
@@ -347,8 +385,16 @@ local function createSupremeUI(callback)
                 return
             end
             
-            verifyBtn.Text = "❌ " .. tostring(errorMsg); verifyBtn.BackgroundColor3 = COLORS.Error
-            task.wait(2)
+            -- ✅ معالجة الخطأ الجديد (رسالة الديسكورد ونسخ اللينك)
+            if tostring(errorMsg):find("الديسكورد") then
+                if setclipboard then pcall(setclipboard, KeySystem.DiscordInvite) end
+                verifyBtn.Text = "❌ مشتركش في الديسكورد (تم نسخ اللينك)"
+            else
+                verifyBtn.Text = "❌ " .. tostring(errorMsg)
+            end
+            
+            verifyBtn.BackgroundColor3 = COLORS.Error
+            task.wait(3.5) -- وقت كافي لقراءة الرسالة
             verifyBtn.Text = "Verify & Continue"; verifyBtn.BackgroundColor3 = COLORS.Accent1; vbg.Enabled = true; verifyBtn.Active = true
         end
     end)
