@@ -14,13 +14,10 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 
 -- ================= [1] الإعدادات =================
 local KeySystem = {
-    -- ⚠️ تأكد من وضع رابط Linkvertise الجديد هنا
     LinkvertiseURL = "https://link-target.net/10307604/ikbTu3tbVOrU",   
-    -- ⚠️ رابط سيرفر val.town الخاص بك
     VerifyAPI      = "https://muhammadmajed54.val.run/", 
-    -- ⚠️ رابط السكربت الأساسي الذي سيتم تحميله بعد التحقق
     ScriptURL      = "https://raw.githubusercontent.com/muhammadmajedmatter-beep/Slap-aura/main/Script.lua", 
-    Duration       = 14 * 24 * 60 * 60,
+    Duration       = 4 * 24 * 60 * 60,
     SaveFile       = "SlapAura_CloudKey.json",
     DeveloperName  = "Muhammad Majed",
     OwnerKey       = "MAJED-OWNER-2025",
@@ -106,30 +103,6 @@ local function checkLocalSession()
     return false
 end
 
--- ================= [4.5] دالة النبضات (Heartbeat) =================
-local function StartHeartbeat(keyToUse)
-    task.spawn(function()
-        while _G.SlapAuraKeySystemRunning do
-            pcall(function()
-                local url = KeySystem.VerifyAPI .. "?action=heartbeat" ..
-                    "&key=" .. HttpService:UrlEncode(keyToUse) ..
-                    "&userid=" .. tostring(LocalPlayer.UserId) ..
-                    "&username=" .. HttpService:UrlEncode(LocalPlayer.Name) ..
-                    "&hwid=" .. HttpService:UrlEncode(HWID)
-                
-                if syn and syn.request then 
-                    syn.request({Url = url, Method = "GET"})
-                elseif request then 
-                    request({Url = url, Method = "GET"})
-                else 
-                    game:HttpGet(url) 
-                end
-            end)
-            task.wait(45) -- كل 45 ثانية يبعت نبضة
-        end
-    end)
-end
-
 -- ================= [5] شاشة الحظر (Ban Screen) =================
 local function ShowBanScreen(reason, expiresAt)
     local banGui = Instance.new("ScreenGui")
@@ -206,7 +179,49 @@ local function ShowBanScreen(reason, expiresAt)
     end)
 end
 
--- ================= [6] واجهة المفتاح (Supreme UI) =================
+-- ================= [6] دالة النبضات (Heartbeat) مع فحص الباند =================
+local function StartHeartbeat(keyToUse)
+    task.spawn(function()
+        while _G.SlapAuraKeySystemRunning do
+            local shouldStop = false
+            pcall(function()
+                local url = KeySystem.VerifyAPI .. "?action=heartbeat" ..
+                    "&key=" .. HttpService:UrlEncode(keyToUse) ..
+                    "&userid=" .. tostring(LocalPlayer.UserId) ..
+                    "&username=" .. HttpService:UrlEncode(LocalPlayer.Name) ..
+                    "&hwid=" .. HttpService:UrlEncode(HWID)
+                
+                local response
+                if syn and syn.request then 
+                    response = syn.request({Url = url, Method = "GET"}).Body
+                elseif request then 
+                    response = request({Url = url, Method = "GET"}).Body
+                else 
+                    response = game:HttpGet(url) 
+                end
+                
+                if response then
+                    local ok, data = pcall(function() return HttpService:JSONDecode(response) end)
+                    if ok and data then
+                        if data.banned == true then
+                            shouldStop = true
+                            if ShowBanScreen then
+                                ShowBanScreen(data.reason or "Banned", data.expires or 0)
+                            end
+                        elseif data.success == false then
+                            shouldStop = true 
+                        end
+                    end
+                end
+            end)
+            
+            if shouldStop then break end
+            task.wait(1) 
+        end
+    end)
+end
+
+-- ================= [7] واجهة المفتاح (Supreme UI) =================
 local function createSupremeUI(callback)
     local gui = Instance.new("ScreenGui"); gui.Name = "SlapAuraSupremeKey"; gui.ResetOnSpawn = false; gui.IgnoreGuiInset = true; gui.DisplayOrder = 99999; gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     pcall(function() gui.Parent = game:GetService("CoreGui") end); if not gui.Parent then gui.Parent = PlayerGui end
@@ -302,7 +317,7 @@ local function createSupremeUI(callback)
             task.wait(0.8)
             TweenService:Create(blur, TweenInfo.new(0.4), {Size = 0}):Play(); TweenService:Create(uiScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0}):Play()
             task.wait(0.4); gui:Destroy()
-            callback(k) -- تشغيل السكربت الأساسي وتمرير المفتاح للنبضات
+            callback(k) -- تشغيل السكريبت الأساسي
         else
             if errorMsg == "BANNED" then
                 gui:Destroy()
@@ -339,10 +354,9 @@ local function createSupremeUI(callback)
     end)
 end
 
--- ================= [7] التشغيل =================
+-- ================= [8] التشغيل =================
 local function LoadMainScript(keyToUse)
-    -- بدء إرسال النبضات للسيرفر
-    StartHeartbeat(keyToUse)
+    StartHeartbeat(keyToUse) -- تشغيل نظام الحظر الفوري
 
     local success, err = pcall(function()
         local code = game:HttpGet(KeySystem.ScriptURL)
