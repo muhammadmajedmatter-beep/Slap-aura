@@ -106,6 +106,30 @@ local function checkLocalSession()
     return false
 end
 
+-- ================= [4.5] دالة النبضات (Heartbeat) =================
+local function StartHeartbeat(keyToUse)
+    task.spawn(function()
+        while _G.SlapAuraKeySystemRunning do
+            pcall(function()
+                local url = KeySystem.VerifyAPI .. "?action=heartbeat" ..
+                    "&key=" .. HttpService:UrlEncode(keyToUse) ..
+                    "&userid=" .. tostring(LocalPlayer.UserId) ..
+                    "&username=" .. HttpService:UrlEncode(LocalPlayer.Name) ..
+                    "&hwid=" .. HttpService:UrlEncode(HWID)
+                
+                if syn and syn.request then 
+                    syn.request({Url = url, Method = "GET"})
+                elseif request then 
+                    request({Url = url, Method = "GET"})
+                else 
+                    game:HttpGet(url) 
+                end
+            end)
+            task.wait(45) -- كل 45 ثانية يبعت نبضة
+        end
+    end)
+end
+
 -- ================= [5] شاشة الحظر (Ban Screen) =================
 local function ShowBanScreen(reason, expiresAt)
     local banGui = Instance.new("ScreenGui")
@@ -278,7 +302,7 @@ local function createSupremeUI(callback)
             task.wait(0.8)
             TweenService:Create(blur, TweenInfo.new(0.4), {Size = 0}):Play(); TweenService:Create(uiScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0}):Play()
             task.wait(0.4); gui:Destroy()
-            callback() -- تشغيل السكربت الأساسي
+            callback(k) -- تشغيل السكربت الأساسي وتمرير المفتاح للنبضات
         else
             if errorMsg == "BANNED" then
                 gui:Destroy()
@@ -297,7 +321,7 @@ local function createSupremeUI(callback)
                             saveData({key = k, expires = reVerifyTime, hwid = HWID})
                             verifyBtn.Text = "✅ Success"; verifyBtn.BackgroundColor3 = COLORS.Success
                             task.wait(0.8); TweenService:Create(blur, TweenInfo.new(0.4), {Size = 0}):Play(); TweenService:Create(uiScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0}):Play(); task.wait(0.4); gui:Destroy()
-                            callback()
+                            callback(k)
                         else
                             verifyBtn.Text = "Verify & Continue"; verifyBtn.BackgroundColor3 = COLORS.Accent1
                         end
@@ -316,7 +340,10 @@ local function createSupremeUI(callback)
 end
 
 -- ================= [7] التشغيل =================
-local function LoadMainScript()
+local function LoadMainScript(keyToUse)
+    -- بدء إرسال النبضات للسيرفر
+    StartHeartbeat(keyToUse)
+
     local success, err = pcall(function()
         local code = game:HttpGet(KeySystem.ScriptURL)
         local func = loadstring(code)
@@ -327,8 +354,11 @@ local function LoadMainScript()
     end
 end
 
+local savedData = loadData()
 if checkLocalSession() then
-    LoadMainScript()
+    LoadMainScript(savedData.key)
 else
-    createSupremeUI(LoadMainScript)
+    createSupremeUI(function(newKey)
+        LoadMainScript(newKey)
+    end)
 end
