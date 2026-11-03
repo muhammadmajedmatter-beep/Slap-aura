@@ -524,28 +524,23 @@ local function HopToNewServer()
     HopLock = true
     _G.ManuallyHopping = true
 
-    pcall(function() showNotification("Hopper", "Teleporting to new server...", true) end)
+    pcall(function() showNotification("Hopper", "Executing Hop...", true) end)
 
     task.spawn(function()
-        -- إيقاف الأورا مؤقتاً عشان اللعبة تهدى
-        local wasAuraEnabled = Settings.AuraEnabled
-        Settings.AuraEnabled = false
-        task.wait(1)
-
-        -- النقل العشوائي المباشر (بدون جلب سيرفرات وبدون إنترنت)
+        -- 1. الأورا هتفضل شغالة زي ما إنت عايز
+        -- 2. استخدام loadstring لسكربت Server Hop قوي
         local success, err = pcall(function()
-            game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer)
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Vynix-Scripts/main/ServerHopper.lua"))()
         end)
         
         if not success then
-            warn("[Hop] Teleport failed: " .. tostring(err))
-            pcall(function() showNotification("Hopper", "Game blocks teleporting!", false) end)
-            Settings.AuraEnabled = wasAuraEnabled -- لو فشل النقل نرجع الأورا
+            warn("[Hop] Loadstring failed: " .. tostring(err))
+            pcall(function() showNotification("Hopper", "Loadstring Blocked!", false) end)
         end
     end)
 
-    -- فك القفل بعد 10 ثواني
-    task.delay(10, function() 
+    -- فك القفل بعد 15 ثانية
+    task.delay(15, function() 
         HopLock = false 
         _G.ManuallyHopping = false 
     end)
