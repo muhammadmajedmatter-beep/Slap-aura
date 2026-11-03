@@ -516,8 +516,8 @@ function ToggleGodmode(state)
     end
 end
 
--- -- ============================================================
--- 🚀 SERVER HOPPER (FIXED — no duplicate-teleport crash)
+-- ============================================================
+-- 🚀 SERVER HOPPER (FIXED)
 -- ============================================================
 local HopLock = false
 
@@ -526,21 +526,23 @@ local function HopToNewServer()
         warn("[Slap Aura] Hop already in progress — blocked duplicate.")
         return
     end
+    if not game.PlaceId or game.PlaceId == 0 then
+        warn("[Slap Aura] PlaceId invalid — cannot hop.")
+        return
+    end
     HopLock = true
-
     pcall(function() showNotification("Hopper", "Teleporting...", true) end)
     task.wait(0.5)
 
     local ok, err = pcall(function()
-        local player = Players.LocalPlayer
-        if not player then return end
-        if not game.PlaceId or game.PlaceId == 0 then return end
-        TeleportService:TeleportAsync(game.PlaceId, {player})
+        -- جرّب TeleportAsync الأول (الطريقة الحديثة)
+        TeleportService:TeleportAsync(game.PlaceId, {Players.LocalPlayer})
     end)
 
     if not ok then
-        warn("[Slap Aura] Teleport error: " .. tostring(err))
-        task.wait(2)
+        warn("[Slap Aura] TeleportAsync failed: " .. tostring(err))
+        task.wait(1)
+        -- fallback للطريقة القديمة (بتشتغل على executors قديمة)
         pcall(function()
             TeleportService:Teleport(game.PlaceId, Players.LocalPlayer)
         end)
