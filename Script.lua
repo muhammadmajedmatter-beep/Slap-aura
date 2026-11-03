@@ -521,15 +521,49 @@ function ToggleGodmode(state)
     end
 end
 
--- ============================================================
--- 🚀 SERVER HOPPER
--- ============================================================
 local function HopToNewServer()
-    pcall(function() showNotification("Hopper", "Teleporting...", true) end)
-    task.wait(0.5)
-    pcall(function()
-        local player = Players.LocalPlayer
-        if player then TeleportService:Teleport(game.PlaceId, player) end
+    if HopLock then return end
+    HopLock = true
+    _G.ManuallyHopping = true -- 🛑 عشان نمنع الأوتو روجوين من التداخل
+
+    pcall(function() showNotification("Hopper", "Searching...", true) end)
+
+    task.spawn(function()
+        local HttpService = game:GetService("HttpService")
+        local TeleportService = game:GetService("TeleportService")
+        local Player = game.Players.LocalPlayer
+        
+        -- نفس الرابط من سكربت الـ Server Browser بتاعك
+        local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=50"
+        
+        local ok, res = pcall(function() 
+            return game:HttpGet(url) 
+        end)
+        
+        if ok and res then
+            local success, data = pcall(function() 
+                return HttpService:JSONDecode(res) 
+            end)
+            
+            if success and data and data.data then
+                for _, server in pairs(data.data) do
+                    if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                        print("[Hop] Found server: " .. server.id)
+                        -- نفس دالة النقل من سكربتك
+                        TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, Player)
+                        return
+                    end
+                end
+            end
+        else
+            warn("[Hop] HttpGet failed or blocked.")
+        end
+    end)
+
+    -- فك القفل بعد 10 ثواني
+    task.delay(10, function() 
+        HopLock = false 
+        _G.ManuallyHopping = false 
     end)
 end
 
