@@ -516,73 +516,29 @@ function ToggleGodmode(state)
     end
 end
 
+ ============================================================
+-- 🚀 EXECUTE HOPPER SERVER
 -- ============================================================
--- 🚀 SERVER HOPPER
--- ============================================================
-local function HopToNewServer()
-    if HopLock then return end
-    HopLock = true
-    _G.ManuallyHopping = true
-
-    pcall(function() showNotification("Hopper", "Executing Universal Loader...", true) end)
+_G.ExecuteHopper = function()
+    -- 🛑 إيقاف الأورا مؤقتاً عشان نمنع الكراش (دي أهم خطوة)
+    local wasAuraEnabled = Settings.AuraEnabled
+    Settings.AuraEnabled = false
+    
+    pcall(function() showNotification("Hopper", "Executing Server Hopper...", true) end)
 
     task.spawn(function()
-        -- 1. إيقاف الأورا مؤقتًا لتجنب أي تعارض أثناء النقل
-        local wasAuraEnabled = Settings.AuraEnabled
-        Settings.AuraEnabled = false
-        task.wait(0.5)
-
-        -- 2. دالة تحميل عالمية (Universal Loader) تتعامل مع جميع الـ Executors
-        local function universalLoad(url, fallbackUrl)
-            local httpFunc = (syn and syn.request) or (http and http.request) or request or game.HttpGet
-            
-            local success, code = pcall(function()
-                if httpFunc == game.HttpGet then
-                    return game:HttpGet(url)
-                else
-                    local res = httpFunc({Url = url, Method = "GET"})
-                    return res and res.Body
-                end
-            end)
-
-            -- إذا فشل الرابط الأساسي، جرب الرابط البديل (Fallback)
-            if not success or not code then
-                warn("[Hop] Primary loader failed. Trying fallback...")
-                success, code = pcall(function()
-                    if httpFunc == game.HttpGet then
-                        return game:HttpGet(fallbackUrl)
-                    else
-                        local res = httpFunc({Url = fallbackUrl, Method = "GET"})
-                        return res and res.Body
-                    end
-                end)
-            end
-            
-            if success and code then
-                local func, err = loadstring(code)
-                if func then
-                    pcall(func)
-                else
-                    warn("[Hop] Loadstring error: " .. tostring(err))
-                end
-            else
-                warn("[Hop] All HTTP requests failed.")
-                pcall(function() showNotification("Hopper", "All loaders failed!", false) end)
-                Settings.AuraEnabled = wasAuraEnabled -- إعادة تشغيل الأورا في حال الفشل
-            end
+        task.wait(0.5) -- نستنى اللعبة تهدى قبل تشغيل سكربت النقل
+        
+        -- تحميل سكربت النقل (Vynix)
+        local success, err = pcall(function()
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Vynix-Scripts/main/ServerHopper.lua"))()
+        end)
+        
+        if not success then
+            warn("[Hop] Loadstring failed: " .. tostring(err))
+            pcall(function() showNotification("Hopper", "Loadstring Blocked!", false) end)
+            Settings.AuraEnabled = wasAuraEnabled -- لو فشل نرجع الأورا
         end
-
-        -- 3. استخدم الدالة العالمية مع روابط تعمل على Delta
-        local primaryUrl = "https://raw.githubusercontent.com/RegularVynixu/Vynix-Scripts/main/ServerHopper.lua"
-        local deltaFallbackUrl = "https://lumin-hub.lol/deltaloader.lua" -- رابط احتياطي يعمل على Delta[reference:1]
-
-        universalLoad(primaryUrl, deltaFallbackUrl)
-    end)
-
-    -- فك القفل بعد 15 ثانية
-    task.delay(15, function() 
-        HopLock = false 
-        _G.ManuallyHopping = false 
     end)
 end
 
