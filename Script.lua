@@ -239,36 +239,29 @@ if hasHooks then
     end)
 
         local oldNamecall
-    pcall(function()
-        oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-            if checkcaller() then return oldNamecall(self, ...) end
-            local method = getnamecallmethod()
-            
-            -- 🛑 التعديل بتاعنا هنا (منع الكراش)
-            if method == "HttpGet" or method == "GetAsync" or method == "TeleportToPlaceInstance" or method == "Teleport" then
-                return oldNamecall(self, ...)
+pcall(function()
+    oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+        if checkcaller() then return oldNamecall(self, ...) end
+        local method = getnamecallmethod()
+        if method == "Kick" and self == LocalPlayer then return end
+        if method == "FireServer" then
+            local remoteName = string.lower(self.Name)
+            local badRemotes = {"ban", "kick", "anticheat", "detect", "report", "speedcheck", "flag"}
+            for _, bad in ipairs(badRemotes) do
+                if string.find(remoteName, bad) then return end
             end
-            
-            if method == "Kick" and self == LocalPlayer then return end
-            if method == "FireServer" then
-                local remoteName = string.lower(self.Name)
-                local badRemotes = {"ban", "kick", "anticheat", "detect", "report", "speedcheck", "flag"}
-                for _, bad in ipairs(badRemotes) do
-                    if string.find(remoteName, bad) then return end
-                end
-                local args = {...}
-                if #args > 0 then
-                    if type(args[1]) == "table" and args[1]["victim"] then
-                        if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Table" end
-                    elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart" or args[1]:IsA("BasePart")) then
-                        if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Instance" end
-                    end
+            local args = {...}
+            if #args > 0 then
+                if type(args[1]) == "table" and args[1]["victim"] then
+                    if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Table" end
+                elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart" or args[1]:IsA("BasePart")) then
+                    if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Instance" end
                 end
             end
-            return oldNamecall(self, ...)
-        end))
-    end)
-end -- 👈 السطر ده هو اللي كان ناقص عندك في السطر 270، ده اللي بيقفل if hasHooks
+        end
+        return oldNamecall(self, ...)
+    end))
+end)
 -- ============================================================
 -- ⚙️ الإعدادات
 -- ============================================================
@@ -524,7 +517,7 @@ end
 local function HopToNewServer()
     if HopLock then return end
     HopLock = true
-    _G.ManuallyHopping = true -- 🛑 عشان نمنع الأوتو روجوين من التداخل
+    _G.ManuallyHopping = true
 
     pcall(function() showNotification("Hopper", "Searching...", true) end)
 
@@ -532,35 +525,42 @@ local function HopToNewServer()
         local HttpService = game:GetService("HttpService")
         local TeleportService = game:GetService("TeleportService")
         local Player = game.Players.LocalPlayer
-        
-        -- نفس الرابط من سكربت الـ Server Browser بتاعك
         local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=50"
         
-        local ok, res = pcall(function() 
-            return game:HttpGet(url) 
-        end)
+        local body = nil
         
-        if ok and res then
-            local success, data = pcall(function() 
-                return HttpService:JSONDecode(res) 
-            end)
-            
+        -- 🛑 السر هنا: بنستخدم request بدل game:HttpGet عشان نكسر حماية ديلتا
+        local requestFunc = (syn and syn.request) or (http and http.request) or request
+        if requestFunc then
+            local ok, res = pcall(requestFunc, {Url = url, Method = "GET"})
+            if ok and res and res.Body then
+                body = res.Body
+            end
+        end
+
+        -- لو الـ request فشل، بنجرب HttpGet كخطة بديلة
+        if not body or body == "" then
+            local ok, res = pcall(function() return game:HttpGet(url) end)
+            if ok then body = res end
+        end
+
+        if body and body ~= "" then
+            local success, data = pcall(function() return HttpService:JSONDecode(body) end)
             if success and data and data.data then
                 for _, server in pairs(data.data) do
                     if server.playing < server.maxPlayers and server.id ~= game.JobId then
                         print("[Hop] Found server: " .. server.id)
-                        -- نفس دالة النقل من سكربتك
                         TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, Player)
                         return
                     end
                 end
             end
         else
-            warn("[Hop] HttpGet failed or blocked.")
+            warn("[Hop] Request failed.")
+            pcall(function() showNotification("Hopper", "API Blocked!", false) end)
         end
     end)
 
-    -- فك القفل بعد 10 ثواني
     task.delay(10, function() 
         HopLock = false 
         _G.ManuallyHopping = false 
