@@ -516,41 +516,32 @@ function ToggleGodmode(state)
     end
 end
 -- ============================================================
--- 🚀 SERVER HOPPER (No HTTP - Delta Crash Fix)
+-- 🚀 SERVER HOPPER (Loadstring Integration)
 -- ============================================================
 local function HopToNewServer()
-    if HopLock then return end
+    if HopLock then
+        warn("[Slap Aura] Hop already in progress")
+        return
+    end
     HopLock = true
-    _G.ManuallyHopping = true -- حماية الأوتو روجوين
+    _G.ManuallyHopping = true -- 🛑 تعليم السكربت إن ده نقل يدوي
 
     pcall(function() showNotification("Hopper", "Hopping...", true) end)
 
-    -- 1. نفصل أي اتصال قديم للأوتو روجوين عشان نمنع التداخل
-    if Connections.AutoRejoin then
-        pcall(function() Connections.AutoRejoin:Disconnect() end)
-        Connections.AutoRejoin = nil
-    end
-
-    -- 2. عزل عملية النقل عشان لو كراش ميكسرش باقي السكربت
     task.spawn(function()
-        task.wait(0.5)
+        -- تشغيل سكربت Server Hop الجاهز (بدون واجهة)
         local success, err = pcall(function()
-            -- استخدام دالة النقل المباشرة (الأخف على ديلتا)
-            game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer)
+            loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Vynix-Scripts/main/ServerHopper.lua"))()
         end)
         
         if not success then
-            warn("[Hop] Error: " .. tostring(err))
-            pcall(function() showNotification("Hopper", "Game blocks hopping!", false) end)
-            
-            -- إعادة تشغيل الأوتو روجوين لو فشل النقل
-            if Settings.AutoRejoin then 
-                ToggleAutoRejoin(true) 
-            end
+            warn("[Hop] Loadstring failed: " .. tostring(err))
+            pcall(function() showNotification("Hopper", "Loadstring Blocked!", false) end)
         end
     end)
 
-    task.delay(10, function() 
+    -- فك القفل بعد 15 ثانية
+    task.delay(15, function() 
         HopLock = false 
         _G.ManuallyHopping = false 
     end)
