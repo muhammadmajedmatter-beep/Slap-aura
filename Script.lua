@@ -268,7 +268,7 @@ end
 -- ⚙️ الإعدادات
 -- ============================================================
 local Settings = {
-    AuraEnabled = false, Range = 15, AuraMaxHits = 5,
+    AuraEnabled = true, Range = 15, AuraMaxHits = 5,
     HitPart = "Any", -- "Any" / "Head" / "HumanoidRootPart"
     FlySpeed = 50, Noclip = false, Godmode = false,
     PremiumSpeed = 35, ESP = false, AutoAim = false,
