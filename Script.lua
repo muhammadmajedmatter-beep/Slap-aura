@@ -515,92 +515,44 @@ function ToggleGodmode(state)
         showNotification("Godmode", "Godmode Off", false)
     end
 end
-
 -- ============================================================
--- 🚀 SERVER HOPPER (MAX PROTECTION - Anti-Crash V2)
+-- 🚀 SERVER HOPPER (No HTTP - Delta Crash Fix)
 -- ============================================================
-local HttpService = game:GetService("HttpService")
-local TeleportService = game:GetService("TeleportService")
-local HopLock = false
-
 local function HopToNewServer()
     if HopLock then return end
     HopLock = true
-    _G.ManuallyHopping = true
+    _G.ManuallyHopping = true -- حماية الأوتو روجوين
 
-    pcall(function() showNotification("Hopper", "Bypassing & Searching...", true) end)
-    
-    -- 1. حماية من كراش الـ Teleport لو اللعبة رفضت
-    local failedConn
-    failedConn = TeleportService.TeleportInitFailed:Connect(function(plr, result, msg)
-        if plr == LocalPlayer then
-            warn("[Hop] Teleport Rejected: " .. tostring(msg))
-            pcall(function() showNotification("Hopper", "Teleport Blocked by Game!", false) end)
-            HopLock = false
-            _G.ManuallyHopping = false
-            if failedConn then failedConn:Disconnect() end
-        end
-    end)
+    pcall(function() showNotification("Hopper", "Hopping...", true) end)
 
-    -- 2. عزل الطلب في Thread منفصل عشان لو علق ميكراشش اللعبة
+    -- 1. نفصل أي اتصال قديم للأوتو روجوين عشان نمنع التداخل
+    if Connections.AutoRejoin then
+        pcall(function() Connections.AutoRejoin:Disconnect() end)
+        Connections.AutoRejoin = nil
+    end
+
+    -- 2. عزل عملية النقل عشان لو كراش ميكسرش باقي السكربت
     task.spawn(function()
+        task.wait(0.5)
         local success, err = pcall(function()
-            local url = "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
-            local body = nil
-            
-            -- محاولة جلب السيرفرات بـ Headers عشان نكسر بلوك ديلتا
-            local req = (syn and syn.request) or (http and http.request) or request
-            if req then
-                local ok, res = pcall(req, {
-                    Url = url, 
-                    Method = "GET",
-                    Headers = {["User-Agent"] = "Roblox/WinInet", ["Accept"] = "application/json"}
-                })
-                if ok and res and res.Body then body = res.Body end
-            end
-            
-            -- خطة بديلة
-            if not body or body == "" then
-                local ok, res = pcall(function() return game:HttpGet(url) end)
-                if ok then body = res end
-            end
-
-            -- 3. التأكد إن الرد JSON مش صفحة HTML (ده اللي كان بيكراش ديلتا)
-            if not body or string.find(string.lower(body), "<html") or string.find(string.lower(body), "<!doctype") then
-                warn("[Hop] API Blocked or returned HTML.")
-                pcall(function() showNotification("Hopper", "API Blocked (Delta restriction)", false) end)
-                return
-            end
-
-            local data = HttpService:JSONDecode(body)
-            if not data or not data.data or #data.data == 0 then return end
-
-            -- البحث عن سيرفر
-            for _, srv in ipairs(data.data) do
-                if srv.playing < srv.maxPlayers and srv.id ~= game.JobId then
-                    -- 4. تنفيذ النقل مع حماية
-                    local teleOk, teleErr = pcall(function()
-                        TeleportService:TeleportToPlaceInstance(game.PlaceId, srv.id, LocalPlayer)
-                    end)
-                    if not teleOk then
-                        warn("[Hop] Teleport Error: " .. tostring(teleErr))
-                    end
-                    return
-                end
-            end
-            warn("[Hop] No servers found.")
+            -- استخدام دالة النقل المباشرة (الأخف على ديلتا)
+            game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer)
         end)
-
+        
         if not success then
-            warn("[Hop] Critical Error: " .. tostring(err))
+            warn("[Hop] Error: " .. tostring(err))
+            pcall(function() showNotification("Hopper", "Game blocks hopping!", false) end)
+            
+            -- إعادة تشغيل الأوتو روجوين لو فشل النقل
+            if Settings.AutoRejoin then 
+                ToggleAutoRejoin(true) 
+            end
         end
     end)
 
-    -- فك القفل بأمان بعد 10 ثواني
     task.delay(10, function() 
         HopLock = false 
         _G.ManuallyHopping = false 
-        if failedConn then failedConn:Disconnect() end
     end)
 end
 -- ============================================================
