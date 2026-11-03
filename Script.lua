@@ -238,30 +238,32 @@ if hasHooks then
         setreadonly(mt, true)
     end)
 
-        local oldNamecall
-pcall(function()
-    oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-        if checkcaller() then return oldNamecall(self, ...) end
-        local method = getnamecallmethod()
-        if method == "Kick" and self == LocalPlayer then return end
-        if method == "FireServer" then
-            local remoteName = string.lower(self.Name)
-            local badRemotes = {"ban", "kick", "anticheat", "detect", "report", "speedcheck", "flag"}
-            for _, bad in ipairs(badRemotes) do
-                if string.find(remoteName, bad) then return end
-            end
-            local args = {...}
-            if #args > 0 then
-                if type(args[1]) == "table" and args[1]["victim"] then
-                    if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Table" end
-                elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart" or args[1]:IsA("BasePart")) then
-                    if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Instance" end
+    local oldNamecall
+    pcall(function()
+        oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+            if checkcaller() then return oldNamecall(self, ...) end
+            local method = getnamecallmethod()
+            if method == "Kick" and self == LocalPlayer then return end
+            if method == "FireServer" then
+                local remoteName = string.lower(self.Name)
+                local badRemotes = {"ban", "kick", "anticheat", "detect", "report", "speedcheck", "flag"}
+                for _, bad in ipairs(badRemotes) do
+                    if string.find(remoteName, bad) then return end
+                end
+                local args = {...}
+                if #args > 0 then
+                    if type(args[1]) == "table" and args[1]["victim"] then
+                        if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Table" end
+                    elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart" or args[1]:IsA("BasePart")) then
+                        if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Instance" end
+                    end
                 end
             end
-        end
-        return oldNamecall(self, ...)
-    end))
-end)
+            return oldNamecall(self, ...)
+        end))
+    end)
+end
+
 -- ============================================================
 -- ⚙️ الإعدادات
 -- ============================================================
@@ -514,6 +516,9 @@ function ToggleGodmode(state)
     end
 end
 
+-- ============================================================
+-- 🚀 SERVER HOPPER
+-- ============================================================
 local function HopToNewServer()
     if HopLock then return end
     HopLock = true
