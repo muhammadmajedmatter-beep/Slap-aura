@@ -516,7 +516,7 @@ function ToggleGodmode(state)
     end
 end
 -- ============================================================
--- 🚀 SERVER HOPPER (Loadstring Integration)
+-- 🚀 SERVER HOPPER (Directly from ADVANCED SERVER BROWSER V4)
 -- ============================================================
 local function HopToNewServer()
     if HopLock then
@@ -524,24 +524,45 @@ local function HopToNewServer()
         return
     end
     HopLock = true
-    _G.ManuallyHopping = true -- 🛑 تعليم السكربت إن ده نقل يدوي
+    _G.ManuallyHopping = true -- 🛑 حماية الأوتو روجوين
 
-    pcall(function() showNotification("Hopper", "Hopping...", true) end)
+    pcall(function() showNotification("Hopper", "Searching...", true) end)
 
     task.spawn(function()
-        -- تشغيل سكربت Server Hop الجاهز (بدون واجهة)
-        local success, err = pcall(function()
-            loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Vynix-Scripts/main/ServerHopper.lua"))()
+        local HttpService = game:GetService("HttpService")
+        local TeleportService = game:GetService("TeleportService")
+        local Player = game.Players.LocalPlayer
+        
+        -- 1. نفس الرابط اللي في سكربتك بالظبط
+        local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=50"
+        
+        -- 2. نفس طريقة جلب السيرفرات
+        local ok, res = pcall(function() 
+            return game:HttpGet(url) 
         end)
         
-        if not success then
-            warn("[Hop] Loadstring failed: " .. tostring(err))
-            pcall(function() showNotification("Hopper", "Loadstring Blocked!", false) end)
+        if ok and res then
+            local data = HttpService:JSONDecode(res)
+            if data and data.data then
+                -- 3. نفس اللوب بتاعت سكربتك
+                for _, server in pairs(data.data) do
+                    if server.playing < server.maxPlayers and server.id ~= game.JobId then
+                        -- 4. نفس كود زرار JOIN بالظبط
+                        print("[Hop] Found server: " .. server.id)
+                        TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, Player)
+                        return
+                    end
+                end
+                warn("[Hop] All servers full.")
+            end
+        else
+            warn("[Hop] HttpGet failed.")
+            pcall(function() showNotification("Hopper", "API Blocked!", false) end)
         end
     end)
 
-    -- فك القفل بعد 15 ثانية
-    task.delay(15, function() 
+    -- فك القفل بعد 10 ثواني
+    task.delay(10, function() 
         HopLock = false 
         _G.ManuallyHopping = false 
     end)
