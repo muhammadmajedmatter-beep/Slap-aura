@@ -517,56 +517,69 @@ function ToggleGodmode(state)
 end
 
 -- ============================================================
--- 🚀 SERVER HOPPER (Client-Side Working Version)
+-- 🚀 SERVER HOPPER (Standalone — no menu, hops immediately)
 -- ============================================================
 local HttpService = game:GetService("HttpService")
-local TeleportService = game:GetService("TeleportService")
 local HopLock = false
 
+local function _httpGet(url)
+    -- جرّب executor-specific HTTP الأول (أكثر موثوقية)
+    if syn and syn.request then
+        local ok, r = pcall(function() return syn.request({Url=url, Method="GET"}) end)
+        if ok and r and r.Body then return r.Body end
+    end
+    if http_request then
+        local ok, r = pcall(function() return http_request({Url=url, Method="GET"}) end)
+        if ok and r and r.Body then return r.Body end
+    end
+    if request then
+        local ok, r = pcall(function() return request({Url=url, Method="GET"}) end)
+        if ok and r and r.Body then return r.Body end
+    end
+    -- fallback: Roblox HttpGet
+    return game:HttpGet(url)
+end
+
 local function HopToNewServer()
-    -- منع التكرار وتجنب الكراش
     if HopLock then
-        warn("[Slap Aura] Hop already in progress!")
+        warn("[Slap Aura] Hop already in progress")
         return
     end
     HopLock = true
-    
-    pcall(function() showNotification("Hopper", "Searching for server...", true) end)
-    task.wait(0.5)
+
+    -- 🛑 تأكد إن AutoRejoin مقفول عشان ما يعملش loop
+    if Settings.AutoRejoin then
+        warn("[Slap Aura] AutoRejoin is ON — turn it off to avoid crash loop")
+        HopLock = false
+        return
+    end
+
+    pcall(function() showNotification("Hopper", "Searching...", true) end)
 
     local ok, err = pcall(function()
-        -- جلب قائمة السيرفرات العامة
-        local url = string.format(
-            "https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100",
-            game.PlaceId
-        )
-        local response = game:HttpGet(url)
-        local data = HttpService:JSONDecode(response)
+        local url = "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
+        local body = _httpGet(url)
+        local data = HttpService:JSONDecode(body)
 
-        if data and data.data then
-            for _, server in ipairs(data.data) do
-                -- اختيار سيرفر غير ممتلئ
-                if server.playing < server.maxPlayers then
-                    TeleportService:TeleportToPlaceInstance(
-                        game.PlaceId,
-                        server.id, -- الـ Job ID
-                        game.Players.LocalPlayer
-                    )
-                    return -- تم النقل بنجاح، اخرج من الدالة
-                end
+        if not data or not data.data or #data.data == 0 then
+            warn("[Slap Aura] No servers found")
+            return
+        end
+
+        for _, srv in ipairs(data.data) do
+            if srv.playing < srv.maxPlayers and srv.id ~= game.JobId then
+                TeleportService:TeleportToPlaceInstance(game.PlaceId, srv.id, LocalPlayer)
+                return  -- ✅ نجح، اخرج
             end
         end
-        warn("[Slap Aura] No available servers found.")
+        warn("[Slap Aura] All servers full or you're the only player")
     end)
 
     if not ok then
-        warn("[Slap Aura] Hop failed: " .. tostring(err))
+        warn("[Slap Aura] Hop failed: "..tostring(err))
     end
 
-    -- تحرير القفل بعد 8 ثواني (وقت كافٍ لبدء النقل)
-    task.delay(8, function()
-        HopLock = false
-    end)
+    task.delay(8, function() HopLock = false end)
 end
 -- ============================================================
 -- 🍬 CANDY FARM V5
