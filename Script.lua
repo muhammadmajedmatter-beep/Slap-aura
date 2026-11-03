@@ -243,6 +243,12 @@ pcall(function()
     oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
         if checkcaller() then return oldNamecall(self, ...) end
         local method = getnamecallmethod()
+        
+        -- 🛑 السطرين دول هما سر منع الكراش (تخطي الـ Hook لدوال النقل والإنترنت)
+        if method == "HttpGet" or method == "GetAsync" or method == "TeleportToPlaceInstance" or method == "Teleport" then
+            return oldNamecall(self, ...)
+        end
+        
         if method == "Kick" and self == LocalPlayer then return end
         if method == "FireServer" then
             local remoteName = string.lower(self.Name)
