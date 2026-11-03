@@ -1236,17 +1236,35 @@ end
 
 function ToggleAutoRejoin(state)
     Settings.AutoRejoin = state
+    
+    -- تنظيف أي اتصال قديم
+    if Connections.AutoRejoin then
+        pcall(function() Connections.AutoRejoin:Disconnect() end)
+        Connections.AutoRejoin = nil
+    end
+
     if state then
-        pcall(function()
-            LocalPlayer.OnTeleport:Connect(function(s)      -- 👈 سطر 1301 تقريباً
-                if s == Enum.TeleportState.Started and Settings.AutoRejoin then
-                    task.wait(3)
-                    TeleportService:Teleport(game.PlaceId, LocalPlayer)  -- 💥 سطر 1305 تقريباً
-                end
+        Connections.AutoRejoin = LocalPlayer.OnTeleport:Connect(function(s)
+            if s ~= Enum.TeleportState.Started then return end
+            if not Settings.AutoRejoin then return end
+            
+            -- 🛑 لو النقل ده جاي من زرار Hop Now، متعملش حاجة
+            if _G.ManuallyHopping then
+                warn("[AutoRejoin] Skipping — manual hop in progress")
+                return
+            end
+
+            task.wait(3)
+            if not Settings.AutoRejoin or _G.ManuallyHopping then return end
+
+            pcall(function()
+                TeleportService:Teleport(game.PlaceId, LocalPlayer)
             end)
         end)
         showNotification("Auto Rejoin", "On", true)
-    else showNotification("Auto Rejoin", "Off", false) end
+    else
+        showNotification("Auto Rejoin", "Off", false)
+    end
 end
 
 -- ============================================================
