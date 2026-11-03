@@ -524,40 +524,45 @@ local function HopToNewServer()
     HopLock = true
     _G.ManuallyHopping = true -- 🛑 تعليم السكربت إن ده نقل يدوي
 
-    if Settings.AutoRejoin then
-        warn("[Slap Aura] AutoRejoin is ON — turn it off to avoid crash loop")
-        HopLock = false
-        _G.ManuallyHopping = false
-        return
-    end
-
     pcall(function() showNotification("Hopper", "Searching for server...", true) end)
+    print("[Hop] Started hopping process...")
 
     local ok, err = pcall(function()
         local url = "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
-        local response = SafeRequest({Url = url, Method = "GET"})
+        local body = ""
         
-        if not response or not response.Body or response.Body == "" then
-            warn("[Hop] Failed to fetch server list.")
-            return
+        -- 1. طريقة ديلتا الأساسية (request)
+        local requestFunc = (syn and syn.request) or (http and http.request) or request
+        if requestFunc then
+            local res = requestFunc({Url = url, Method = "GET"})
+            if res and res.Body then body = res.Body end
         end
-
-        local data = HttpService:JSONDecode(response.Body)
+        
+        -- 2. لو فشلت، نجرب الطريقة العادية
+        if body == "" or body == nil then
+            body = game:HttpGet(url)
+        end
+        
+        print("[Hop] API Response length: " .. tostring(#body))
+        
+        local data = game:GetService("HttpService"):JSONDecode(body)
         if not data or not data.data or #data.data == 0 then
-            warn("[Hop] No servers found.")
+            warn("[Hop] No servers found or API blocked by Roblox.")
             return
         end
 
         for _, srv in ipairs(data.data) do
             if srv.playing < srv.maxPlayers and srv.id ~= game.JobId then
-                TeleportService:TeleportToPlaceInstance(game.PlaceId, srv.id, LocalPlayer)
+                print("[Hop] Found server: " .. srv.id)
+                game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, srv.id, LocalPlayer)
                 return
             end
         end
+        warn("[Hop] All servers are full.")
     end)
 
     if not ok then
-        warn("[Hop] Error: "..tostring(err))
+        warn("[Hop] Error: " .. tostring(err))
     end
 
     -- فك القفل بعد 8 ثواني
