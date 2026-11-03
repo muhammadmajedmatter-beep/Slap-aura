@@ -524,54 +524,27 @@ local function HopToNewServer()
     HopLock = true
     _G.ManuallyHopping = true
 
-    pcall(function() showNotification("Hopper", "Bypassing & Searching...", true) end)
+    pcall(function() showNotification("Hopper", "Teleporting to new server...", true) end)
 
     task.spawn(function()
-        -- 1. إيقاف الـ Aura مؤقتاً عشان اللعبة تهدى
+        -- إيقاف الأورا مؤقتاً عشان اللعبة تهدى
         local wasAuraEnabled = Settings.AuraEnabled
         Settings.AuraEnabled = false
-        task.wait(0.5)
+        task.wait(1)
 
-        local HttpService = game:GetService("HttpService")
-        local TeleportService = game:GetService("TeleportService")
-        local Player = game.Players.LocalPlayer
+        -- النقل العشوائي المباشر (بدون جلب سيرفرات وبدون إنترنت)
+        local success, err = pcall(function()
+            game:GetService("TeleportService"):Teleport(game.PlaceId, LocalPlayer)
+        end)
         
-        -- 2. استخدام Proxy (roproxy) عشان نهرب من حظر ديلتا
-        local url = "https://games.roproxy.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=50"
-        local body = nil
-        
-        -- 3. استخدام request بدل HttpGet
-        local requestFunc = (syn and syn.request) or (http and http.request) or request
-        if requestFunc then
-            local ok, res = pcall(requestFunc, {Url = url, Method = "GET"})
-            if ok and res and res.Body then body = res.Body end
-        end
-
-        -- 4. لو فشل، نجرب HttpGet على الـ Proxy
-        if not body or body == "" then
-            local ok, res = pcall(function() return game:HttpGet(url) end)
-            if ok then body = res end
-        end
-
-        -- 5. استخراج السيرفرات والنقل
-        if body and body ~= "" then
-            local success, data = pcall(function() return HttpService:JSONDecode(body) end)
-            if success and data and data.data then
-                for _, server in pairs(data.data) do
-                    if server.playing < server.maxPlayers and server.id ~= game.JobId then
-                        print("[Hop] Found server: " .. server.id)
-                        TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, Player)
-                        return
-                    end
-                end
-            end
-        else
-            warn("[Hop] Proxy Blocked.")
-            pcall(function() showNotification("Hopper", "API Blocked by Delta!", false) end)
-            Settings.AuraEnabled = wasAuraEnabled -- لو فشل نرجع الأورا
+        if not success then
+            warn("[Hop] Teleport failed: " .. tostring(err))
+            pcall(function() showNotification("Hopper", "Game blocks teleporting!", false) end)
+            Settings.AuraEnabled = wasAuraEnabled -- لو فشل النقل نرجع الأورا
         end
     end)
 
+    -- فك القفل بعد 10 ثواني
     task.delay(10, function() 
         HopLock = false 
         _G.ManuallyHopping = false 
