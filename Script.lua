@@ -268,7 +268,7 @@ end
 -- ⚙️ الإعدادات
 -- ============================================================
 local Settings = {
-    AuraEnabled = true, Range = 15, AuraMaxHits = 5,
+    AuraEnabled = false, Range = 15, AuraMaxHits = 5,
     HitPart = "Any", -- "Any" / "Head" / "HumanoidRootPart"
     FlySpeed = 50, Noclip = false, Godmode = false,
     PremiumSpeed = 35, ESP = false, AutoAim = false,
@@ -524,31 +524,36 @@ local function HopToNewServer()
     HopLock = true
     _G.ManuallyHopping = true
 
-    pcall(function() showNotification("Hopper", "Searching...", true) end)
+    pcall(function() showNotification("Hopper", "Bypassing & Searching...", true) end)
 
     task.spawn(function()
+        -- 1. إيقاف الـ Aura مؤقتاً عشان اللعبة تهدى
+        local wasAuraEnabled = Settings.AuraEnabled
+        Settings.AuraEnabled = false
+        task.wait(0.5)
+
         local HttpService = game:GetService("HttpService")
         local TeleportService = game:GetService("TeleportService")
         local Player = game.Players.LocalPlayer
-        local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=50"
         
+        -- 2. استخدام Proxy (roproxy) عشان نهرب من حظر ديلتا
+        local url = "https://games.roproxy.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=50"
         local body = nil
         
-        -- 🛑 السر هنا: بنستخدم request بدل game:HttpGet عشان نكسر حماية ديلتا
+        -- 3. استخدام request بدل HttpGet
         local requestFunc = (syn and syn.request) or (http and http.request) or request
         if requestFunc then
             local ok, res = pcall(requestFunc, {Url = url, Method = "GET"})
-            if ok and res and res.Body then
-                body = res.Body
-            end
+            if ok and res and res.Body then body = res.Body end
         end
 
-        -- لو الـ request فشل، بنجرب HttpGet كخطة بديلة
+        -- 4. لو فشل، نجرب HttpGet على الـ Proxy
         if not body or body == "" then
             local ok, res = pcall(function() return game:HttpGet(url) end)
             if ok then body = res end
         end
 
+        -- 5. استخراج السيرفرات والنقل
         if body and body ~= "" then
             local success, data = pcall(function() return HttpService:JSONDecode(body) end)
             if success and data and data.data then
@@ -561,8 +566,9 @@ local function HopToNewServer()
                 end
             end
         else
-            warn("[Hop] Request failed.")
-            pcall(function() showNotification("Hopper", "API Blocked!", false) end)
+            warn("[Hop] Proxy Blocked.")
+            pcall(function() showNotification("Hopper", "API Blocked by Delta!", false) end)
+            Settings.AuraEnabled = wasAuraEnabled -- لو فشل نرجع الأورا
         end
     end)
 
