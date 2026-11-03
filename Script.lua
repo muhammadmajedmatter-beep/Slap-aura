@@ -516,53 +516,18 @@ function ToggleGodmode(state)
     end
 end
 
--- ============================================================
--- 🚀 SERVER HOPPER (Delta-Safe Version with HTTP Timeout)
--- ============================================================
-local HttpService = game:GetService("HttpService")
-local HopLock = false
-
--- دالة مساعدة: تنفيذ طلب HTTP مع مهلة 5 ثوانٍ لتجنب تعليق ديلتا
-local function SafeRequest(options)
-    local requestFunc = (syn and syn.request) or (http and http.request) or request
-    if not requestFunc then
-        warn("[Hop] No HTTP request function found.")
-        return nil
-    end
-    
-    local result = nil
-    local finished = false
-    local HTTP_TIMEOUT = 5 -- ثواني
-
-    task.spawn(function()
-        local ok, res = pcall(requestFunc, options)
-        if ok then result = res end
-        finished = true
-    end)
-
-    local t0 = tick()
-    while not finished and (tick() - t0) < HTTP_TIMEOUT do
-        task.wait(0.1)
-    end
-
-    if not finished then
-        warn("[Hop] HTTP request timed out (Delta hang prevented).")
-        return nil
-    end
-    return result
-end
-
 local function HopToNewServer()
     if HopLock then
         warn("[Slap Aura] Hop already in progress")
         return
     end
     HopLock = true
+    _G.ManuallyHopping = true -- 🛑 تعليم السكربت إن ده نقل يدوي
 
-    -- 🛑 خطوة حاسمة: تأكد أن AutoRejoin مغلق لتجنب حلقة النقل
     if Settings.AutoRejoin then
         warn("[Slap Aura] AutoRejoin is ON — turn it off to avoid crash loop")
         HopLock = false
+        _G.ManuallyHopping = false
         return
     end
 
@@ -573,33 +538,33 @@ local function HopToNewServer()
         local response = SafeRequest({Url = url, Method = "GET"})
         
         if not response or not response.Body or response.Body == "" then
-            warn("[Hop] Failed to fetch server list (HTTP failed or timed out).")
+            warn("[Hop] Failed to fetch server list.")
             return
         end
 
         local data = HttpService:JSONDecode(response.Body)
         if not data or not data.data or #data.data == 0 then
-            warn("[Hop] No servers found in response.")
+            warn("[Hop] No servers found.")
             return
         end
 
         for _, srv in ipairs(data.data) do
-            -- اختر سيرفراً غير ممتلئ وليس السيرفر الحالي
             if srv.playing < srv.maxPlayers and srv.id ~= game.JobId then
-                warn("[Hop] Teleporting to server: "..srv.id)
                 TeleportService:TeleportToPlaceInstance(game.PlaceId, srv.id, LocalPlayer)
                 return
             end
         end
-        warn("[Hop] All servers are full or you are the only player.")
     end)
 
     if not ok then
         warn("[Hop] Error: "..tostring(err))
     end
 
-    -- تحرير القفل بعد 10 ثوانٍ (وقت كافٍ لبدء النقل)
-    task.delay(10, function() HopLock = false end)
+    -- فك القفل بعد 8 ثواني
+    task.delay(8, function() 
+        HopLock = false 
+        _G.ManuallyHopping = false 
+    end)
 end
 -- ============================================================
 -- 🍬 CANDY FARM V5
@@ -1237,7 +1202,6 @@ end
 function ToggleAutoRejoin(state)
     Settings.AutoRejoin = state
     
-    -- تنظيف أي اتصال قديم
     if Connections.AutoRejoin then
         pcall(function() Connections.AutoRejoin:Disconnect() end)
         Connections.AutoRejoin = nil
@@ -1248,7 +1212,7 @@ function ToggleAutoRejoin(state)
             if s ~= Enum.TeleportState.Started then return end
             if not Settings.AutoRejoin then return end
             
-            -- 🛑 لو النقل ده جاي من زرار Hop Now، متعملش حاجة
+            -- 🛑 لو ده نقل يدوي (من Hop Now) متعملش حاجة
             if _G.ManuallyHopping then
                 warn("[AutoRejoin] Skipping — manual hop in progress")
                 return
