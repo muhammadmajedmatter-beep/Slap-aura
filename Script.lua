@@ -239,35 +239,30 @@ if hasHooks then
     end)
 
     local oldNamecall
-pcall(function()
-    oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
-        if checkcaller() then return oldNamecall(self, ...) end
-        local method = getnamecallmethod()
-        
-        -- 🛑 السطرين دول هما سر منع الكراش (تخطي الـ Hook لدوال النقل والإنترنت)
-        if method == "HttpGet" or method == "GetAsync" or method == "TeleportToPlaceInstance" or method == "Teleport" then
-            return oldNamecall(self, ...)
-        end
-        
-        if method == "Kick" and self == LocalPlayer then return end
-        if method == "FireServer" then
-            local remoteName = string.lower(self.Name)
-            local badRemotes = {"ban", "kick", "anticheat", "detect", "report", "speedcheck", "flag"}
-            for _, bad in ipairs(badRemotes) do
-                if string.find(remoteName, bad) then return end
-            end
-            local args = {...}
-            if #args > 0 then
-                if type(args[1]) == "table" and args[1]["victim"] then
-                    if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Table" end
-                elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart" or args[1]:IsA("BasePart")) then
-                    if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Instance" end
+    pcall(function()
+        oldNamecall = hookmetamethod(game, "__namecall", newcclosure(function(self, ...)
+            if checkcaller() then return oldNamecall(self, ...) end
+            local method = getnamecallmethod()
+            if method == "Kick" and self == LocalPlayer then return end
+            if method == "FireServer" then
+                local remoteName = string.lower(self.Name)
+                local badRemotes = {"ban", "kick", "anticheat", "detect", "report", "speedcheck", "flag"}
+                for _, bad in ipairs(badRemotes) do
+                    if string.find(remoteName, bad) then return end
+                end
+                local args = {...}
+                if #args > 0 then
+                    if type(args[1]) == "table" and args[1]["victim"] then
+                        if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Table" end
+                    elseif typeof(args[1]) == "Instance" and (args[1].Name == "Head" or args[1].Name == "HumanoidRootPart" or args[1]:IsA("BasePart")) then
+                        if CapturedRemote ~= self then CapturedRemote = self; RemoteFormat = "Instance" end
+                    end
                 end
             end
-        end
-        return oldNamecall(self, ...)
-    end))
-end)
+            return oldNamecall(self, ...)
+        end))
+    end)
+end
 
 -- ============================================================
 -- ⚙️ الإعدادات
@@ -520,58 +515,19 @@ function ToggleGodmode(state)
         showNotification("Godmode", "Godmode Off", false)
     end
 end
+
 -- ============================================================
--- 🚀 SERVER HOPPER (Directly from ADVANCED SERVER BROWSER V4)
+-- 🚀 SERVER HOPPER
 -- ============================================================
 local function HopToNewServer()
-    if HopLock then
-        warn("[Slap Aura] Hop already in progress")
-        return
-    end
-    HopLock = true
-    _G.ManuallyHopping = true -- 🛑 حماية الأوتو روجوين
-
-    pcall(function() showNotification("Hopper", "Searching...", true) end)
-
-    task.spawn(function()
-        local HttpService = game:GetService("HttpService")
-        local TeleportService = game:GetService("TeleportService")
-        local Player = game.Players.LocalPlayer
-        
-        -- 1. نفس الرابط اللي في سكربتك بالظبط
-        local url = "https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=50"
-        
-        -- 2. نفس طريقة جلب السيرفرات
-        local ok, res = pcall(function() 
-            return game:HttpGet(url) 
-        end)
-        
-        if ok and res then
-            local data = HttpService:JSONDecode(res)
-            if data and data.data then
-                -- 3. نفس اللوب بتاعت سكربتك
-                for _, server in pairs(data.data) do
-                    if server.playing < server.maxPlayers and server.id ~= game.JobId then
-                        -- 4. نفس كود زرار JOIN بالظبط
-                        print("[Hop] Found server: " .. server.id)
-                        TeleportService:TeleportToPlaceInstance(game.PlaceId, server.id, Player)
-                        return
-                    end
-                end
-                warn("[Hop] All servers full.")
-            end
-        else
-            warn("[Hop] HttpGet failed.")
-            pcall(function() showNotification("Hopper", "API Blocked!", false) end)
-        end
-    end)
-
-    -- فك القفل بعد 10 ثواني
-    task.delay(10, function() 
-        HopLock = false 
-        _G.ManuallyHopping = false 
+    pcall(function() showNotification("Hopper", "Teleporting...", true) end)
+    task.wait(0.5)
+    pcall(function()
+        local player = Players.LocalPlayer
+        if player then TeleportService:Teleport(game.PlaceId, player) end
     end)
 end
+
 -- ============================================================
 -- 🍬 CANDY FARM V5
 -- ============================================================
@@ -1207,34 +1163,17 @@ end
 
 function ToggleAutoRejoin(state)
     Settings.AutoRejoin = state
-    
-    if Connections.AutoRejoin then
-        pcall(function() Connections.AutoRejoin:Disconnect() end)
-        Connections.AutoRejoin = nil
-    end
-
     if state then
-        Connections.AutoRejoin = LocalPlayer.OnTeleport:Connect(function(s)
-            if s ~= Enum.TeleportState.Started then return end
-            if not Settings.AutoRejoin then return end
-            
-            -- 🛑 لو ده نقل يدوي (من Hop Now) متعملش حاجة
-            if _G.ManuallyHopping then
-                warn("[AutoRejoin] Skipping — manual hop in progress")
-                return
-            end
-
-            task.wait(3)
-            if not Settings.AutoRejoin or _G.ManuallyHopping then return end
-
-            pcall(function()
-                TeleportService:Teleport(game.PlaceId, LocalPlayer)
+        pcall(function()
+            LocalPlayer.OnTeleport:Connect(function(s)
+                if s == Enum.TeleportState.Started and Settings.AutoRejoin then
+                    task.wait(3)
+                    TeleportService:Teleport(game.PlaceId, LocalPlayer)
+                end
             end)
         end)
         showNotification("Auto Rejoin", "On", true)
-    else
-        showNotification("Auto Rejoin", "Off", false)
-    end
+    else showNotification("Auto Rejoin", "Off", false) end
 end
 
 -- ============================================================
