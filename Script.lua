@@ -517,38 +517,56 @@ function ToggleGodmode(state)
 end
 
 -- ============================================================
--- 🚀 SERVER HOPPER (FIXED)
+-- 🚀 SERVER HOPPER (Client-Side Working Version)
 -- ============================================================
+local HttpService = game:GetService("HttpService")
+local TeleportService = game:GetService("TeleportService")
 local HopLock = false
 
 local function HopToNewServer()
+    -- منع التكرار وتجنب الكراش
     if HopLock then
-        warn("[Slap Aura] Hop already in progress — blocked duplicate.")
-        return
-    end
-    if not game.PlaceId or game.PlaceId == 0 then
-        warn("[Slap Aura] PlaceId invalid — cannot hop.")
+        warn("[Slap Aura] Hop already in progress!")
         return
     end
     HopLock = true
-    pcall(function() showNotification("Hopper", "Teleporting...", true) end)
+    
+    pcall(function() showNotification("Hopper", "Searching for server...", true) end)
     task.wait(0.5)
 
     local ok, err = pcall(function()
-        -- جرّب TeleportAsync الأول (الطريقة الحديثة)
-        TeleportService:TeleportAsync(game.PlaceId, {Players.LocalPlayer})
+        -- جلب قائمة السيرفرات العامة
+        local url = string.format(
+            "https://games.roblox.com/v1/games/%d/servers/Public?sortOrder=Asc&limit=100",
+            game.PlaceId
+        )
+        local response = game:HttpGet(url)
+        local data = HttpService:JSONDecode(response)
+
+        if data and data.data then
+            for _, server in ipairs(data.data) do
+                -- اختيار سيرفر غير ممتلئ
+                if server.playing < server.maxPlayers then
+                    TeleportService:TeleportToPlaceInstance(
+                        game.PlaceId,
+                        server.id, -- الـ Job ID
+                        game.Players.LocalPlayer
+                    )
+                    return -- تم النقل بنجاح، اخرج من الدالة
+                end
+            end
+        end
+        warn("[Slap Aura] No available servers found.")
     end)
 
     if not ok then
-        warn("[Slap Aura] TeleportAsync failed: " .. tostring(err))
-        task.wait(1)
-        -- fallback للطريقة القديمة (بتشتغل على executors قديمة)
-        pcall(function()
-            TeleportService:Teleport(game.PlaceId, Players.LocalPlayer)
-        end)
+        warn("[Slap Aura] Hop failed: " .. tostring(err))
     end
 
-    task.delay(6, function() HopLock = false end)
+    -- تحرير القفل بعد 8 ثواني (وقت كافٍ لبدء النقل)
+    task.delay(8, function()
+        HopLock = false
+    end)
 end
 -- ============================================================
 -- 🍬 CANDY FARM V5
