@@ -517,27 +517,39 @@ function ToggleGodmode(state)
 end
 
 -- ============================================================
--- 🚀 SERVER HOPPER (Standalone — no menu, hops immediately)
+-- 🚀 SERVER HOPPER (Delta-Safe Version with HTTP Timeout)
 -- ============================================================
 local HttpService = game:GetService("HttpService")
 local HopLock = false
 
-local function _httpGet(url)
-    -- جرّب executor-specific HTTP الأول (أكثر موثوقية)
-    if syn and syn.request then
-        local ok, r = pcall(function() return syn.request({Url=url, Method="GET"}) end)
-        if ok and r and r.Body then return r.Body end
+-- دالة مساعدة: تنفيذ طلب HTTP مع مهلة 5 ثوانٍ لتجنب تعليق ديلتا
+local function SafeRequest(options)
+    local requestFunc = (syn and syn.request) or (http and http.request) or request
+    if not requestFunc then
+        warn("[Hop] No HTTP request function found.")
+        return nil
     end
-    if http_request then
-        local ok, r = pcall(function() return http_request({Url=url, Method="GET"}) end)
-        if ok and r and r.Body then return r.Body end
+    
+    local result = nil
+    local finished = false
+    local HTTP_TIMEOUT = 5 -- ثواني
+
+    task.spawn(function()
+        local ok, res = pcall(requestFunc, options)
+        if ok then result = res end
+        finished = true
+    end)
+
+    local t0 = tick()
+    while not finished and (tick() - t0) < HTTP_TIMEOUT do
+        task.wait(0.1)
     end
-    if request then
-        local ok, r = pcall(function() return request({Url=url, Method="GET"}) end)
-        if ok and r and r.Body then return r.Body end
+
+    if not finished then
+        warn("[Hop] HTTP request timed out (Delta hang prevented).")
+        return nil
     end
-    -- fallback: Roblox HttpGet
-    return game:HttpGet(url)
+    return result
 end
 
 local function HopToNewServer()
@@ -547,39 +559,47 @@ local function HopToNewServer()
     end
     HopLock = true
 
-    -- 🛑 تأكد إن AutoRejoin مقفول عشان ما يعملش loop
+    -- 🛑 خطوة حاسمة: تأكد أن AutoRejoin مغلق لتجنب حلقة النقل
     if Settings.AutoRejoin then
         warn("[Slap Aura] AutoRejoin is ON — turn it off to avoid crash loop")
         HopLock = false
         return
     end
 
-    pcall(function() showNotification("Hopper", "Searching...", true) end)
+    pcall(function() showNotification("Hopper", "Searching for server...", true) end)
 
     local ok, err = pcall(function()
         local url = "https://games.roblox.com/v1/games/"..game.PlaceId.."/servers/Public?sortOrder=Asc&limit=100"
-        local body = _httpGet(url)
-        local data = HttpService:JSONDecode(body)
+        local response = SafeRequest({Url = url, Method = "GET"})
+        
+        if not response or not response.Body or response.Body == "" then
+            warn("[Hop] Failed to fetch server list (HTTP failed or timed out).")
+            return
+        end
 
+        local data = HttpService:JSONDecode(response.Body)
         if not data or not data.data or #data.data == 0 then
-            warn("[Slap Aura] No servers found")
+            warn("[Hop] No servers found in response.")
             return
         end
 
         for _, srv in ipairs(data.data) do
+            -- اختر سيرفراً غير ممتلئ وليس السيرفر الحالي
             if srv.playing < srv.maxPlayers and srv.id ~= game.JobId then
+                warn("[Hop] Teleporting to server: "..srv.id)
                 TeleportService:TeleportToPlaceInstance(game.PlaceId, srv.id, LocalPlayer)
-                return  -- ✅ نجح، اخرج
+                return
             end
         end
-        warn("[Slap Aura] All servers full or you're the only player")
+        warn("[Hop] All servers are full or you are the only player.")
     end)
 
     if not ok then
-        warn("[Slap Aura] Hop failed: "..tostring(err))
+        warn("[Hop] Error: "..tostring(err))
     end
 
-    task.delay(8, function() HopLock = false end)
+    -- تحرير القفل بعد 10 ثوانٍ (وقت كافٍ لبدء النقل)
+    task.delay(10, function() HopLock = false end)
 end
 -- ============================================================
 -- 🍬 CANDY FARM V5
