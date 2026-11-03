@@ -1238,10 +1238,10 @@ function ToggleAutoRejoin(state)
     Settings.AutoRejoin = state
     if state then
         pcall(function()
-            LocalPlayer.OnTeleport:Connect(function(s)
+            LocalPlayer.OnTeleport:Connect(function(s)      -- 👈 سطر 1301 تقريباً
                 if s == Enum.TeleportState.Started and Settings.AutoRejoin then
                     task.wait(3)
-                    TeleportService:Teleport(game.PlaceId, LocalPlayer)
+                    TeleportService:Teleport(game.PlaceId, LocalPlayer)  -- 💥 سطر 1305 تقريباً
                 end
             end)
         end)
