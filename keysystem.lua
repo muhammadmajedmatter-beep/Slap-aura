@@ -15,7 +15,6 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 -- ================= [1] الإعدادات =================
 local KeySystem = {
     LinkvertiseURL = "https://link-target.net/10307604/ikbTu3tbVOrU",   
-    -- ⚠️ تأكد أن الرابط هنا ينتهي بـ / 
     VerifyAPI      = "https://muhammadmajed54.val.run/", 
     ScriptURL      = "https://raw.githubusercontent.com/muhammadmajedmatter-beep/Slap-aura/main/Script.lua", 
     Duration       = 14 * 24 * 60 * 60,
@@ -98,7 +97,7 @@ local function resetHWIDOnline(inputKey)
     return false, "فشل الاتصال بالسيرفر."
 end
 
--- ✅ دالة النبض (Heartbeat) الجديدة للتأكد من عدم حظر اللاعب
+-- ✅ دالة النبض (Heartbeat) للتأكد من عدم حظر اللاعب
 local function startHeartbeat(key)
     task.spawn(function()
         while task.wait(30) do
@@ -126,11 +125,13 @@ local function checkLocalSession()
     local saved = loadData()
     if saved and saved.hwid == HWID and os.time() < saved.expires then 
         if saved.key == KeySystem.OwnerKey then 
+            _G.SlapAura_CurrentKey = saved.key -- ✅ حفظ المفتاح للفايندر
             startHeartbeat(saved.key)
             return true 
         end
         local isValid, errorMsg, banReason, banExpires = verifyKeyOnline(saved.key)
         if isValid then 
+            _G.SlapAura_CurrentKey = saved.key -- ✅ حفظ المفتاح للفايندر
             startHeartbeat(saved.key)
             return true 
         end
@@ -303,6 +304,7 @@ local function createSupremeUI(callback)
         local isValid, errorMsg, banReason, banExpires = verifyKeyOnline(k)
         
         if isValid then
+            _G.SlapAura_CurrentKey = k -- ✅ حفظ المفتاح للفايندر
             local expiryTime = errorMsg
             if expiryTime == true then expiryTime = os.time() + KeySystem.Duration end
             saveData({key = k, expires = expiryTime, hwid = HWID})
@@ -310,7 +312,7 @@ local function createSupremeUI(callback)
             task.wait(0.8)
             TweenService:Create(blur, TweenInfo.new(0.4), {Size = 0}):Play(); TweenService:Create(uiScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0}):Play()
             task.wait(0.4); gui:Destroy()
-            startHeartbeat(k) -- ✅ بدء النبض بعد النجاح
+            startHeartbeat(k)
             callback() 
         else
             if errorMsg == "BANNED" then
@@ -327,6 +329,7 @@ local function createSupremeUI(callback)
                     if resetSuccess then
                         local reVerifySuccess, reVerifyTime = verifyKeyOnline(k)
                         if reVerifySuccess then
+                            _G.SlapAura_CurrentKey = k -- ✅ حفظ المفتاح للفايندر
                             saveData({key = k, expires = reVerifyTime, hwid = HWID})
                             verifyBtn.Text = "✅ Success"; verifyBtn.BackgroundColor3 = COLORS.Success
                             task.wait(0.8); TweenService:Create(blur, TweenInfo.new(0.4), {Size = 0}):Play(); TweenService:Create(uiScale, TweenInfo.new(0.4, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0}):Play(); task.wait(0.4); gui:Destroy()
