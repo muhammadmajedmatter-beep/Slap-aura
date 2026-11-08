@@ -1,7 +1,5 @@
 -- ============================================================
 -- 👑 SLAP AURA HUB | V59 | ESP PRO + AUTO AVOID + ANY-PART AURA
--- (Glove Detection + Danger Levels + Auto Avoid
---  + Candy Farm V5 + All Antis + Aura hits ANY body part)
 -- ============================================================
 
 if _G.SlapAuraAlreadyRunning then
@@ -269,7 +267,7 @@ end
 -- ============================================================
 local Settings = {
     AuraEnabled = true, Range = 15, AuraMaxHits = 5,
-    HitPart = "Any", -- "Any" / "Head" / "HumanoidRootPart"
+    HitPart = "Any",
     FlySpeed = 50, Noclip = false, Godmode = false,
     PremiumSpeed = 35, ESP = false, AutoAim = false,
     HitboxExpander = false, GravityControl = false,
@@ -293,7 +291,6 @@ local function GetTargetPart(char)
     elseif Settings.HitPart == "HumanoidRootPart" then
         return char:FindFirstChild("HumanoidRootPart")
     else
-        -- "Any" = جرب Head، بعدين HRP، بعدين أي BasePart
         return char:FindFirstChild("Head")
             or char:FindFirstChild("HumanoidRootPart")
             or char:FindFirstChild("Torso")
@@ -520,16 +517,14 @@ end
 -- 🚀 EXECUTE HOPPER SERVER
 -- ============================================================
 _G.ExecuteHopper = function()
-    -- 🛑 إيقاف الأورا مؤقتاً عشان نمنع الكراش (دي أهم خطوة)
     local wasAuraEnabled = Settings.AuraEnabled
     Settings.AuraEnabled = false
     
     pcall(function() showNotification("Hopper", "Executing Server Hopper...", true) end)
 
     task.spawn(function()
-        task.wait(0.5) -- نستنى اللعبة تهدى قبل تشغيل سكربت النقل
+        task.wait(0.5)
         
-        -- تحميل سكربت النقل (Vynix)
         local success, err = pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Vynix-Scripts/main/ServerHopper.lua"))()
         end)
@@ -537,10 +532,11 @@ _G.ExecuteHopper = function()
         if not success then
             warn("[Hop] Loadstring failed: " .. tostring(err))
             pcall(function() showNotification("Hopper", "Loadstring Blocked!", false) end)
-            Settings.AuraEnabled = wasAuraEnabled -- لو فشل نرجع الأورا
+            Settings.AuraEnabled = wasAuraEnabled
         end
     end)
 end
+
 -- ============================================================
 -- 🍬 CANDY FARM V5
 -- ============================================================
@@ -966,7 +962,6 @@ Connections.Aura = RunService.Stepped:Connect(function()
     end
     
     if closest and closest.Character then
-        -- 🎯 استخدام دالة اختيار الجزء (Any / Head / HRP)
         local targetPart = GetTargetPart(closest.Character)
         if targetPart then
             pcall(function()
@@ -1274,6 +1269,71 @@ function LoadMainGUI()
         AntiTab:Toggle({ Title = "Anti AFK", Value = false, Callback = function(s) ToggleAntiAFK(s) end })
         AntiTab:Toggle({ Title = "Auto Rejoin", Value = false, Callback = function(s) ToggleAutoRejoin(s) end })
 
+        -- 🔍 Finder Tab (عرض السيرفرات الممتلئة)
+        local FinderTab = Window:Tab({ Title = "السيرفرات", Icon = "server" })
+        FinderTab:Section({ Title = "🌐 السيرفرات المليانة بالناس" })
+        
+        local loadedServers = false
+        
+        local function LoadServers()
+            if loadedServers then return end
+            
+            local key = _G.SlapAura_CurrentKey
+            if not key then
+                FinderTab:Paragraph({ Title = "تنبيه", Desc = "المفتاح غير موجود! السيرفرات متاحة فقط لمن سجل الدخول." })
+                return
+            end
+            
+            local url = "https://muhammadmajed54.val.run/api/finder/servers?key=" .. key
+            local ok, res = pcall(function() return game:HttpGet(url) end)
+            
+            if ok and res then
+                local data = game:GetService("HttpService"):JSONDecode(res)
+                if data.success and data.servers and #data.servers > 0 then
+                    -- فلترة السيرفرات اللي فيها 5 لاعبين أو أكتر
+                    local fullServers = {}
+                    for i, s in ipairs(data.servers) do
+                        if s.players >= 5 then
+                            table.insert(fullServers, s)
+                        end
+                    end
+                    
+                    if #fullServers == 0 then
+                        fullServers = data.servers
+                    end
+                    
+                    for i, s in ipairs(fullServers) do
+                        local fillIcon = "🟢" 
+                        if s.players >= 10 then fillIcon = "🟡" end
+                        if s.players >= 15 then fillIcon = "🟠" end
+                        if s.players >= 20 then fillIcon = "🔴" end
+                        
+                        local btnTitle = fillIcon .. " " .. s.jobId:sub(1,8) .. " | " .. s.players .. "/" .. s.maxPlayers .. " لاعب"
+                        
+                        FinderTab:Button({
+                            Title = btnTitle,
+                            Callback = function()
+                                showNotification("Finder", "🔄 جاري الدخول للسيرفر...", true)
+                                local success, err = pcall(function()
+                                    game:GetService("TeleportService"):TeleportToPlaceInstance(game.PlaceId, s.jobId, LocalPlayer)
+                                end)
+                                if not success then
+                                    showNotification("Finder", "❌ فشل: " .. tostring(err), false)
+                                end
+                            end
+                        })
+                    end
+                    loadedServers = true
+                else
+                    FinderTab:Paragraph({ Title = "لا يوجد سيرفرات", Desc = "مفيش سيرفرات متاحة دلوقتي، جرب تاني بعد شوية." })
+                end
+            else
+                FinderTab:Paragraph({ Title = "خطأ", Desc = "فشل الاتصال بالسيرفر." })
+            end
+        end
+
+        task.delay(3, LoadServers)
+
         -- ⚙️ Settings
         local SetTab = Window:Tab({ Title = "Settings", Icon = "settings" })
         SetTab:Button({ Title = "🔔 Test Notification", Callback = function() showNotification("Test", "Working!", true) end })
@@ -1345,3 +1405,62 @@ task.delay(3, function()
 end)
 
 print("✅ [Slap Aura] V59 Any-Part Aura Ready!")
+
+-- ============================================================
+-- 🔍 FINDER SCANNER (يرسل البيانات للسيرفر)
+-- ============================================================
+task.spawn(function()
+    local FINDER_URL = "https://muhammadmajed54.val.run/finder/ingest"
+    local FINDER_KEY = "slap_aura_finder_secret_2026_xyz"
+    local INTERVAL   = 20
+    local HttpService = game:GetService("HttpService")
+
+    local function ScanGloves()
+        local list = {}
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p and p.Character then
+                local gloveName = nil
+                local tool = p.Character:FindFirstChildOfClass("Tool")
+                if tool then gloveName = tool.Name end
+                if not gloveName then
+                    for _, obj in ipairs(p.Character:GetChildren()) do
+                        if obj:IsA("Accessory") then gloveName = obj.Name; break end
+                    end
+                end
+                if gloveName then
+                    local danger = GloveDanger[string.lower(gloveName)] or "SAFE"
+                    table.insert(list, { name = gloveName, danger = danger })
+                end
+            end
+        end
+        return list
+    end
+
+    local function Send()
+        pcall(function()
+            local gloves = ScanGloves()
+            local rare = {}
+            for _, g in ipairs(gloves) do
+                if g.danger == "EXTREME" or g.danger == "HIGH" then table.insert(rare, g) end
+            end
+            local body = HttpService:JSONEncode({
+                apiKey = FINDER_KEY, jobId = game.JobId, placeId = game.PlaceId,
+                players = #Players:GetPlayers(), maxPlayers = Players.MaxPlayers,
+                gloves = gloves, rareGloves = rare, timestamp = os.time() * 1000,
+            })
+            local req = (syn and syn.request) or (http and http.request) or http_request or request
+            if req then
+                req({ Url = FINDER_URL, Method = "POST", Headers = { ["Content-Type"] = "application/json" }, Body = body })
+            else
+                HttpService:PostAsync(FINDER_URL, body, Enum.HttpContentType.ApplicationJson)
+            end
+        end)
+    end
+
+    task.wait(15)
+    while true do
+        Send()
+        task.wait(INTERVAL)
+    end
+end)
+print("🔍 [Slap Aura] Finder Active!")
