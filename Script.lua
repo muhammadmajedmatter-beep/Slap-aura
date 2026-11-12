@@ -1,5 +1,5 @@
 -- ============================================================
--- 👑 SLAP AURA HUB | V59 | ESP PRO + AUTO AVOID + ANY-PART AURA
+-- 👑 SLAP AURA HUB | V60 | ESP PRO + AUTO AVOID + ANY-PART AURA
 -- ============================================================
 
 if _G.SlapAuraAlreadyRunning then
@@ -90,7 +90,7 @@ local Version = Instance.new("TextLabel")
 Version.Size = UDim2.new(1, 0, 0, 20)
 Version.Position = UDim2.fromOffset(0, 75)
 Version.BackgroundTransparency = 1
-Version.Text = "V59  •  Any-Part Aura Edition"
+Version.Text = "V60  •  Any-Part Aura Edition"
 Version.TextColor3 = Color3.fromRGB(160, 160, 175)
 Version.Font = Enum.Font.Gotham
 Version.TextSize = 13
@@ -1190,7 +1190,7 @@ end
 function LoadMainGUI()
     local success, err = pcall(function()
         local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-        local Window = WindUI:CreateWindow({ Title = "Slap Aura | V59", Icon = "shield", Author = "Majed", Folder = "SlapAuraV59", Size = UDim2.fromOffset(600, 540), Transparent = true, Theme = "Dark" })
+        local Window = WindUI:CreateWindow({ Title = "Slap Aura | V60", Icon = "shield", Author = "Majed", Folder = "SlapAuraV60", Size = UDim2.fromOffset(600, 540), Transparent = true, Theme = "Dark" })
 
         -- ⚔️ Combat
         local CombatTab = Window:Tab({ Title = "Combat", Icon = "crosshair" })
@@ -1236,7 +1236,9 @@ function LoadMainGUI()
         end })
         CandyFarm.UI_Toggle = farmToggle
         FarmTab:Toggle({ Title = "⚠️ Auto Server Hop (Off default)", Value = false, Callback = function(s) Settings.ServerHopper = s end })
-        FarmTab:Button({ Title = "🚀 Hop Now", Callback = function() HopToNewServer() end })
+        FarmTab:Button({ Title = "🚀 Hop Now", Callback = function() 
+            if _G.ExecuteHopper then _G.ExecuteHopper() end
+        end })
         FarmTab:Paragraph({ Title = "Candy Stats", Desc = "Collected: 0 | Folder: None" })
 
         -- 👁️ Visuals
@@ -1393,7 +1395,7 @@ function LoadMainGUI()
         warn("[Slap Aura] GUI Error: " .. tostring(err))
         showNotification("GUI Error", "WindUI Failed to Load", false)
     else
-        showNotification("Slap Aura", "V59 Ready! Auto Slap ON", true)
+        showNotification("Slap Aura", "V60 Ready! Auto Slap ON", true)
     end
 end
 
@@ -1404,7 +1406,7 @@ task.delay(3, function()
     print("✅ [Slap Aura] Candy Farm ready")
 end)
 
-print("✅ [Slap Aura] V59 Any-Part Aura Ready!")
+print("✅ [Slap Aura] V60 Any-Part Aura Ready!")
 
 -- ============================================================
 -- 🔍 FINDER SCANNER (يرسل البيانات للسيرفر)
