@@ -16,7 +16,8 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local KeySystem = {
     LinkvertiseURL = "https://link-target.net/10307604/ikbTu3tbVOrU",   
     VerifyAPI      = "https://muhammadmajed54.val.run/", 
-    ScriptURL      = "https://raw.githubusercontent.com/muhammadmajedmatter-beep/Slap-aura/main/Script.lua", 
+    -- تأكد إن اسم الملف هنا هو اللي إنت رافعه على جيت هاب (Hub.lua أو Script.lua)
+    ScriptURL      = "https://raw.githubusercontent.com/muhammadmajedmatter-beep/Slap-aura/main/Hub.lua", 
     Duration       = 14 * 24 * 60 * 60,
     SaveFile       = "SlapAura_CloudKey.json",
     DeveloperName  = "Muhammad Majed",
@@ -55,6 +56,7 @@ end
 
 -- ================= [4] دوال الاتصال بالسيرفر =================
 local function verifyKeyOnline(inputKey)
+    -- ✅ لو المفتاح بتاع الأونر، متبعتش للسيرفر واعتبره صح
     if inputKey == KeySystem.OwnerKey then return true, os.time() + KeySystem.Duration end
     
     local url = KeySystem.VerifyAPI .. "validate?key=" .. HttpService:UrlEncode(inputKey) .. "&hwid=" .. HWID .. "&userid=" .. tostring(LocalPlayer.UserId) .. "&session=" .. sessionId
@@ -97,8 +99,12 @@ local function resetHWIDOnline(inputKey)
     return false, "فشل الاتصال بالسيرفر."
 end
 
--- ✅ دالة النبض (Heartbeat) للتأكد من عدم حظر اللاعب
+-- ✅ التعديل هنا: دالة النبض (Heartbeat) متبعتش خالص لو المفتاح بتاع الأونر
 local function startHeartbeat(key)
+    if key == KeySystem.OwnerKey then 
+        return -- لو أونر، متبعتش Heartbeat عشان السيرفر ميعملكش باند
+    end
+    
     task.spawn(function()
         while task.wait(30) do
             local url = KeySystem.VerifyAPI .. "heartbeat?key=" .. HttpService:UrlEncode(key) .. "&hwid=" .. HWID .. "&userid=" .. tostring(LocalPlayer.UserId) .. "&username=" .. HttpService:UrlEncode(LocalPlayer.Name)
