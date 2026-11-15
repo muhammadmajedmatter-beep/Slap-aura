@@ -17,7 +17,7 @@ local KeySystem = {
     LinkvertiseURL = "https://link-target.net/10307604/ikbTu3tbVOrU",   
     VerifyAPI      = "https://muhammadmajed54.val.run/", 
     -- تأكد إن اسم الملف هنا هو اللي إنت رافعه على جيت هاب (Hub.lua أو Script.lua)
-    ScriptURL      = "https://raw.githubusercontent.com/muhammadmajedmatter-beep/Slap-aura/main/Hub.lua", 
+    ScriptURL      = "ScriptURL = "https://raw.githubusercontent.com/muhammadmajedmatter-beep/Slap-aura/main/Script.lua", 
     Duration       = 14 * 24 * 60 * 60,
     SaveFile       = "SlapAura_CloudKey.json",
     DeveloperName  = "Muhammad Majed",
