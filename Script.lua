@@ -1,5 +1,5 @@
 -- ============================================================
--- 👑 SLAP AURA HUB | V59 | ESP PRO + AUTO AVOID + ANY-PART AURA
+-- 👑 SLAP AURA HUB | V60 | TIER LOCK SYSTEM
 -- ============================================================
 
 if _G.SlapAuraAlreadyRunning then
@@ -19,6 +19,18 @@ local HttpService = game:GetService("HttpService")
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local Camera = workspace.CurrentCamera
+
+-- ============================================================
+-- 🛡️ TIER SYSTEM (نظام الصلاحيات)
+-- ============================================================
+local UserTier = string.lower(_G.SlapAura_Tier or "free")
+
+local function HasAccess(requiredTier)
+    if UserTier == "lifetime" or UserTier == "ultimate" then return true end
+    if UserTier == "pro" and (requiredTier == "pro" or requiredTier == "free") then return true end
+    if UserTier == "free" and requiredTier == "free" then return true end
+    return false
+end
 
 -- ============================================================
 -- 🎬 LOADING SCREEN
@@ -91,7 +103,7 @@ local Version = Instance.new("TextLabel")
 Version.Size = UDim2.new(1, 0, 0, 20)
 Version.Position = UDim2.fromOffset(0, 75)
 Version.BackgroundTransparency = 1
-Version.Text = "V59  •  Any-Part Aura Edition"
+Version.Text = "V60  •  Tier Edition"
 Version.TextColor3 = Color3.fromRGB(160, 160, 175)
 Version.Font = Enum.Font.Gotham
 Version.TextSize = 13
@@ -164,8 +176,8 @@ local loadSteps = {
     {p = 45, text = "Injecting Remote Hooks..."},
     {p = 60, text = "Building HUD..."},
     {p = 75, text = "Loading WindUI Framework..."},
-    {p = 90, text = "Preparing Any-Part Aura..."},
-    {p = 100, text = "Ready! Punch once with glove"}
+    {p = 90, text = "Checking User Tier..."},
+    {p = 100, text = "Ready! Tier: " .. string.upper(UserTier)}
 }
 
 local function runLoadingScreen()
@@ -281,23 +293,11 @@ local Settings = {
 local Connections = {}
 local HitCount = 0
 
--- ============================================================
--- 🎯 دالة اختيار جزء الهدف
--- ============================================================
 local function GetTargetPart(char)
     if not char then return nil end
-    
-    if Settings.HitPart == "Head" then
-        return char:FindFirstChild("Head")
-    elseif Settings.HitPart == "HumanoidRootPart" then
-        return char:FindFirstChild("HumanoidRootPart")
-    else
-        return char:FindFirstChild("Head")
-            or char:FindFirstChild("HumanoidRootPart")
-            or char:FindFirstChild("Torso")
-            or char:FindFirstChild("UpperTorso")
-            or char:FindFirstChildOfClass("BasePart")
-    end
+    if Settings.HitPart == "Head" then return char:FindFirstChild("Head")
+    elseif Settings.HitPart == "HumanoidRootPart" then return char:FindFirstChild("HumanoidRootPart")
+    else return char:FindFirstChild("Head") or char:FindFirstChild("HumanoidRootPart") or char:FindFirstChild("Torso") or char:FindFirstChild("UpperTorso") or char:FindFirstChildOfClass("BasePart") end
 end
 
 -- ============================================================
@@ -520,18 +520,13 @@ end
 _G.ExecuteHopper = function()
     local wasAuraEnabled = Settings.AuraEnabled
     Settings.AuraEnabled = false
-    
     pcall(function() showNotification("Hopper", "Executing Server Hopper...", true) end)
-
     task.spawn(function()
         task.wait(0.5)
-        
         local success, err = pcall(function()
             loadstring(game:HttpGet("https://raw.githubusercontent.com/RegularVynixu/Vynix-Scripts/main/ServerHopper.lua"))()
         end)
-        
         if not success then
-            warn("[Hop] Loadstring failed: " .. tostring(err))
             pcall(function() showNotification("Hopper", "Loadstring Blocked!", false) end)
             Settings.AuraEnabled = wasAuraEnabled
         end
@@ -542,19 +537,9 @@ end
 -- 👁️ ESP PRO
 -- ============================================================
 local GloveDanger = {
-    ["killstreak"] = "EXTREME", ["god's hand"] = "EXTREME", ["gods hand"] = "EXTREME",
-    ["error"] = "EXTREME", ["reaper"] = "EXTREME", ["thanos"] = "EXTREME",
-    ["overkill"] = "EXTREME", ["megarock"] = "EXTREME", ["berserk"] = "EXTREME",
-    ["hallow jack"] = "EXTREME", ["detonator"] = "EXTREME", ["bob"] = "EXTREME",
-    ["mitten"] = "HIGH", ["leash"] = "HIGH", ["fish"] = "HIGH", ["grab"] = "HIGH",
-    ["pull"] = "HIGH", ["lure"] = "HIGH", ["phase"] = "HIGH", ["wormhole"] = "HIGH",
-    ["blackhole"] = "HIGH", ["rattlebones"] = "HIGH", ["home run"] = "HIGH",
-    ["jet"] = "HIGH", ["baller"] = "HIGH", ["za hando"] = "HIGH", ["recycler"] = "HIGH",
-    ["bomb"] = "HIGH", ["sparky"] = "HIGH", ["conductor"] = "HIGH", ["tinkerer"] = "HIGH",
-    ["rhythm"] = "HIGH", ["track"] = "HIGH",
-    ["ice"] = "MEDIUM", ["snowball"] = "MEDIUM", ["mr"] = "MEDIUM", ["mail"] = "MEDIUM",
-    ["squid"] = "MEDIUM", ["honey"] = "MEDIUM", ["cloud"] = "MEDIUM", ["kinetic"] = "MEDIUM",
-    ["slapple"] = "MEDIUM", ["moon"] = "MEDIUM",
+    ["killstreak"] = "EXTREME", ["god's hand"] = "EXTREME", ["gods hand"] = "EXTREME", ["error"] = "EXTREME", ["reaper"] = "EXTREME", ["thanos"] = "EXTREME", ["overkill"] = "EXTREME", ["megarock"] = "EXTREME", ["berserk"] = "EXTREME", ["hallow jack"] = "EXTREME", ["detonator"] = "EXTREME", ["bob"] = "EXTREME",
+    ["mitten"] = "HIGH", ["leash"] = "HIGH", ["fish"] = "HIGH", ["grab"] = "HIGH", ["pull"] = "HIGH", ["lure"] = "HIGH", ["phase"] = "HIGH", ["wormhole"] = "HIGH", ["blackhole"] = "HIGH", ["rattlebones"] = "HIGH", ["home run"] = "HIGH", ["jet"] = "HIGH", ["baller"] = "HIGH", ["za hando"] = "HIGH", ["recycler"] = "HIGH", ["bomb"] = "HIGH", ["sparky"] = "HIGH", ["conductor"] = "HIGH", ["tinkerer"] = "HIGH", ["rhythm"] = "HIGH", ["track"] = "HIGH",
+    ["ice"] = "MEDIUM", ["snowball"] = "MEDIUM", ["mr"] = "MEDIUM", ["mail"] = "MEDIUM", ["squid"] = "MEDIUM", ["honey"] = "MEDIUM", ["cloud"] = "MEDIUM", ["kinetic"] = "MEDIUM", ["slapple"] = "MEDIUM", ["moon"] = "MEDIUM"
 }
 
 local DangerColors = {
@@ -562,7 +547,7 @@ local DangerColors = {
     HIGH = {Fill = Color3.fromRGB(255, 140, 0), Text = "🟠 HIGH"},
     MEDIUM = {Fill = Color3.fromRGB(255, 220, 50), Text = "🟡 MEDIUM"},
     SAFE = {Fill = Color3.fromRGB(80, 220, 130), Text = "🟢 SAFE"},
-    NONE = {Fill = Color3.fromRGB(150, 150, 150), Text = "⚪ NONE"},
+    NONE = {Fill = Color3.fromRGB(150, 150, 150), Text = "⚪ NONE"}
 }
 
 local function GetPlayerGlove(plr)
@@ -947,108 +932,90 @@ function ToggleAutoRejoin(state)
     else showNotification("Auto Rejoin", "Off", false) end
 end
 
+
 -- ============================================================
--- 🎨 الواجهة (WindUI)
+-- 🎨 الواجهة (WindUI) مع القفل
 -- ============================================================
-function LoadMainGUI()
+local function LoadMainGUI()
     local success, err = pcall(function()
         local WindUI = loadstring(game:HttpGet("https://github.com/Footagesus/WindUI/releases/latest/download/main.lua"))()
-        local Window = WindUI:CreateWindow({ Title = "Slap Aura | V59", Icon = "shield", Author = "Majed", Folder = "SlapAuraV59", Size = UDim2.fromOffset(600, 540), Transparent = true, Theme = "Dark" })
+        local Window = WindUI:CreateWindow({ Title = "Slap Aura | V60", Icon = "shield", Author = "Majed", Folder = "SlapAuraV60", Size = UDim2.fromOffset(600, 540), Transparent = true, Theme = "Dark" })
 
         -- ⚔️ Combat
         local CombatTab = Window:Tab({ Title = "Combat", Icon = "crosshair" })
         CombatTab:Button({ Title = "🔄 Refresh Glove", Callback = function() CapturedRemote = nil; RemoteFormat = "None"; showNotification("System", "Glove Reset", true) end })
-        CombatTab:Toggle({ Title = "Auto Slap", Value = true, Callback = function(s)
-            Settings.AuraEnabled = s
-            if s and not CapturedRemote then
-                showNotification("Aura", "⚠️ Punch once with glove to capture remote", false)
-            end
-        end })
+        
+        CombatTab:Toggle({ Title = "Auto Slap [FREE]", Value = true, Callback = function(s) Settings.AuraEnabled = s end })
         CombatTab:Slider({ Title = "Aura Range", Value = { Min = 5, Max = 50, Default = 15 }, Callback = function(v) Settings.Range = v end })
         CombatTab:Slider({ Title = "Aura Max Hits/sec", Value = { Min = 1, Max = 20, Default = 5 }, Callback = function(v) Settings.AuraMaxHits = v end })
+        CombatTab:Dropdown({ Title = "🎯 Hit Target Part", Values = {"Any", "Head", "HumanoidRootPart"}, Default = "Any", Callback = function(option) Settings.HitPart = option end })
         
-        -- 🎯 اختيار جزء الهدف
-        CombatTab:Dropdown({
-            Title = "🎯 Hit Target Part",
-            Values = {"Any", "Head", "HumanoidRootPart"},
-            Default = "Any",
-            Callback = function(option)
-                Settings.HitPart = option
-                showNotification("Aura", "Now hitting: "..option, true)
-            end
-        })
-        
-        CombatTab:Toggle({ Title = "Auto Aim", Value = false, Callback = function(s) ToggleAutoAim(s) end })
-        CombatTab:Toggle({ Title = "Hitbox", Value = false, Callback = function(s) ToggleHitbox(s) end })
-        CombatTab:Toggle({ Title = "Godmode", Value = false, Callback = function(s) ToggleGodmode(s) end })
+        CombatTab:Toggle({ Title = (HasAccess("pro") and "Auto Aim" or "🔒 Auto Aim [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleAutoAim(s) end })
+        CombatTab:Toggle({ Title = (HasAccess("pro") and "Hitbox Expander" or "🔒 Hitbox [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleHitbox(s) end })
+        CombatTab:Toggle({ Title = (HasAccess("lifetime") and "Godmode" or "🔒 Godmode [LIFETIME]"), Value = false, Callback = function(s) if not HasAccess("lifetime") then if s then showNotification("🔒 Locked", "باقة Lifetime", false) end return end; ToggleGodmode(s) end })
 
         -- 💨 Movement
         local MoveTab = Window:Tab({ Title = "Movement", Icon = "wind" })
-        MoveTab:Toggle({ Title = "Premium Speed", Value = false, Callback = function(s) ToggleSpeed(s) end })
-        MoveTab:Slider({ Title = "Speed Value", Value = { Min = 16, Max = 100, Default = 35 }, Callback = function(v) Settings.PremiumSpeed = v end })
-        MoveTab:Toggle({ Title = "Fly", Value = false, Callback = function(s) ToggleFly(s) end })
-        MoveTab:Slider({ Title = "Fly Speed", Value = { Min = 20, Max = 200, Default = 50 }, Callback = function(v) Settings.FlySpeed = v end })
-        MoveTab:Toggle({ Title = "Zero Gravity", Value = false, Callback = function(s) ToggleGravity(s) end })
-        MoveTab:Toggle({ Title = "Noclip", Value = false, Callback = function(s) ToggleNoclip(s) end })
+        
+        MoveTab:Toggle({ Title = (HasAccess("pro") and "Premium Speed" or "🔒 Speed [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleSpeed(s) end })
+        MoveTab:Slider({ Title = "Speed Value", Value = { Min = 16, Max = 100, Default = 35 }, Callback = function(v) if HasAccess("pro") then Settings.PremiumSpeed = v end end })
+        MoveTab:Toggle({ Title = (HasAccess("pro") and "Fly" or "🔒 Fly [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleFly(s) end })
+        MoveTab:Slider({ Title = "Fly Speed", Value = { Min = 20, Max = 200, Default = 50 }, Callback = function(v) if HasAccess("pro") then Settings.FlySpeed = v end end })
+        MoveTab:Toggle({ Title = (HasAccess("pro") and "Noclip" or "🔒 Noclip [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleNoclip(s) end })
+        MoveTab:Toggle({ Title = (HasAccess("lifetime") and "Zero Gravity" or "🔒 Gravity [LIFETIME]"), Value = false, Callback = function(s) if not HasAccess("lifetime") then if s then showNotification("🔒 Locked", "باقة Lifetime", false) end return end; ToggleGravity(s) end })
 
         -- 👁️ Visuals
         local VisTab = Window:Tab({ Title = "Visuals", Icon = "eye" })
-        VisTab:Toggle({ Title = "👁️ Player ESP (Glove Detection)", Value = false, Callback = function(s) ToggleESP(s) end })
-        VisTab:Section({ Title = "🛡️ Auto Avoid" })
-        VisTab:Toggle({ Title = "Enable Auto Avoid", Value = false, Callback = function(s)
-            AutoAvoidSettings.Enabled = s
-            showNotification("Auto Avoid", s and "ON" or "OFF", s)
-        end })
-        VisTab:Toggle({ Title = "Only EXTREME Gloves", Value = true, Callback = function(s) AutoAvoidSettings.OnlyExtreme = s end })
-        VisTab:Slider({ Title = "Avoid Distance (studs)", Value = { Min = 10, Max = 100, Default = 30 }, Callback = function(v) AutoAvoidSettings.Distance = v end })
-        VisTab:Slider({ Title = "Teleport Away Distance", Value = { Min = 30, Max = 200, Default = 60 }, Callback = function(v) AutoAvoidSettings.SafeDistance = v end })
+        
+        VisTab:Toggle({ Title = (HasAccess("pro") and "👁️ Player ESP" or "🔒 ESP [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleESP(s) end })
+        VisTab:Section({ Title = "🛡️ Auto Avoid (PRO)" })
+        VisTab:Toggle({ Title = (HasAccess("pro") and "Enable Auto Avoid" or "🔒 Auto Avoid [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; AutoAvoidSettings.Enabled = s end })
+        VisTab:Toggle({ Title = "Only EXTREME Gloves", Value = true, Callback = function(s) if HasAccess("pro") then AutoAvoidSettings.OnlyExtreme = s end end })
+        VisTab:Slider({ Title = "Avoid Distance", Value = { Min = 10, Max = 100, Default = 30 }, Callback = function(v) if HasAccess("pro") then AutoAvoidSettings.Distance = v end end })
 
         -- 🛡️ Anti
         local AntiTab = Window:Tab({ Title = "Anti", Icon = "shield" })
-        AntiTab:Section({ Title = "Game Mechanics" })
-        AntiTab:Toggle({ Title = "Anti Void", Value = false, Callback = function(s) ToggleAntiVoid(s) end })
-        AntiTab:Toggle({ Title = "Anti Fling", Value = false, Callback = function(s) ToggleAntiFling(s) end })
-        AntiTab:Toggle({ Title = "Anti Ragdoll", Value = false, Callback = function(s) ToggleAntiRagdoll(s) end })
-        AntiTab:Toggle({ Title = "Anti Knockback", Value = false, Callback = function(s) ToggleAntiKnockback(s) end })
-        AntiTab:Section({ Title = "Glove Effects" })
-        AntiTab:Toggle({ Title = "🍯 Anti Honey", Value = false, Callback = function(s) ToggleAntiHoney(s) end })
-        AntiTab:Toggle({ Title = "🧊 Anti Ice", Value = false, Callback = function(s) ToggleAntiIce(s) end })
-        AntiTab:Toggle({ Title = "📬 Anti Mail", Value = false, Callback = function(s) ToggleAntiMail(s) end })
-        AntiTab:Toggle({ Title = "🎭 Anti MR", Value = false, Callback = function(s) ToggleAntiMR(s) end })
-        AntiTab:Toggle({ Title = "🧤 Anti Mitten", Value = false, Callback = function(s) ToggleAntiMitten(s) end })
-        AntiTab:Toggle({ Title = "🦑 Anti Squid", Value = false, Callback = function(s) ToggleAntiSquid(s) end })
+        AntiTab:Section({ Title = "Basic Anti (PRO)" })
+        AntiTab:Toggle({ Title = "Anti Void", Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleAntiVoid(s) end })
+        AntiTab:Toggle({ Title = "Anti Fling", Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleAntiFling(s) end })
+        AntiTab:Toggle({ Title = "Anti Ragdoll", Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleAntiRagdoll(s) end })
+        AntiTab:Toggle({ Title = "Anti Knockback", Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleAntiKnockback(s) end })
+        
+        AntiTab:Section({ Title = "Glove Effects (LIFETIME)" })
+        local function LockLifetime(s) 
+            if not HasAccess("lifetime") then if s then showNotification("🔒 Locked", "باقة Lifetime", false) end return false end 
+            return true 
+        end
+        AntiTab:Toggle({ Title = "🍯 Anti Honey", Value = false, Callback = function(s) if LockLifetime(s) then ToggleAntiHoney(s) end end })
+        AntiTab:Toggle({ Title = "🧊 Anti Ice", Value = false, Callback = function(s) if LockLifetime(s) then ToggleAntiIce(s) end end })
+        AntiTab:Toggle({ Title = "📬 Anti Mail", Value = false, Callback = function(s) if LockLifetime(s) then ToggleAntiMail(s) end end })
+        AntiTab:Toggle({ Title = "🎭 Anti MR", Value = false, Callback = function(s) if LockLifetime(s) then ToggleAntiMR(s) end end })
+        AntiTab:Toggle({ Title = "🧤 Anti Mitten", Value = false, Callback = function(s) if LockLifetime(s) then ToggleAntiMitten(s) end end })
+        AntiTab:Toggle({ Title = "🦑 Anti Squid", Value = false, Callback = function(s) if LockLifetime(s) then ToggleAntiSquid(s) end end })
+        
         AntiTab:Section({ Title = "System" })
-        AntiTab:Toggle({ Title = "Anti AFK", Value = false, Callback = function(s) ToggleAntiAFK(s) end })
-        AntiTab:Toggle({ Title = "Auto Rejoin", Value = false, Callback = function(s) ToggleAutoRejoin(s) end })
+        AntiTab:Toggle({ Title = "Anti AFK [FREE]", Value = false, Callback = function(s) ToggleAntiAFK(s) end })
+        AntiTab:Toggle({ Title = "Auto Rejoin", Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleAutoRejoin(s) end })
 
-        -- 🔍 Servers Tab (WORKING VERSION)
+        -- 🔍 Servers (PRO)
         local FinderTab = Window:Tab({ Title = "Servers", Icon = "server" })
         FinderTab:Section({ Title = "🌐 Server Finder" })
         
-        local StatusLbl = FinderTab:Paragraph({
-            Title = "⏳ Status",
-            Desc = "Loading servers..."
-        })
-        
-        FinderTab:Paragraph({
-            Title = "📍 Your Server",
-            Desc = "JobId: " .. game.JobId:sub(1, 12) .. "... | Players: " .. #Players:GetPlayers() .. "/" .. Players.MaxPlayers
-        })
+        local StatusLbl = FinderTab:Paragraph({ Title = "⏳ Status", Desc = "Loading servers..." })
         
         local serverButtons = {}
         local isRefreshing = false
         
-        local function ClearButtons()
-            for _, btn in ipairs(serverButtons) do
-                pcall(function() btn:Destroy() end)
-            end
-            serverButtons = {}
-        end
-        
         local function LoadServers()
             if isRefreshing then return end
+            if not HasAccess("pro") then
+                pcall(function() StatusLbl:SetDesc("🔒 You need PRO to use Server Finder!") end)
+                return
+            end
+            
             isRefreshing = true
-            ClearButtons()
+            for _, btn in ipairs(serverButtons) do pcall(function() btn:Destroy() end) end
+            serverButtons = {}
             
             local key = _G.SlapAura_CurrentKey
             if not key or key == "" then
@@ -1058,7 +1025,6 @@ function LoadMainGUI()
             end
             
             pcall(function() StatusLbl:SetDesc("🔄 Fetching servers...") end)
-            
             local url = "https://muhammadmajed54.val.run/api/finder/servers?key=" .. key
             local ok, res = pcall(function() return game:HttpGet(url) end)
             
@@ -1068,10 +1034,7 @@ function LoadMainGUI()
                 return
             end
             
-            local decodeOk, data = pcall(function()
-                return HttpService:JSONDecode(res)
-            end)
-            
+            local decodeOk, data = pcall(function() return HttpService:JSONDecode(res) end)
             if not decodeOk or not data or not data.success then
                 pcall(function() StatusLbl:SetDesc("❌ Invalid response") end)
                 isRefreshing = false
@@ -1079,66 +1042,36 @@ function LoadMainGUI()
             end
             
             local servers = data.servers or {}
-            
             if #servers == 0 then
-                pcall(function() StatusLbl:SetDesc("⚠️ No servers. Wait & refresh.") end)
-                local btn = FinderTab:Button({
-                    Title = "🔄 Retry",
-                    Callback = function() isRefreshing = false; LoadServers() end
-                })
-                table.insert(serverButtons, btn)
+                pcall(function() StatusLbl:SetDesc("⚠️ No servers found.") end)
                 isRefreshing = false
                 return
             end
             
             pcall(function() StatusLbl:SetDesc("✅ " .. #servers .. " server(s) found") end)
-            
-            table.sort(servers, function(a, b) 
-                return (a.players or 0) > (b.players or 0) 
-            end)
+            table.sort(servers, function(a, b) return (a.players or 0) > (b.players or 0) end)
             
             for i, s in ipairs(servers) do
-                if i > 20 then break end
+                if i > 15 then break end
                 local pCount = s.players or 0
-                local icon = "🟢"
-                if pCount >= 10 then icon = "🟡" end
-                if pCount >= 15 then icon = "🟠" end
-                if pCount >= 20 then icon = "🔴" end
                 local isCurrent = (s.jobId == game.JobId)
                 local prefix = isCurrent and "📍 " or ""
                 
                 local btn = FinderTab:Button({
-                    Title = prefix .. icon .. " " .. s.jobId:sub(1, 8) .. " | " .. pCount .. "/" .. (s.maxPlayers or 0),
+                    Title = prefix .. "🟢 " .. s.jobId:sub(1, 8) .. " | " .. pCount .. "/" .. (s.maxPlayers or 0),
                     Callback = function()
-                        if isCurrent then
-                            showNotification("Finder", "Already here!", false)
-                            return
-                        end
+                        if isCurrent then showNotification("Finder", "Already here!", false) return end
                         showNotification("Finder", "🔄 Joining...", true)
-                        pcall(function()
-                            TeleportService:TeleportToPlaceInstance(game.PlaceId, s.jobId, LocalPlayer)
-                        end)
+                        pcall(function() TeleportService:TeleportToPlaceInstance(game.PlaceId, s.jobId, LocalPlayer) end)
                     end
                 })
                 table.insert(serverButtons, btn)
             end
-            
             isRefreshing = false
         end
         
-        FinderTab:Button({
-            Title = "🔄 Refresh Now",
-            Callback = function() isRefreshing = false; LoadServers() end
-        })
-        
+        FinderTab:Button({ Title = "🔄 Refresh Now", Callback = function() isRefreshing = false; LoadServers() end })
         task.delay(3, LoadServers)
-        
-        task.spawn(function()
-            while _G.SlapAuraAlreadyRunning do
-                task.wait(15)
-                pcall(LoadServers)
-            end
-        end)
 
         -- ⚙️ Settings
         local SetTab = Window:Tab({ Title = "Settings", Icon = "settings" })
@@ -1150,25 +1083,25 @@ function LoadMainGUI()
                 showNotification("Safe Pos", "Updated!", true)
             end
         end })
-        SetTab:Button({ Title = "🚀 Server Hop", Callback = function() _G.ExecuteHopper() end })
+        SetTab:Button({ Title = "🚀 Server Hop", Callback = function() 
+            if not HasAccess("pro") then showNotification("🔒 Locked", "باقة Pro", false) return end
+            _G.ExecuteHopper() 
+        end })
         SetTab:Button({ Title = "❌ Unload", Callback = function()
             for _, c in pairs(Connections) do pcall(function() c:Disconnect() end) end
-            for _, c in pairs(espConnections) do pcall(function() c:Disconnect() end) end
             _G.SlapAuraAlreadyRunning = false
             HUD:Destroy()
             Window:Destroy()
         end })
     end)
+    
     if not success then
         warn("[Slap Aura] GUI Error: " .. tostring(err))
-        showNotification("GUI Error", "WindUI Failed to Load", false)
-    else
-        showNotification("Slap Aura", "V59 Ready!", true)
     end
 end
 
 LoadMainGUI()
-print("✅ [Slap Aura] V59 Loaded")
+print("✅ [Slap Aura] V60 Loaded | Tier: " .. string.upper(UserTier))
 
 -- ============================================================
 -- 🔍 FINDER SCANNER
@@ -1221,4 +1154,4 @@ task.spawn(function()
     end
 end)
 
-print("🔍 [Slap Aura] Finder Active!")
+print("🔍 [Slap Aura] Finder Active!")```
