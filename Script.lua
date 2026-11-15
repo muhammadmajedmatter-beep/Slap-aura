@@ -932,7 +932,6 @@ function ToggleAutoRejoin(state)
     else showNotification("Auto Rejoin", "Off", false) end
 end
 
-
 -- ============================================================
 -- 🎨 الواجهة (WindUI) مع القفل
 -- ============================================================
@@ -950,40 +949,40 @@ local function LoadMainGUI()
         CombatTab:Slider({ Title = "Aura Max Hits/sec", Value = { Min = 1, Max = 20, Default = 5 }, Callback = function(v) Settings.AuraMaxHits = v end })
         CombatTab:Dropdown({ Title = "🎯 Hit Target Part", Values = {"Any", "Head", "HumanoidRootPart"}, Default = "Any", Callback = function(option) Settings.HitPart = option end })
         
-        CombatTab:Toggle({ Title = (HasAccess("pro") and "Auto Aim" or "🔒 Auto Aim [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleAutoAim(s) end })
-        CombatTab:Toggle({ Title = (HasAccess("pro") and "Hitbox Expander" or "🔒 Hitbox [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleHitbox(s) end })
-        CombatTab:Toggle({ Title = (HasAccess("lifetime") and "Godmode" or "🔒 Godmode [LIFETIME]"), Value = false, Callback = function(s) if not HasAccess("lifetime") then if s then showNotification("🔒 Locked", "باقة Lifetime", false) end return end; ToggleGodmode(s) end })
+        CombatTab:Toggle({ Title = (HasAccess("pro") and "Auto Aim" or "🔒 Auto Aim [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "Upgrade to Pro", false) end return end; ToggleAutoAim(s) end })
+        CombatTab:Toggle({ Title = (HasAccess("pro") and "Hitbox Expander" or "🔒 Hitbox [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "Upgrade to Pro", false) end return end; ToggleHitbox(s) end })
+        CombatTab:Toggle({ Title = (HasAccess("lifetime") and "Godmode" or "🔒 Godmode [LIFETIME]"), Value = false, Callback = function(s) if not HasAccess("lifetime") then if s then showNotification("🔒 Locked", "Upgrade to Lifetime", false) end return end; ToggleGodmode(s) end })
 
         -- 💨 Movement
         local MoveTab = Window:Tab({ Title = "Movement", Icon = "wind" })
         
-        MoveTab:Toggle({ Title = (HasAccess("pro") and "Premium Speed" or "🔒 Speed [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleSpeed(s) end })
+        MoveTab:Toggle({ Title = (HasAccess("pro") and "Premium Speed" or "🔒 Speed [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "Upgrade to Pro", false) end return end; ToggleSpeed(s) end })
         MoveTab:Slider({ Title = "Speed Value", Value = { Min = 16, Max = 100, Default = 35 }, Callback = function(v) if HasAccess("pro") then Settings.PremiumSpeed = v end end })
-        MoveTab:Toggle({ Title = (HasAccess("pro") and "Fly" or "🔒 Fly [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleFly(s) end })
+        MoveTab:Toggle({ Title = (HasAccess("pro") and "Fly" or "🔒 Fly [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "Upgrade to Pro", false) end return end; ToggleFly(s) end })
         MoveTab:Slider({ Title = "Fly Speed", Value = { Min = 20, Max = 200, Default = 50 }, Callback = function(v) if HasAccess("pro") then Settings.FlySpeed = v end end })
-        MoveTab:Toggle({ Title = (HasAccess("pro") and "Noclip" or "🔒 Noclip [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleNoclip(s) end })
-        MoveTab:Toggle({ Title = (HasAccess("lifetime") and "Zero Gravity" or "🔒 Gravity [LIFETIME]"), Value = false, Callback = function(s) if not HasAccess("lifetime") then if s then showNotification("🔒 Locked", "باقة Lifetime", false) end return end; ToggleGravity(s) end })
+        MoveTab:Toggle({ Title = (HasAccess("pro") and "Noclip" or "🔒 Noclip [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "Upgrade to Pro", false) end return end; ToggleNoclip(s) end })
+        MoveTab:Toggle({ Title = (HasAccess("lifetime") and "Zero Gravity" or "🔒 Gravity [LIFETIME]"), Value = false, Callback = function(s) if not HasAccess("lifetime") then if s then showNotification("🔒 Locked", "Upgrade to Lifetime", false) end return end; ToggleGravity(s) end })
 
         -- 👁️ Visuals
         local VisTab = Window:Tab({ Title = "Visuals", Icon = "eye" })
         
-        VisTab:Toggle({ Title = (HasAccess("pro") and "👁️ Player ESP" or "🔒 ESP [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleESP(s) end })
+        VisTab:Toggle({ Title = (HasAccess("pro") and "👁️ Player ESP" or "🔒 ESP [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "Upgrade to Pro", false) end return end; ToggleESP(s) end })
         VisTab:Section({ Title = "🛡️ Auto Avoid (PRO)" })
-        VisTab:Toggle({ Title = (HasAccess("pro") and "Enable Auto Avoid" or "🔒 Auto Avoid [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; AutoAvoidSettings.Enabled = s end })
+        VisTab:Toggle({ Title = (HasAccess("pro") and "Enable Auto Avoid" or "🔒 Auto Avoid [PRO]"), Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "Upgrade to Pro", false) end return end; AutoAvoidSettings.Enabled = s end })
         VisTab:Toggle({ Title = "Only EXTREME Gloves", Value = true, Callback = function(s) if HasAccess("pro") then AutoAvoidSettings.OnlyExtreme = s end end })
         VisTab:Slider({ Title = "Avoid Distance", Value = { Min = 10, Max = 100, Default = 30 }, Callback = function(v) if HasAccess("pro") then AutoAvoidSettings.Distance = v end end })
 
         -- 🛡️ Anti
         local AntiTab = Window:Tab({ Title = "Anti", Icon = "shield" })
         AntiTab:Section({ Title = "Basic Anti (PRO)" })
-        AntiTab:Toggle({ Title = "Anti Void", Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleAntiVoid(s) end })
-        AntiTab:Toggle({ Title = "Anti Fling", Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleAntiFling(s) end })
-        AntiTab:Toggle({ Title = "Anti Ragdoll", Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleAntiRagdoll(s) end })
-        AntiTab:Toggle({ Title = "Anti Knockback", Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleAntiKnockback(s) end })
+        AntiTab:Toggle({ Title = "Anti Void", Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "Upgrade to Pro", false) end return end; ToggleAntiVoid(s) end })
+        AntiTab:Toggle({ Title = "Anti Fling", Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "Upgrade to Pro", false) end return end; ToggleAntiFling(s) end })
+        AntiTab:Toggle({ Title = "Anti Ragdoll", Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "Upgrade to Pro", false) end return end; ToggleAntiRagdoll(s) end })
+        AntiTab:Toggle({ Title = "Anti Knockback", Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "Upgrade to Pro", false) end return end; ToggleAntiKnockback(s) end })
         
         AntiTab:Section({ Title = "Glove Effects (LIFETIME)" })
         local function LockLifetime(s) 
-            if not HasAccess("lifetime") then if s then showNotification("🔒 Locked", "باقة Lifetime", false) end return false end 
+            if not HasAccess("lifetime") then if s then showNotification("🔒 Locked", "Upgrade to Lifetime", false) end return false end 
             return true 
         end
         AntiTab:Toggle({ Title = "🍯 Anti Honey", Value = false, Callback = function(s) if LockLifetime(s) then ToggleAntiHoney(s) end end })
@@ -995,7 +994,7 @@ local function LoadMainGUI()
         
         AntiTab:Section({ Title = "System" })
         AntiTab:Toggle({ Title = "Anti AFK [FREE]", Value = false, Callback = function(s) ToggleAntiAFK(s) end })
-        AntiTab:Toggle({ Title = "Auto Rejoin", Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "باقة Pro", false) end return end; ToggleAutoRejoin(s) end })
+        AntiTab:Toggle({ Title = "Auto Rejoin", Value = false, Callback = function(s) if not HasAccess("pro") then if s then showNotification("🔒 Locked", "Upgrade to Pro", false) end return end; ToggleAutoRejoin(s) end })
 
         -- 🔍 Servers (PRO)
         local FinderTab = Window:Tab({ Title = "Servers", Icon = "server" })
@@ -1084,7 +1083,7 @@ local function LoadMainGUI()
             end
         end })
         SetTab:Button({ Title = "🚀 Server Hop", Callback = function() 
-            if not HasAccess("pro") then showNotification("🔒 Locked", "باقة Pro", false) return end
+            if not HasAccess("pro") then showNotification("🔒 Locked", "Upgrade to Pro", false) return end
             _G.ExecuteHopper() 
         end })
         SetTab:Button({ Title = "❌ Unload", Callback = function()
@@ -1154,4 +1153,4 @@ task.spawn(function()
     end
 end)
 
-print("🔍 [Slap Aura] Finder Active!")```
+print("🔍 [Slap Aura] Finder Active!")
