@@ -16,9 +16,9 @@ local PlayerGui = LocalPlayer:WaitForChild("PlayerGui")
 local KeySystem = {
     LinkvertiseURL = "https://link-target.net/10307604/ikbTu3tbVOrU",   
     VerifyAPI      = "https://muhammadmajed54.val.run/", 
-    -- تأكد إن اسم الملف هنا هو اللي إنت رافعه على جيت هاب (Hub.lua أو Script.lua)
-    ScriptURL      = "ScriptURL = "https://raw.githubusercontent.com/muhammadmajedmatter-beep/Slap-aura/main/Script.lua", 
-    Duration       = 14 * 24 * 60 * 60,
+    -- ✅ تم تصحيح الخطأ الإملائي هنا
+    ScriptURL      = "https://raw.githubusercontent.com/muhammadmajedmatter-beep/Slap-aura/main/Script.lua", 
+    Duration       = 86400, -- يوم واحد (لسيرفر لينك فيرتايز)
     SaveFile       = "SlapAura_CloudKey.json",
     DeveloperName  = "Muhammad Majed",
     OwnerKey       = "MAJED-OWNER-2025",
@@ -56,8 +56,12 @@ end
 
 -- ================= [4] دوال الاتصال بالسيرفر =================
 local function verifyKeyOnline(inputKey)
-    -- ✅ لو المفتاح بتاع الأونر، متبعتش للسيرفر واعتبره صح
-    if inputKey == KeySystem.OwnerKey then return true, os.time() + KeySystem.Duration end
+    -- ✅ لو المفتاح بتاع الأونر، متبعتش للسيرفر واعتبره Lifetime
+    if inputKey == KeySystem.OwnerKey then 
+        _G.SlapAura_Tier = "lifetime"
+        _G.SlapAura_Features = { basicAutoFarm = true, speedHack = true, teleport = true, noclip = true, fly = true, esp = true }
+        return true, os.time() + KeySystem.Duration 
+    end
     
     local url = KeySystem.VerifyAPI .. "validate?key=" .. HttpService:UrlEncode(inputKey) .. "&hwid=" .. HWID .. "&userid=" .. tostring(LocalPlayer.UserId) .. "&session=" .. sessionId
     
@@ -75,6 +79,10 @@ local function verifyKeyOnline(inputKey)
     local decodeSuccess, data = pcall(function() return HttpService:JSONDecode(response) end)
     if decodeSuccess and data then
         if data.success == true then 
+            -- ✅ التعديل المهم: حفظ الخطة والمميزات عشان السكربت الأساسي يشوفها
+            _G.SlapAura_Tier = data.tier or "free"
+            _G.SlapAura_Features = data.features or {}
+            
             return true, data.expires_at and math.floor(data.expires_at / 1000) or (os.time() + KeySystem.Duration)
         elseif data.message == "BANNED" then
             return false, "BANNED", data.reason or "Bypass", data.expires or 0
@@ -99,7 +107,6 @@ local function resetHWIDOnline(inputKey)
     return false, "فشل الاتصال بالسيرفر."
 end
 
--- ✅ التعديل هنا: دالة النبض (Heartbeat) متبعتش خالص لو المفتاح بتاع الأونر
 local function startHeartbeat(key)
     if key == KeySystem.OwnerKey then 
         return -- لو أونر، متبعتش Heartbeat عشان السيرفر ميعملكش باند
@@ -131,13 +138,17 @@ local function checkLocalSession()
     local saved = loadData()
     if saved and saved.hwid == HWID and os.time() < saved.expires then 
         if saved.key == KeySystem.OwnerKey then 
-            _G.SlapAura_CurrentKey = saved.key -- ✅ حفظ المفتاح للفايندر
+            _G.SlapAura_Tier = "lifetime"
+            _G.SlapAura_Features = { basicAutoFarm = true, speedHack = true, teleport = true, noclip = true, fly = true, esp = true }
+            _G.SlapAura_CurrentKey = saved.key
             startHeartbeat(saved.key)
             return true 
         end
+        
+        -- ✅ بنرجع نتحقق من السيرفر عشان نجيب أحدث خطة ومميزات (لو رقى حسابه)
         local isValid, errorMsg, banReason, banExpires = verifyKeyOnline(saved.key)
         if isValid then 
-            _G.SlapAura_CurrentKey = saved.key -- ✅ حفظ المفتاح للفايندر
+            _G.SlapAura_CurrentKey = saved.key 
             startHeartbeat(saved.key)
             return true 
         end
